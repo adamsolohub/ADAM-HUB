@@ -1,0 +1,81 @@
+-- ==========================================================
+-- [ ADAM SCRIPT | Ultimate Combat & ESP Hub ]
+-- إيم بوت 100 متر + كشف أماكن 300 متر + تدوير شاشة سلس
+-- ==========================================================
+
+local Players = game:GetService("Players")
+local RunService = game:GetService("RunService")
+local Workspace = game:GetService("Workspace")
+local LocalPlayer = Players.LocalPlayer
+local Camera = Workspace.CurrentCamera
+
+-- إعدادات السكربت
+local Settings = {
+    AimbotEnabled = true,
+    AimbotRange = 100, -- مدى الإيم بوت
+    Smoothness = 5,    -- تدوير الشاشة السلس (كلما قل زادت السرعة)
+    EspEnabled = true,
+    EspRange = 300     -- مدى كشف الأماكن
+}
+
+-- دالة البحث عن أقرب وأفضل عدو داخل المدى
+local function getClosestPlayer()
+    local target = nil
+    local shortestDistance = Settings.AimbotRange
+
+    for _, v in pairs(Players:GetPlayers()) do
+        if v ~= LocalPlayer and v.Character and v.Character:FindFirstChild("HumanoidRootPart") and v.Character:FindFirstChild("Humanoid") and v.Character.Humanoid.Health > 0 then
+            local rootPart = v.Character.HumanoidRootPart
+            local distance = (LocalPlayer.Character.HumanoidRootPart.Position - rootPart.Position).Magnitude
+            
+            if distance < shortestDistance then
+                shortestDistance = distance
+                target = rootPart
+            end
+        end
+    end
+    return target
+end
+
+-- تشغيل تدوير الشاشة والإيم بوت السلس (100 متر)
+RunService.RenderStepped:Connect(function()
+    if Settings.AimbotEnabled and LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("HumanoidRootPart") then
+        local targetPart = getClosestPlayer()
+        if targetPart then
+            -- تدوير الشاشة بسلاسة نحو العدو
+            local targetCFrame = CFrame.new(Camera.CFrame.Position, targetPart.Position)
+            Camera.CFrame = Camera.CFrame:Lerp(targetCFrame, 1 / Settings.Smoothness)
+        end
+    end
+end)
+
+-- تفعيل كشف الأماكن (ESP بمدى 300 متر)
+RunService.Heartbeat:Connect(function()
+    if Settings.EspEnabled and LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("HumanoidRootPart") then
+        for _, v in pairs(Players:GetPlayers()) do
+            if v ~= LocalPlayer and v.Character and v.Character:FindFirstChild("HumanoidRootPart") then
+                local rootPart = v.Character.HumanoidRootPart
+                local distance = (LocalPlayer.Character.HumanoidRootPart.Position - rootPart.Position).Magnitude
+                
+                if distance <= Settings.EspRange then
+                    -- إضافة صندوق أو تلوين بسيط يظهر مكان اللاعب (ESP)
+                    if not v.Character:FindFirstChild("AdamHighlight") then
+                        local highlight = Instance.new("Highlight")
+                        highlight.Name = "AdamHighlight"
+                        highlight.Adornee = v.Character
+                        highlight.FillColor = Color3.fromRGB(255, 0, 0) -- لون أحمر للكشف
+                        highlight.OutlineColor = Color3.fromRGB(255, 255, 255)
+                        highlight.Parent = v.Character
+                    end
+                else
+                    -- إزالة الكشف إذا خرج من نطاق 300 متر
+                    if v.Character:FindFirstChild("AdamHighlight") then
+                        v.Character.AdamHighlight:Destroy()
+                    end
+                end
+            end
+        end
+    end
+end)
+
+print("Adam Combat & ESP Script Loaded Successfully!")
