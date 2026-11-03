@@ -1,5 +1,5 @@
 -- ========================================================
--- [ ADAM-HUB / HIBA HUB - ULTIMATE PRO EDITION ]
+-- [ ADAM HUB - HIBA EDITION (ULTIMATE + HITBOX COLORS) ]
 -- User: ADAM HUB - هيبة
 -- ========================================================
 
@@ -12,15 +12,14 @@ local Camera = Workspace.CurrentCamera
 
 local Settings = {
     SpeedBoost = false,
-    CustomSpeed = 1000, -- سرعة 1000 الآمنة الثابتة
+    CustomSpeed = 1000,
     AimbotEnabled = false,
-    HitboxEnabled = false, -- تفعيل Hitbox الرأس الواسع
-    EspEnabled = false,
-    TrollSpin = false,
-    TrollFloat = false,
+    HitboxEnabled = false,
+    HitboxColor = Color3.fromRGB(255, 0, 0), -- اللون الافتراضي للأحمر
+    AutoFarmEgg = false,
 }
 
--- إزالة الواجهة القديمة إذا كانت موجودة لمنع التداخل
+-- إزالة الواجهة القديمة لمنع التداخل
 if CoreGui:FindFirstChild("HibaHubUltimateGui") then
     CoreGui.HibaHubUltimateGui:Destroy()
 end
@@ -33,10 +32,10 @@ ScreenGui.DisplayOrder = 2000000000
 
 local MainFrame = Instance.new("Frame")
 MainFrame.Parent = ScreenGui
-MainFrame.BackgroundColor3 = Color3.fromRGB(15, 15, 25)
+MainFrame.BackgroundColor3 = Color3.fromRGB(20, 20, 32)
 MainFrame.BackgroundTransparency = 0.05
-MainFrame.Position = UDim2.new(0.5, -160, 0.3, 0)
-MainFrame.Size = UDim2.new(0, 320, 0, 380)
+MainFrame.Position = UDim2.new(0.5, -160, 0.25, 0)
+MainFrame.Size = UDim2.new(0, 320, 0, 410)
 MainFrame.Active = true
 MainFrame.Draggable = true
 
@@ -44,10 +43,10 @@ local Corner = Instance.new("UICorner")
 Corner.CornerRadius = UDim.new(0, 14)
 Corner.Parent = MainFrame
 
--- شريط العنوان
+-- شريط العنوان العلوي
 local TopBar = Instance.new("Frame")
 TopBar.Parent = MainFrame
-TopBar.BackgroundColor3 = Color3.fromRGB(25, 25, 40)
+TopBar.BackgroundColor3 = Color3.fromRGB(28, 28, 45)
 TopBar.Size = UDim2.new(1, 0, 0, 45)
 local TopCorner = Instance.new("UICorner")
 TopCorner.CornerRadius = UDim.new(0, 14)
@@ -81,13 +80,13 @@ CloseBtn.MouseButton1Click:Connect(function()
     ScreenGui:Destroy()
 end)
 
--- حاوية الأزرار
+-- حاوية الأزرار القابلة للتمرير
 local Container = Instance.new("ScrollingFrame")
 Container.Parent = MainFrame
 Container.BackgroundTransparency = 1
 Container.Position = UDim2.new(0, 10, 0, 55)
 Container.Size = UDim2.new(1, -20, 1, -65)
-Container.CanvasSize = UDim2.new(0, 0, 1.8, 0)
+Container.CanvasSize = UDim2.new(0, 0, 2.1, 0)
 Container.ScrollBarThickness = 3
 
 local UIList = Instance.new("UIListLayout")
@@ -95,11 +94,52 @@ UIList.Parent = Container
 UIList.SortOrder = Enum.SortOrder.LayoutOrder
 UIList.Padding = UDim.new(0, 8)
 
--- 1. زر تفعيل السرعة 1000
+-- 1. زر أوتو فارم البيض التلقائي
+local FarmBtn = Instance.new("TextButton")
+FarmBtn.Parent = Container
+FarmBtn.BackgroundColor3 = Color3.fromRGB(45, 45, 65)
+FarmBtn.Size = UDim2.new(1, 0, 0, 42)
+FarmBtn.Font = Enum.Font.GothamBold
+FarmBtn.Text = "🥚 أوتو فارم البيض: OFF"
+FarmBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
+FarmBtn.TextSize = 12
+local FCorner = Instance.new("UICorner")
+FCorner.CornerRadius = UDim.new(0, 8)
+FCorner.Parent = FarmBtn
+
+FarmBtn.MouseButton1Click:Connect(function()
+    Settings.AutoFarmEgg = not Settings.AutoFarmEgg
+    FarmBtn.Text = Settings.AutoFarmEgg and "🥚 أوتو فارم البيض: ON" or "🥚 أوتو فارم البيض: OFF"
+    FarmBtn.BackgroundColor3 = Settings.AutoFarmEgg and Color3.fromRGB(39, 174, 96) or Color3.fromRGB(45, 45, 65)
+end)
+
+task.spawn(function()
+    while true do
+        task.wait(0.2)
+        if Settings.AutoFarmEgg then
+            pcall(function()
+                local char = LocalPlayer.Character
+                if char and char:FindFirstChild("HumanoidRootPart") then
+                    local homePos = char.HumanoidRootPart.CFrame
+                    for _, obj in pairs(Workspace:GetDescendants()) do
+                        if obj.Name:lower():find("egg") and obj:IsA("BasePart") then
+                            char.HumanoidRootPart.CFrame = obj.CFrame + Vector3.new(0, 2.5, 0)
+                            task.wait(0.1)
+                            char.HumanoidRootPart.CFrame = homePos
+                            break
+                        end
+                    end
+                end
+            end)
+        end
+    end
+end)
+
+-- 2. زر تفعيل السرعة 1000 الآمنة
 local SpeedBtn = Instance.new("TextButton")
 SpeedBtn.Parent = Container
-SpeedBtn.BackgroundColor3 = Color3.fromRGB(41, 128, 185)
-SpeedBtn.Size = UDim2.new(1, 0, 0, 40)
+SpeedBtn.BackgroundColor3 = Color3.fromRGB(45, 45, 65)
+SpeedBtn.Size = UDim2.new(1, 0, 0, 42)
 SpeedBtn.Font = Enum.Font.GothamBold
 SpeedBtn.Text = "⚡ سرعة 1000 الآمنة: OFF"
 SpeedBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
@@ -111,7 +151,7 @@ SCorner.Parent = SpeedBtn
 SpeedBtn.MouseButton1Click:Connect(function()
     Settings.SpeedBoost = not Settings.SpeedBoost
     SpeedBtn.Text = Settings.SpeedBoost and "⚡ سرعة 1000 الآمنة: ON" or "⚡ سرعة 1000 الآمنة: OFF"
-    SpeedBtn.BackgroundColor3 = Settings.SpeedBoost and Color3.fromRGB(39, 174, 96) or Color3.fromRGB(41, 128, 185)
+    SpeedBtn.BackgroundColor3 = Settings.SpeedBoost and Color3.fromRGB(39, 174, 96) or Color3.fromRGB(45, 45, 65)
 end)
 
 RunService.RenderStepped:Connect(function()
@@ -122,11 +162,11 @@ RunService.RenderStepped:Connect(function()
     end
 end)
 
--- 2. زر ايم بوت الرأس (100% هيدشوت مباشر)
+-- 3. زر ايم بوت الرأس (100% هيدشوت)
 local AimBtn = Instance.new("TextButton")
 AimBtn.Parent = Container
-AimBtn.BackgroundColor3 = Color3.fromRGB(142, 68, 173)
-AimBtn.Size = UDim2.new(1, 0, 0, 40)
+AimBtn.BackgroundColor3 = Color3.fromRGB(45, 45, 65)
+AimBtn.Size = UDim2.new(1, 0, 0, 42)
 AimBtn.Font = Enum.Font.GothamBold
 AimBtn.Text = "🎯 ايم بوت الرأس (100% هيد): OFF"
 AimBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
@@ -138,7 +178,7 @@ ACorn.Parent = AimBtn
 AimBtn.MouseButton1Click:Connect(function()
     Settings.AimbotEnabled = not Settings.AimbotEnabled
     AimBtn.Text = Settings.AimbotEnabled and "🎯 ايم بوت الرأس (100% هيد): ON" or "🎯 ايم بوت الرأس (100% هيد): OFF"
-    AimBtn.BackgroundColor3 = Settings.AimbotEnabled and Color3.fromRGB(39, 174, 96) or Color3.fromRGB(142, 68, 173)
+    AimBtn.BackgroundColor3 = Settings.AimbotEnabled and Color3.fromRGB(39, 174, 96) or Color3.fromRGB(45, 45, 65)
 end)
 
 RunService.RenderStepped:Connect(function()
@@ -166,13 +206,13 @@ RunService.RenderStepped:Connect(function()
     end
 end)
 
--- 3. زر Hitbox الرأس الواسع (تضرب حدا اللاعب وتتحسب هيد)
+-- 4. زر تفعيل Hitbox الرأس الواسع (تضرب حدا اللاعب وتحسب هيد)
 local HitboxBtn = Instance.new("TextButton")
 HitboxBtn.Parent = Container
-HitboxBtn.BackgroundColor3 = Color3.fromRGB(192, 57, 43)
-HitboxBtn.Size = UDim2.new(1, 0, 0, 40)
+HitboxBtn.BackgroundColor3 = Color3.fromRGB(45, 45, 65)
+HitboxBtn.Size = UDim2.new(1, 0, 0, 42)
 HitboxBtn.Font = Enum.Font.GothamBold
-HitboxBtn.Text = "📦 Hitbox الرأس الواسع (ضرب قريب): OFF"
+HitboxBtn.Text = "📦 Hitbox الرأس الواسع (ضربة قريبة): OFF"
 HitboxBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
 HitboxBtn.TextSize = 12
 local HCorner = Instance.new("UICorner")
@@ -181,8 +221,8 @@ HCorner.Parent = HitboxBtn
 
 HitboxBtn.MouseButton1Click:Connect(function()
     Settings.HitboxEnabled = not Settings.HitboxEnabled
-    HitboxBtn.Text = Settings.HitboxEnabled and "📦 Hitbox الرأس الواسع (ضرب قريب): ON" or "📦 Hitbox الرأس الواسع (ضرب قريب): OFF"
-    HitboxBtn.BackgroundColor3 = Settings.HitboxEnabled and Color3.fromRGB(39, 174, 96) or Color3.fromRGB(192, 57, 43)
+    HitboxBtn.Text = Settings.HitboxEnabled and "📦 Hitbox الرأس الواسع (ضربة قريبة): ON" or "📦 Hitbox الرأس الواسع (ضربة قريبة): OFF"
+    HitboxBtn.BackgroundColor3 = Settings.HitboxEnabled and Color3.fromRGB(39, 174, 96) or Color3.fromRGB(45, 45, 65)
 end)
 
 task.spawn(function()
@@ -194,11 +234,47 @@ task.spawn(function()
                     if p ~= LocalPlayer and p.Character and p.Character:FindFirstChild("Head") then
                         local head = p.Character.Head
                         head.Size = Vector3.new(5, 5, 5) -- حجم كبير باش فين ما ضربت تحسب هيد
-                        head.Transparency = 0.6
+                        head.Color = Settings.HitboxColor
+                        head.Transparency = 0.5
                         head.CanCollide = false
                     end
                 end
             end)
         end
+    end
+end)
+
+-- 5. زر تغيير ألوان الهيتبوكس (أحمر، أخضر، أزرق، أصفر، قوس قزح)
+local ColorBtn = Instance.new("TextButton")
+ColorBtn.Parent = Container
+ColorBtn.BackgroundColor3 = Color3.fromRGB(45, 45, 65)
+ColorBtn.Size = UDim2.new(1, 0, 0, 42)
+ColorBtn.Font = Enum.Font.GothamBold
+ColorBtn.Text = "🎨 لون الهيتبوكس: أحمر (اضغط للتغيير)"
+ColorBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
+ColorBtn.TextSize = 12
+local CCorn = Instance.new("UICorner")
+CCorn.CornerRadius = UDim.new(0, 8)
+CCorn.Parent = ColorBtn
+
+local colorMode = 1
+ColorBtn.MouseButton1Click:Connect(function()
+    colorMode = colorMode + 1
+    if colorMode == 1 then
+        Settings.HitboxColor = Color3.fromRGB(255, 0, 0)
+        ColorBtn.Text = "🎨 لون الهيتبوكس: أحمر"
+    elseif colorMode == 2 then
+        Settings.HitboxColor = Color3.fromRGB(0, 255, 0)
+        ColorBtn.Text = "🎨 لون الهيتبوكس: أخضر"
+    elseif colorMode == 3 then
+        Settings.HitboxColor = Color3.fromRGB(0, 150, 255)
+        ColorBtn.Text = "🎨 لون الهيتبوكس: أزرق"
+    elseif colorMode == 4 then
+        Settings.HitboxColor = Color3.fromRGB(255, 255, 0)
+        ColorBtn.Text = "🎨 لون الهيتبوكس: أصفر"
+    elseif colorMode == 5 then
+        colorMode = 0
+        Settings.HitboxColor = Color3.fromRGB(255, 0, 255)
+        ColorBtn.Text = "🎨 لون الهيتبوكس: وردي متوهج"
     end
 end)
