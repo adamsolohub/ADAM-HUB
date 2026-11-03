@@ -1,1 +1,319 @@
+-- ========================================================
+-- [ ADAM HUB - BLOX (ULTIMATE REDZ STYLE) ]
+-- User: ADAM HUB - هيبة | السكربت الشامل والأسطوري
+-- ========================================================
 
+local Players = game:GetService("Players")
+local RunService = game:GetService("RunService")
+local Workspace = game:GetService("Workspace")
+local CoreGui = game:GetService("CoreGui")
+local LocalPlayer = Players.LocalPlayer
+local Camera = Workspace.CurrentCamera
+
+local Settings = {
+    AutoFarmLevel = false,
+    AutoFarmNearest = false,
+    AutoStatMelee = false,
+    AutoStatDefense = false,
+    AutoStatSword = false,
+    AutoStatGun = false,
+    AutoStatDevilFruit = false,
+    AutoChest = false,
+    BringMobs = false,
+    AutoBounty = false,
+    EspPlayers = false,
+    EspFruits = false,
+    Aimbot = false,
+}
+
+-- مسح الواجهة السابقة لمنع التداخل
+pcall(function()
+    if CoreGui:FindFirstChild("AdamBloxHub") then
+        CoreGui.AdamBloxHub:Destroy()
+    end
+end)
+
+local ScreenGui = Instance.new("ScreenGui")
+ScreenGui.Name = "AdamBloxHub"
+ScreenGui.Parent = CoreGui
+ScreenGui.ResetOnSpawn = false
+ScreenGui.DisplayOrder = 2000000000
+
+local MainFrame = Instance.new("Frame")
+MainFrame.Parent = ScreenGui
+MainFrame.BackgroundColor3 = Color3.fromRGB(12, 12, 20)
+MainFrame.BackgroundTransparency = 0.05
+MainFrame.Position = UDim2.new(0.5, -180, 0.15, 0)
+MainFrame.Size = UDim2.new(0, 360, 0, 480)
+MainFrame.Active = true
+MainFrame.Draggable = true
+
+local Corner = Instance.new("UICorner")
+Corner.CornerRadius = UDim.new(0, 16)
+Corner.Parent = MainFrame
+
+-- شريط العنوان المهيب
+local TopBar = Instance.new("Frame")
+TopBar.Parent = MainFrame
+TopBar.BackgroundColor3 = Color3.fromRGB(20, 20, 32)
+TopBar.Size = UDim2.new(1, 0, 0, 50)
+local TopCorner = Instance.new("UICorner")
+TopCorner.CornerRadius = UDim.new(0, 16)
+TopCorner.Parent = TopBar
+
+-- بروفايل الأنمي المهيب
+local ProfileImg = Instance.new("ImageLabel")
+ProfileImg.Parent = TopBar
+ProfileImg.BackgroundTransparency = 1
+ProfileImg.Position = UDim2.new(0, 10, 0, 8)
+ProfileImg.Size = UDim2.new(0, 34, 0, 34)
+ProfileImg.Image = "rbxassetid://10883552144"
+local ProfileCorner = Instance.new("UICorner")
+ProfileCorner.CornerRadius = UDim.new(1, 0)
+ProfileCorner.Parent = ProfileImg
+
+local Title = Instance.new("TextLabel")
+Title.Parent = TopBar
+Title.BackgroundTransparency = 1
+Title.Position = UDim2.new(0, 52, 0, 0)
+Title.Size = UDim2.new(1, -95, 1, 0)
+Title.Font = Enum.Font.GothamBold
+Title.Text = "🔥 ADAM HUB - BLOX (SUPREME) 🔥"
+Title.TextColor3 = Color3.fromRGB(255, 215, 0)
+Title.TextSize = 10
+
+-- زر الإغلاق (X)
+local CloseBtn = Instance.new("TextButton")
+CloseBtn.Parent = TopBar
+CloseBtn.BackgroundColor3 = Color3.fromRGB(231, 76, 60)
+CloseBtn.Position = UDim2.new(1, -38, 0, 12)
+CloseBtn.Size = UDim2.new(0, 26, 0, 26)
+CloseBtn.Font = Enum.Font.GothamBold
+CloseBtn.Text = "X"
+CloseBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
+CloseBtn.TextSize = 12
+local CloseCorner = Instance.new("UICorner")
+CloseCorner.CornerRadius = UDim.new(0, 6)
+CloseCorner.Parent = CloseBtn
+
+CloseBtn.MouseButton1Click:Connect(function()
+    ScreenGui:Destroy()
+end)
+
+-- زر التقليص (-)
+local MinBtn = Instance.new("TextButton")
+MinBtn.Parent = TopBar
+MinBtn.BackgroundColor3 = Color3.fromRGB(241, 196, 15)
+MinBtn.Position = UDim2.new(1, -70, 0, 12)
+MinBtn.Size = UDim2.new(0, 26, 0, 26)
+MinBtn.Font = Enum.Font.GothamBold
+MinBtn.Text = "-"
+MinBtn.TextColor3 = Color3.fromRGB(0, 0, 0)
+MinBtn.TextSize = 14
+local MinCorner = Instance.new("UICorner")
+MinCorner.CornerRadius = UDim.new(0, 6)
+MinCorner.Parent = MinBtn
+
+local Container = Instance.new("ScrollingFrame")
+Container.Parent = MainFrame
+Container.BackgroundTransparency = 1
+Container.Position = UDim2.new(0, 10, 0, 60)
+Container.Size = UDim2.new(1, -20, 1, -70)
+Container.CanvasSize = UDim2.new(0, 0, 3.2, 0)
+Container.ScrollBarThickness = 3
+
+local minimized = false
+MinBtn.MouseButton1Click:Connect(function()
+    minimized = not minimized
+    Container.Visible = not minimized
+    if minimized then
+        MainFrame.Size = UDim2.new(0, 360, 0, 50)
+        MinBtn.Text = "+"
+    else
+        MainFrame.Size = UDim2.new(0, 360, 0, 480)
+        MinBtn.Text = "-"
+    end
+end)
+
+local UIList = Instance.new("UIListLayout")
+UIList.Parent = Container
+UIList.SortOrder = Enum.SortOrder.LayoutOrder
+UIList.Padding = UDim.new(0, 8)
+
+local function CreateButton(text)
+    local btn = Instance.new("TextButton")
+    btn.Parent = Container
+    btn.BackgroundColor3 = Color3.fromRGB(30, 30, 45)
+    btn.Size = UDim2.new(1, 0, 0, 42)
+    btn.Font = Enum.Font.GothamBold
+    btn.Text = text
+    btn.TextColor3 = Color3.fromRGB(255, 255, 255)
+    btn.TextSize = 12
+    local corner = Instance.new("UICorner")
+    corner.CornerRadius = UDim.new(0, 8)
+    corner.Parent = btn
+    return btn
+end
+
+-- 1. نظام الأتو فارم ليفل (Auto Farm Level)
+local FarmBtn = CreateButton("⚔️ نظام الأتو فارم ليفل (Auto Farm): OFF")
+FarmBtn.MouseButton1Click:Connect(function()
+    Settings.AutoFarmLevel = not Settings.AutoFarmLevel
+    FarmBtn.Text = Settings.AutoFarmLevel and "⚔️ نظام الأتو فارم ليفل (Auto Farm): ON" or "⚔️ نظام الأتو فارم ليفل (Auto Farm): OFF"
+    FarmBtn.BackgroundColor3 = Settings.AutoFarmLevel and Color3.fromRGB(39, 174, 96) or Color3.fromRGB(30, 30, 45)
+end)
+
+-- 2. نظام تجميع الوحوش (Bring Mobs)
+local BringBtn = CreateButton("🧲 نظام تجميع الوحوش الشامل (Bring Mobs): OFF")
+BringBtn.MouseButton1Click:Connect(function()
+    Settings.BringMobs = not Settings.BringMobs
+    BringBtn.Text = Settings.BringMobs and "🧲 نظام تجميع الوحوش الشامل (Bring Mobs): ON" or "🧲 نظام تجميع الوحوش الشامل (Bring Mobs): OFF"
+    BringBtn.BackgroundColor3 = Settings.BringMobs and Color3.fromRGB(39, 174, 96) or Color3.fromRGB(30, 30, 45)
+end)
+
+-- 3. نظام جمع الصناديق (Auto Chests)
+local ChestBtn = CreateButton("💰 نظام جمع الصناديق والمال (Auto Chests): OFF")
+ChestBtn.MouseButton1Click:Connect(function()
+    Settings.AutoChest = not Settings.AutoChest
+    ChestBtn.Text = Settings.AutoChest and "💰 نظام جمع الصناديق والمال (Auto Chests): ON" or "💰 نظام جمع الصناديق والمال (Auto Chests): OFF"
+    ChestBtn.BackgroundColor3 = Settings.AutoChest and Color3.fromRGB(39, 174, 96) or Color3.fromRGB(30, 30, 45)
+end)
+
+RunService.Stepped:Connect(function()
+    pcall(function()
+        if Settings.AutoChest then
+            for _, v in pairs(Workspace:GetChildren()) do
+                if v.Name:find("Chest") and v:FindFirstChild("Handle") and LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("HumanoidRootPart") then
+                    LocalPlayer.Character.HumanoidRootPart.CFrame = v.Handle.CFrame
+                end
+            end
+        end
+    end)
+end)
+
+-- 4. نظام توزيع النقاط (Auto Stats - Melee)
+local StatMeleeBtn = CreateButton("📈 توزيع نقاط القتال (Auto Melee Stats): OFF")
+StatMeleeBtn.MouseButton1Click:Connect(function()
+    Settings.AutoStatMelee = not Settings.AutoStatMelee
+    StatMeleeBtn.Text = Settings.AutoStatMelee and "📈 توزيع نقاط القتال (Auto Melee Stats): ON" or "📈 توزيع نقاط القتال (Auto Melee Stats): OFF"
+    StatMeleeBtn.BackgroundColor3 = Settings.AutoStatMelee and Color3.fromRGB(39, 174, 96) or Color3.fromRGB(30, 30, 45)
+end)
+
+-- 5. نظام توزيع نقاط الدفاع (Auto Stats - Defense)
+local StatDefBtn = CreateButton("🛡️ توزيع نقاط الدفاع (Auto Defense Stats): OFF")
+StatDefBtn.MouseButton1Click:Connect(function()
+    Settings.AutoStatDefense = not Settings.AutoStatDefense
+    StatDefBtn.Text = Settings.AutoStatDefense and "🛡️ توزيع نقاط الدفاع (Auto Defense Stats): ON" or "🛡️ توزيع نقاط الدفاع (Auto Defense Stats): OFF"
+    StatDefBtn.BackgroundColor3 = Settings.AutoStatDefense and Color3.fromRGB(39, 174, 96) or Color3.fromRGB(30, 30, 45)
+end)
+
+-- 6. نظام توزيع نقاط السيف (Auto Stats - Sword)
+local StatSwordBtn = CreateButton("🗡️ توزيع نقاط السيوف (Auto Sword Stats): OFF")
+StatSwordBtn.MouseButton1Click:Connect(function()
+    Settings.AutoStatSword = not Settings.AutoStatSword
+    StatSwordBtn.Text = Settings.AutoStatSword and "🗡️ توزيع نقاط السيوف (Auto Sword Stats): ON" or "🗡️ توزيع نقاط السيوف (Auto Sword Stats): OFF"
+    StatSwordBtn.BackgroundColor3 = Settings.AutoStatSword and Color3.fromRGB(39, 174, 96) or Color3.fromRGB(30, 30, 45)
+end)
+
+-- 7. نظام كشف الأماكن (ESP Players)
+local EspBtn = CreateButton("👁️ كشف أماكن اللاعبين (ESP Players): OFF")
+local espFolder = Instance.new("Folder")
+espFolder.Name = "AdamBloxESP"
+espFolder.Parent = CoreGui
+
+EspBtn.MouseButton1Click:Connect(function()
+    Settings.EspPlayers = not Settings.EspPlayers
+    EspBtn.Text = Settings.EspPlayers and "👁️ كشف أماكن اللاعبين (ESP Players): ON" or "👁️ كشف أماكن اللاعبين (ESP Players): OFF"
+    EspBtn.BackgroundColor3 = Settings.EspPlayers and Color3.fromRGB(39, 174, 96) or Color3.fromRGB(30, 30, 45)
+    if not Settings.EspPlayers then
+        espFolder:ClearAllChildren()
+    end
+end)
+
+RunService.RenderStepped:Connect(function()
+    if Settings.EspPlayers then
+        pcall(function()
+            espFolder:ClearAllChildren()
+            for _, p in pairs(Players:GetPlayers()) do
+                if p ~= LocalPlayer and p.Character and p.Character:FindFirstChild("HumanoidRootPart") then
+                    local box = Instance.new("BoxHandleAdornment")
+                    box.Size = p.Character:GetExtentsSize()
+                    box.Adornee = p.Character.HumanoidRootPart
+                    box.AlwaysOnTop = true
+                    box.ZIndex = 5
+                    box.Transparency = 0.6
+                    box.Color3 = Color3.fromRGB(255, 0, 0)
+                    box.Parent = espFolder
+                end
+            end
+        end)
+    end
+end)
+
+-- 8. نظام كشف الفواكه (ESP Fruits)
+local FruitEspBtn = CreateButton("🍈 كشف فواكه بلوكس (ESP Fruits): OFF")
+local fruitFolder = Instance.new("Folder")
+fruitFolder.Name = "AdamFruitESP"
+fruitFolder.Parent = CoreGui
+
+FruitEspBtn.MouseButton1Click:Connect(function()
+    Settings.EspFruits = not Settings.EspFruits
+    FruitEspBtn.Text = Settings.EspFruits and "🍈 كشف فواكه بلوكس (ESP Fruits): ON" or "🍈 كشف فواكه بلوكس (ESP Fruits): OFF"
+    FruitEspBtn.BackgroundColor3 = Settings.EspFruits and Color3.fromRGB(39, 174, 96) or Color3.fromRGB(30, 30, 45)
+    if not Settings.EspFruits then
+        fruitFolder:ClearAllChildren()
+    end
+end)
+
+RunService.RenderStepped:Connect(function()
+    if Settings.EspFruits then
+        pcall(function()
+            fruitFolder:ClearAllChildren()
+            for _, v in pairs(Workspace:GetChildren()) do
+                if v.Name:find("Fruit") and v:FindFirstChild("Handle") then
+                    local box = Instance.new("BoxHandleAdornment")
+                    box.Size = Vector3.new(3, 3, 3)
+                    box.Adornee = v.Handle
+                    box.AlwaysOnTop = true
+                    box.ZIndex = 5
+                    box.Transparency = 0.3
+                    box.Color3 = Color3.fromRGB(0, 255, 255)
+                    box.Parent = fruitFolder
+                end
+            end
+        end)
+    end
+end)
+
+-- 9. نظام الإيم بوت (Aimbot Head)
+local AimBtn = CreateButton("🎯 ايم بوت الرأس القاتل (Aimbot): OFF")
+AimBtn.MouseButton1Click:Connect(function()
+    Settings.Aimbot = not Settings.Aimbot
+    AimBtn.Text = Settings.Aimbot and "🎯 ايم بوت الرأس القاتل (Aimbot): ON" or "🎯 ايم بوت الرأس القاتل (Aimbot): OFF"
+    AimBtn.BackgroundColor3 = Settings.Aimbot and Color3.fromRGB(39, 174, 96) or Color3.fromRGB(30, 30, 45)
+end)
+
+RunService.RenderStepped:Connect(function()
+    if Settings.Aimbot then
+        pcall(function()
+            local target = nil
+            local minDist = math.huge
+            for _, p in pairs(Players:GetPlayers()) do
+                if p ~= LocalPlayer and p.Character and p.Character:FindFirstChild("Head") and p.Character:FindFirstChild("Humanoid") and p.Character.Humanoid.Health > 0 then
+                    local pos, onScreen = Camera:WorldToViewportPoint(p.Character.Head.Position)
+                    if onScreen then
+                        local mouse = LocalPlayer:GetMouse()
+                        local dist = (Vector2.new(mouse.X, mouse.Y) - Vector2.new(pos.X, pos.Y)).Magnitude
+                        if dist < minDist then
+                            minDist = dist
+                            target = p.Character.Head
+                        end
+                    end
+                end
+            end
+            if target then
+                Camera.CFrame = CFrame.new(Camera.CFrame.Position, target.Position)
+            end
+        end)
+    end
+end)
