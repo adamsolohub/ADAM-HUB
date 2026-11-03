@@ -1,6 +1,6 @@
 -- ========================================================
--- [ ADAM HUB - HIBA ULTIMATE SUPREME (FIXED GUI) ]
--- User: ADAM HUB - هيبة | النسخة النظيفة والمضمونة للظهور
+-- [ ADAM HUB - HIBA ULTIMATE SUPREME (FINAL CLEAN) ]
+-- User: ADAM HUB - هيبة | النسخة المضمونة 100%
 -- ========================================================
 
 local Players = game:GetService("Players")
@@ -136,11 +136,10 @@ UIList.Parent = Container
 UIList.SortOrder = Enum.SortOrder.LayoutOrder
 UIList.Padding = UDim.new(0, 8)
 
--- دالة مساعدة لإنشاء الأزرار بسلاسة
-local function CreateButton(text, defaultColor)
+local function CreateButton(text)
     local btn = Instance.new("TextButton")
     btn.Parent = Container
-    btn.BackgroundColor3 = defaultColor or Color3.fromRGB(30, 30, 45)
+    btn.BackgroundColor3 = Color3.fromRGB(30, 30, 45)
     btn.Size = UDim2.new(1, 0, 0, 42)
     btn.Font = Enum.Font.GothamBold
     btn.Text = text
@@ -152,7 +151,7 @@ local function CreateButton(text, defaultColor)
     return btn
 end
 
--- 1. زر السرعة الخارقة (1000)
+-- 1. زر السرعة 1000
 local SpeedBtn = CreateButton("⚡ سرعة 1000 الأسطورية: OFF")
 SpeedBtn.MouseButton1Click:Connect(function()
     Settings.SpeedBoost = not Settings.SpeedBoost
@@ -203,7 +202,7 @@ RunService.RenderStepped:Connect(function()
     end
 end)
 
--- 3. زر ايم كيل المدمر (AimKill)
+-- 3. زر ايم كيل المدمر
 local AimKillBtn = CreateButton("💀 ايم كيل المدمر (ضربة = موت فوري): OFF")
 AimKillBtn.MouseButton1Click:Connect(function()
     Settings.AimKillEnabled = not Settings.AimKillEnabled
@@ -268,89 +267,4 @@ RunService.RenderStepped:Connect(function()
     end
 end)
 
--- 5. زر هيتبوكس مربع متوسط الحجم
-local HitboxBtn = CreateButton("📦 Hitbox مربع متوسط الحجم: OFF")
-HitboxBtn.MouseButton1Click:Connect(function()
-    Settings.HitboxEnabled = not Settings.HitboxEnabled
-    HitboxBtn.Text = Settings.HitboxEnabled and "📦 Hitbox مربع متوسط الحجم: ON" or "📦 Hitbox مربع متوسط الحجم: OFF"
-    HitboxBtn.BackgroundColor3 = Settings.HitboxEnabled and Color3.fromRGB(39, 174, 96) or Color3.fromRGB(30, 30, 45)
-end)
-
-RunService.RenderStepped:Connect(function()
-    if Settings.HitboxEnabled then
-        pcall(function()
-            for _, p in pairs(Players:GetPlayers()) do
-                if p ~= LocalPlayer and p.Character and p.Character:FindFirstChild("HumanoidRootPart") then
-                    local root = p.Character.HumanoidRootPart
-                    root.Size = Vector3.new(5, 5, 5)
-                    root.Color = Settings.HitboxColor
-                    root.Transparency = 0.4
-                    root.CanCollide = false
-                    root.Massless = true
-                end
-            end
-        end)
-    end
-end)
-
--- 6. زر تلوين الهيتبوكس
-local ColorBtn = CreateButton("🎨 لون الهيتبوكس: أحمر")
-local colorMode = 1
-ColorBtn.MouseButton1Click:Connect(function()
-    colorMode = colorMode + 1
-    if colorMode == 1 then
-        Settings.HitboxColor = Color3.fromRGB(255, 0, 0)
-        ColorBtn.Text = "🎨 لون الهيتبوكس: أحمر"
-    elseif colorMode == 2 then
-        Settings.HitboxColor = Color3.fromRGB(0, 255, 0)
-        ColorBtn.Text = "🎨 لون الهيتبوكس: أخضر"
-    elseif colorMode == 3 then
-        Settings.HitboxColor = Color3.fromRGB(0, 150, 255)
-        ColorBtn.Text = "🎨 لون الهيتبوكس: أزرق"
-    elseif colorMode == 4 then
-        Settings.HitboxColor = Color3.fromRGB(255, 255, 0)
-        ColorBtn.Text = "🎨 لون الهيتبوكس: أصفر"
-    elseif colorMode == 5 then
-        colorMode = 0
-        Settings.HitboxColor = Color3.fromRGB(255, 0, 255)
-        ColorBtn.Text = "🎨 لون الهيتبوكس: وردي متوهج"
-    end
-end)
-
--- 7. زر مقلب الدوران (Troll Spin)
-local TrollSpinBtn = CreateButton("🌀 مقلب الدوران السريع: OFF")
-TrollSpinBtn.MouseButton1Click:Connect(function()
-    Settings.TrollSpin = not Settings.TrollSpin
-    TrollSpinBtn.Text = Settings.TrollSpin and "🌀 مقلب الدوران السريع: ON" or "🌀 مقلب الدوران السريع: OFF"
-    TrollSpinBtn.BackgroundColor3 = Settings.TrollSpin and Color3.fromRGB(39, 174, 96) or Color3.fromRGB(30, 30, 45)
-end)
-
-RunService.RenderStepped:Connect(function()
-    if Settings.TrollSpin then
-        pcall(function()
-            local char = LocalPlayer.Character
-            if char and char:FindFirstChild("HumanoidRootPart") then
-                char.HumanoidRootPart.CFrame = char.HumanoidRootPart.CFrame * CFrame.Angles(0, math.rad(35), 0)
-            end
-        end)
-    end
-end)
-
--- 8. زر مقلب الطفو (Troll Float)
-local TrollFloatBtn = CreateButton("🛸 مقلب الطفو فالهواء: OFF")
-TrollFloatBtn.MouseButton1Click:Connect(function()
-    Settings.TrollFloat = not Settings.TrollFloat
-    TrollFloatBtn.Text = Settings.TrollFloat and "🛸 مقلب الطفو فالهواء: ON" or "🛸 مقلب الطفو فالهواء: OFF"
-    TrollFloatBtn.BackgroundColor3 = Settings.TrollFloat and Color3.fromRGB(39, 174, 96) or Color3.fromRGB(30, 30, 45)
-end)
-
-RunService.RenderStepped:Connect(function()
-    if Settings.TrollFloat then
-        pcall(function()
-            local char = LocalPlayer.Character
-            if char and char:FindFirstChild("HumanoidRootPart") then
-                char.HumanoidRootPart.Velocity = Vector3.new(0, 6, 0)
-            end
-        end)
-    end
-end)
+-- 5.
