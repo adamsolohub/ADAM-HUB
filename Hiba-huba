@@ -1,6 +1,6 @@
 -- ==========================================================
--- [ HIBA HUB | Ultimate Anime Edition & Troll Menu V2 ]
--- واجهة أنيمي بنات فخمة + أوتو فارم البيض المطور + قائمة المقالب الكاملة
+-- [ HIBA HUB | Anime Edition - Safe Speed & Head Aimbot ]
+-- واجهة أنيمي بنات فخمة + سرعة آمنة بدون رجوع للخلف + إيم بوت رأس
 -- ==========================================================
 
 local Players = game:GetService("Players")
@@ -10,17 +10,16 @@ local LocalPlayer = Players.LocalPlayer
 local Camera = Workspace.CurrentCamera
 
 local Settings = {
-    AutoFarmEggs = false,
     SpeedBoost = false,
-    CustomSpeed = 50,
+    CustomSpeed = 35,    -- سرعة آمنة ومستقرة تماماً داخل الماب باش ما يرجعكش anti-cheat اللور
     AimbotEnabled = false,
     AimbotRange = 100,
     Smoothness = 4,
     EspEnabled = false,
     EspRange = 300,
-    TrollSpin = false,    -- مقلب الدوران
-    TrollFloat = false,   -- مقلب الطيران
-    TrollJumpscare = false -- مقلب القفز العشوائي
+    TrollSpin = false,
+    TrollFloat = false,
+    TrollJumpscare = false
 }
 
 -- إزالة الواجهة القديمة إذا كانت موجودة
@@ -34,8 +33,8 @@ ScreenGui.Name = "HibaHubUltimateGui"
 ScreenGui.Parent = game.CoreGui
 
 local MainFrame = Instance.new("Frame")
-MainFrame.Size = UDim2.new(0, 320, 0, 520)
-MainFrame.Position = UDim2.new(0.5, -160, 0.5, -260)
+MainFrame.Size = UDim2.new(0, 320, 0, 480)
+MainFrame.Position = UDim2.new(0.5, -160, 0.5, -240)
 MainFrame.BackgroundColor3 = Color3.fromRGB(30, 20, 35)
 MainFrame.BorderSizePixel = 0
 MainFrame.Active = true
@@ -123,12 +122,12 @@ MinimizeBtn.MouseButton1Click:Connect(function()
         MainFrame.Size = UDim2.new(0, 320, 0, 38)
         AnimeBg.Visible = false
     else
-        MainFrame.Size = UDim2.new(0, 320, 0, 520)
+        MainFrame.Size = UDim2.new(0, 320, 0, 480)
         AnimeBg.Visible = true
     end
 end)
 
--- وظيفة إنشاء الأزرار مع حالة التشغيل والإطفاء (ON/OFF)
+-- وظيفة إنشاء الأزرار
 local function createButton(name, posY, callback)
     local btn = Instance.new("TextButton")
     btn.Size = UDim2.new(0, 290, 0, 35)
@@ -159,39 +158,25 @@ local function createButton(name, posY, callback)
     return btn
 end
 
--- الأزرار داخل الواجهة بترتيب منظم
-createButton("Auto Farm Eggs", 120, function(state) Settings.AutoFarmEggs = state end)
-createButton("Speed Boost", 160, function(state) Settings.SpeedBoost = state end)
-createButton("Aimbot (100m)", 200, function(state) Settings.AimbotEnabled = state end)
-createButton("ESP (300m)", 240, function(state) Settings.EspEnabled = state end)
-createButton("Troll: Spin Friend", 280, function(state) Settings.TrollSpin = state end)
-createButton("Troll: Float Friend", 320, function(state) Settings.TrollFloat = state end)
-createButton("Troll: Jump Spam", 360, function(state) Settings.TrollJumpscare = state end)
+-- أزرار الواجهة
+createButton("Safe Speed Boost", 120, function(state) Settings.SpeedBoost = state end)
+createButton("Head Aimbot (100m)", 160, function(state) Settings.AimbotEnabled = state end)
+createButton("ESP (300m)", 200, function(state) Settings.EspEnabled = state end)
+createButton("Troll: Spin Friend", 240, function(state) Settings.TrollSpin = state end)
+createButton("Troll: Float Friend", 280, function(state) Settings.TrollFloat = state end)
+createButton("Troll: Jump Spam", 320, function(state) Settings.TrollJumpscare = state end)
 
--- الوظائف البرمجية للتشغيل التلقائي (أوتو فارم البيض المطور)
+-- الوظائف البرمجية
 RunService.RenderStepped:Connect(function()
     if LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("Humanoid") then
         if Settings.SpeedBoost then
             LocalPlayer.Character.Humanoid.WalkSpeed = Settings.CustomSpeed
+        else
+            LocalPlayer.Character.Humanoid.WalkSpeed = 16 -- السرعة العادية للعبة
         end
     end
 
-    -- جمع البيض المرسب تلقائياً وبدقة عالية
-    if Settings.AutoFarmEggs and LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("HumanoidRootPart") then
-        pcall(function()
-            for _, obj in pairs(Workspace:GetDescendants()) do
-                if obj.Name:lower():find("egg") or obj.Name:lower():find("spawn") or obj.Name:lower():find("chest") then
-                    if obj:IsA("Model") and obj.PrimaryPart then
-                        LocalPlayer.Character.HumanoidRootPart.CFrame = obj.PrimaryPart.CFrame + Vector3.new(0, 3, 0)
-                    elseif obj:IsA("BasePart") then
-                        LocalPlayer.Character.HumanoidRootPart.CFrame = obj.CFrame + Vector3.new(0, 3, 0)
-                    end
-                end
-            end
-        end)
-    end
-
-    -- مقالب الأصدقاء المتاحة
+    -- مقالب الأصدقاء
     if LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("HumanoidRootPart") then
         pcall(function()
             for _, v in pairs(Players:GetPlayers()) do
@@ -214,17 +199,17 @@ RunService.RenderStepped:Connect(function()
     end
 end)
 
--- الإيم بوت (Combat Aimbot)
-local function getClosestPlayer()
+-- إيم بوت على الرأس (Head Aimbot)
+local function getClosestHead()
     local target = nil
     local shortestDistance = Settings.AimbotRange
     for _, v in pairs(Players:GetPlayers()) do
-        if v ~= LocalPlayer and v.Character and v.Character:FindFirstChild("HumanoidRootPart") and v.Character:FindFirstChild("Humanoid") and v.Character.Humanoid.Health > 0 then
-            local rootPart = v.Character.HumanoidRootPart
-            local distance = (LocalPlayer.Character.HumanoidRootPart.Position - rootPart.Position).Magnitude
+        if v ~= LocalPlayer and v.Character and v.Character:FindFirstChild("Head") and v.Character:FindFirstChild("Humanoid") and v.Character.Humanoid.Health > 0 then
+            local headPart = v.Character.Head
+            local distance = (LocalPlayer.Character.HumanoidRootPart.Position - headPart.Position).Magnitude
             if distance < shortestDistance then
                 shortestDistance = distance
-                target = rootPart
+                target = headPart
             end
         end
     end
@@ -233,9 +218,9 @@ end
 
 RunService.RenderStepped:Connect(function()
     if Settings.AimbotEnabled and LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("HumanoidRootPart") then
-        local targetPart = getClosestPlayer()
-        if targetPart then
-            local targetCFrame = CFrame.new(Camera.CFrame.Position, targetPart.Position)
+        local targetHead = getClosestHead()
+        if targetHead then
+            local targetCFrame = CFrame.new(Camera.CFrame.Position, targetHead.Position)
             Camera.CFrame = Camera.CFrame:Lerp(targetCFrame, 1 / Settings.Smoothness)
         end
     end
@@ -267,4 +252,4 @@ RunService.Heartbeat:Connect(function()
     end
 end)
 
-print("Hiba Hub Ultimate V2 Loaded Successfully!")
+print("Hiba Hub Safe Speed Loaded Successfully!")
