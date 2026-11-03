@@ -1,0 +1,104 @@
+-- ==========================================================
+-- [ ADAM HUB | Ultimate Naruto Egg & Combat Script ]
+-- إيم بوت 100م + كشف أماكن 300م + أوتو فارم البيض + سرعة خارقة
+-- ==========================================================
+
+local Players = game:GetService("Players")
+local RunService = game:GetService("RunService")
+local Workspace = game:GetService("Workspace")
+local LocalPlayer = Players.LocalPlayer
+local Camera = Workspace.CurrentCamera
+
+-- إعدادات السكربت الخارقة
+local Settings = {
+    AutoFarmEggs = true,     -- جمع البيض تلقائياً
+    SpeedBoost = true,       -- سرعة خارقة لجمع البيض بسرعة
+    CustomSpeed = 50,        -- سرعة اللاعب
+    AimbotEnabled = true,    -- إيم بوت
+    AimbotRange = 100,       -- مدى الإيم بوت 100 متر
+    Smoothness = 4,          -- سلاسة التدوير
+    EspEnabled = true,       -- كشف الأماكن
+    EspRange = 300           -- مدى الكشف 300 متر
+}
+
+-- 1. وظيفة السرعة الخارقة وأوتو فارم البيض بدون لمس
+RunService.RenderStepped:Connect(function()
+    if LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("Humanoid") then
+        if Settings.SpeedBoost then
+            LocalPlayer.Character.Humanoid.WalkSpeed = Settings.CustomSpeed
+        end
+    end
+
+    -- أوتو فارم البيض أو الصناديق في الماب
+    if Settings.AutoFarmEggs and LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("HumanoidRootPart") then
+        pcall(function()
+            for _, obj in pairs(Workspace:GetDescendants()) do
+                if obj.Name:lower():find("egg") or obj.Name:lower():find("chest") or obj.Name:lower():find("reward") then
+                    if obj:IsA("Model") and obj.PrimaryPart then
+                        LocalPlayer.Character.HumanoidRootPart.CFrame = obj.PrimaryPart.CFrame
+                    elseif obj:IsA("BasePart") then
+                        LocalPlayer.Character.HumanoidRootPart.CFrame = obj.CFrame
+                    end
+                end
+            end
+        end)
+    end
+end)
+
+-- 2. وظيفة الإيم بوت المطور (100 متر)
+local function getClosestPlayer()
+    local target = nil
+    local shortestDistance = Settings.AimbotRange
+
+    for _, v in pairs(Players:GetPlayers()) do
+        if v ~= LocalPlayer and v.Character and v.Character:FindFirstChild("HumanoidRootPart") and v.Character:FindFirstChild("Humanoid") and v.Character.Humanoid.Health > 0 then
+            local rootPart = v.Character.HumanoidRootPart
+            local distance = (LocalPlayer.Character.HumanoidRootPart.Position - rootPart.Position).Magnitude
+            
+            if distance < shortestDistance then
+                shortestDistance = distance
+                target = rootPart
+            end
+        end
+    end
+    return target
+end
+
+RunService.RenderStepped:Connect(function()
+    if Settings.AimbotEnabled and LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("HumanoidRootPart") then
+        local targetPart = getClosestPlayer()
+        if targetPart then
+            local targetCFrame = CFrame.new(Camera.CFrame.Position, targetPart.Position)
+            Camera.CFrame = Camera.CFrame:Lerp(targetCFrame, 1 / Settings.Smoothness)
+        end
+    end
+end)
+
+-- 3. كشف الأماكن المتطور (ESP بمدى 300 متر)
+RunService.Heartbeat:Connect(function()
+    if Settings.EspEnabled and LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("HumanoidRootPart") then
+        for _, v in pairs(Players:GetPlayers()) do
+            if v ~= LocalPlayer and v.Character and v.Character:FindFirstChild("HumanoidRootPart") then
+                local rootPart = v.Character.HumanoidRootPart
+                local distance = (LocalPlayer.Character.HumanoidRootPart.Position - rootPart.Position).Magnitude
+                
+                if distance <= Settings.EspRange then
+                    if not v.Character:FindFirstChild("AdamHighlight") then
+                        local highlight = Instance.new("Highlight")
+                        highlight.Name = "AdamHighlight"
+                        highlight.Adornee = v.Character
+                        highlight.FillColor = Color3.fromRGB(255, 69, 0) -- لون برتقالي ناري (ستايل ناروتو)
+                        highlight.OutlineColor = Color3.fromRGB(255, 255, 255)
+                        highlight.Parent = v.Character
+                    end
+                else
+                    if v.Character:FindFirstChild("AdamHighlight") then
+                        v.Character.AdamHighlight:Destroy()
+                    end
+                end
+            end
+        end
+    end
+end)
+
+print("Adam Ultimate Naruto Egg Hub Loaded Successfully!")
