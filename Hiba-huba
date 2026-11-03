@@ -1,6 +1,6 @@
 -- ==========================================================
--- [ HIBA HUB | Ultimate Anime Edition & Troll Menu ]
--- واجهة أنيمي بنات فخمة + أزرار تحكم كاملة (ON/OFF) + مقالب
+-- [ HIBA HUB | Ultimate Anime Edition & Troll Menu V2 ]
+-- واجهة أنيمي بنات فخمة + أوتو فارم البيض المطور + قائمة المقالب الكاملة
 -- ==========================================================
 
 local Players = game:GetService("Players")
@@ -18,7 +18,9 @@ local Settings = {
     Smoothness = 4,
     EspEnabled = false,
     EspRange = 300,
-    TrollMode = false -- مقلب الأصحاب
+    TrollSpin = false,    -- مقلب الدوران
+    TrollFloat = false,   -- مقلب الطيران
+    TrollJumpscare = false -- مقلب القفز العشوائي
 }
 
 -- إزالة الواجهة القديمة إذا كانت موجودة
@@ -32,8 +34,8 @@ ScreenGui.Name = "HibaHubUltimateGui"
 ScreenGui.Parent = game.CoreGui
 
 local MainFrame = Instance.new("Frame")
-MainFrame.Size = UDim2.new(0, 320, 0, 460)
-MainFrame.Position = UDim2.new(0.5, -160, 0.5, -230)
+MainFrame.Size = UDim2.new(0, 320, 0, 520)
+MainFrame.Position = UDim2.new(0.5, -160, 0.5, -260)
 MainFrame.BackgroundColor3 = Color3.fromRGB(30, 20, 35)
 MainFrame.BorderSizePixel = 0
 MainFrame.Active = true
@@ -46,7 +48,7 @@ UICorner.Parent = MainFrame
 
 -- خلفية أنمي بنات كيوت داخل الواجهة
 local AnimeBg = Instance.new("ImageLabel")
-AnimeBg.Size = UDim2.new(1, 0, 0, 120)
+AnimeBg.Size = UDim2.new(1, 0, 0, 110)
 AnimeBg.BackgroundColor3 = Color3.fromRGB(40, 25, 50)
 AnimeBg.Image = "rbxassetid://8888421112"
 AnimeBg.ScaleType = Enum.ScaleType.Slice
@@ -58,7 +60,7 @@ BgCorner.Parent = AnimeBg
 
 -- شريط العنوان العلوي
 local TopBar = Instance.new("Frame")
-TopBar.Size = UDim2.new(1, 0, 0, 40)
+TopBar.Size = UDim2.new(1, 0, 0, 38)
 TopBar.BackgroundTransparency = 0.3
 TopBar.BackgroundColor3 = Color3.fromRGB(20, 10, 25)
 TopBar.BorderSizePixel = 0
@@ -70,19 +72,19 @@ Title.Position = UDim2.new(0, 12, 0, 0)
 Title.BackgroundTransparency = 1
 Title.Text = "🌸 هيبة هوب | HIBA HUB 🌸"
 Title.TextColor3 = Color3.fromRGB(255, 150, 220)
-Title.TextSize = 14
+Title.TextSize = 13
 Title.Font = Enum.Font.SourceSansBold
 Title.TextXAlignment = Enum.TextXAlignment.Left
 Title.Parent = TopBar
 
 -- زر إغلاق الواجهة (X)
 local CloseBtn = Instance.new("TextButton")
-CloseBtn.Size = UDim2.new(0, 32, 0, 32)
-CloseBtn.Position = UDim2.new(1, -38, 0, 4)
+CloseBtn.Size = UDim2.new(0, 30, 0, 30)
+CloseBtn.Position = UDim2.new(1, -35, 0, 4)
 CloseBtn.BackgroundColor3 = Color3.fromRGB(220, 60, 100)
 CloseBtn.Text = "X"
 CloseBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
-CloseBtn.TextSize = 14
+CloseBtn.TextSize = 13
 CloseBtn.Font = Enum.Font.SourceSansBold
 CloseBtn.Parent = TopBar
 
@@ -96,12 +98,12 @@ end)
 
 -- زر تصغير الواجهة (-)
 local MinimizeBtn = Instance.new("TextButton")
-MinimizeBtn.Size = UDim2.new(0, 32, 0, 32)
-MinimizeBtn.Position = UDim2.new(1, -76, 0, 4)
+MinimizeBtn.Size = UDim2.new(0, 30, 0, 30)
+MinimizeBtn.Position = UDim2.new(1, -70, 0, 4)
 MinimizeBtn.BackgroundColor3 = Color3.fromRGB(80, 50, 90)
 MinimizeBtn.Text = "-"
 MinimizeBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
-MinimizeBtn.TextSize = 18
+MinimizeBtn.TextSize = 16
 MinimizeBtn.Font = Enum.Font.SourceSansBold
 MinimizeBtn.Parent = TopBar
 
@@ -118,10 +120,10 @@ MinimizeBtn.MouseButton1Click:Connect(function()
         end
     end
     if minimized then
-        MainFrame.Size = UDim2.new(0, 320, 0, 40)
+        MainFrame.Size = UDim2.new(0, 320, 0, 38)
         AnimeBg.Visible = false
     else
-        MainFrame.Size = UDim2.new(0, 320, 0, 460)
+        MainFrame.Size = UDim2.new(0, 320, 0, 520)
         AnimeBg.Visible = true
     end
 end)
@@ -129,12 +131,12 @@ end)
 -- وظيفة إنشاء الأزرار مع حالة التشغيل والإطفاء (ON/OFF)
 local function createButton(name, posY, callback)
     local btn = Instance.new("TextButton")
-    btn.Size = UDim2.new(0, 290, 0, 38)
+    btn.Size = UDim2.new(0, 290, 0, 35)
     btn.Position = UDim2.new(0.5, -145, 0, posY)
     btn.BackgroundColor3 = Color3.fromRGB(60, 35, 75)
     btn.Text = name .. ": OFF"
     btn.TextColor3 = Color3.fromRGB(255, 255, 255)
-    btn.TextSize = 13
+    btn.TextSize = 12
     btn.Font = Enum.Font.SourceSansBold
     btn.Parent = MainFrame
 
@@ -157,32 +159,16 @@ local function createButton(name, posY, callback)
     return btn
 end
 
--- 1. زر أوتو فارم البيض
-createButton("Auto Farm Eggs", 130, function(state)
-    Settings.AutoFarmEggs = state
-end)
+-- الأزرار داخل الواجهة بترتيب منظم
+createButton("Auto Farm Eggs", 120, function(state) Settings.AutoFarmEggs = state end)
+createButton("Speed Boost", 160, function(state) Settings.SpeedBoost = state end)
+createButton("Aimbot (100m)", 200, function(state) Settings.AimbotEnabled = state end)
+createButton("ESP (300m)", 240, function(state) Settings.EspEnabled = state end)
+createButton("Troll: Spin Friend", 280, function(state) Settings.TrollSpin = state end)
+createButton("Troll: Float Friend", 320, function(state) Settings.TrollFloat = state end)
+createButton("Troll: Jump Spam", 360, function(state) Settings.TrollJumpscare = state end)
 
--- 2. زر السرعة الخارقة
-createButton("Speed Boost", 175, function(state)
-    Settings.SpeedBoost = state
-end)
-
--- 3. زر الإيم بوت
-createButton("Aimbot (100m)", 220, function(state)
-    Settings.AimbotEnabled = state
-end)
-
--- 4. زر كشف الأماكن (ESP)
-createButton("ESP (300m)", 265, function(state)
-    Settings.EspEnabled = state
-end)
-
--- 5. زر المقلب الضحك (Troll Mode)
-createButton("Troll / Prank Mode", 310, function(state)
-    Settings.TrollMode = state
-end)
-
--- الوظائف البرمجية للتشغيل
+-- الوظائف البرمجية للتشغيل التلقائي (أوتو فارم البيض المطور)
 RunService.RenderStepped:Connect(function()
     if LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("Humanoid") then
         if Settings.SpeedBoost then
@@ -190,29 +176,37 @@ RunService.RenderStepped:Connect(function()
         end
     end
 
-    -- أوتو فارم البيض
+    -- جمع البيض المرسب تلقائياً وبدقة عالية
     if Settings.AutoFarmEggs and LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("HumanoidRootPart") then
         pcall(function()
             for _, obj in pairs(Workspace:GetDescendants()) do
-                if obj.Name:lower():find("egg") or obj.Name:lower():find("chest") or obj.Name:lower():find("reward") then
+                if obj.Name:lower():find("egg") or obj.Name:lower():find("spawn") or obj.Name:lower():find("chest") then
                     if obj:IsA("Model") and obj.PrimaryPart then
-                        LocalPlayer.Character.HumanoidRootPart.CFrame = obj.PrimaryPart.CFrame
+                        LocalPlayer.Character.HumanoidRootPart.CFrame = obj.PrimaryPart.CFrame + Vector3.new(0, 3, 0)
                     elseif obj:IsA("BasePart") then
-                        LocalPlayer.Character.HumanoidRootPart.CFrame = obj.CFrame
+                        LocalPlayer.Character.HumanoidRootPart.CFrame = obj.CFrame + Vector3.new(0, 3, 0)
                     end
                 end
             end
         end)
     end
 
-    -- مقلب الأصحاب (دوران وصعق مرح)
-    if Settings.TrollMode and LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("HumanoidRootPart") then
+    -- مقالب الأصدقاء المتاحة
+    if LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("HumanoidRootPart") then
         pcall(function()
             for _, v in pairs(Players:GetPlayers()) do
                 if v ~= LocalPlayer and v.Character and v.Character:FindFirstChild("HumanoidRootPart") then
                     local dist = (LocalPlayer.Character.HumanoidRootPart.Position - v.Character.HumanoidRootPart.Position).Magnitude
                     if dist < 15 then
-                        v.Character.HumanoidRootPart.CFrame = v.Character.HumanoidRootPart.CFrame * CFrame.Angles(0, math.rad(25), 0)
+                        if Settings.TrollSpin then
+                            v.Character.HumanoidRootPart.CFrame = v.Character.HumanoidRootPart.CFrame * CFrame.Angles(0, math.rad(30), 0)
+                        end
+                        if Settings.TrollFloat then
+                            v.Character.HumanoidRootPart.Velocity = Vector3.new(0, 35, 0)
+                        end
+                        if Settings.TrollJumpscare and v.Character:FindFirstChild("Humanoid") then
+                            v.Character.Humanoid.Jump = true
+                        end
                     end
                 end
             end
@@ -220,7 +214,7 @@ RunService.RenderStepped:Connect(function()
     end
 end)
 
--- الإيم بوت
+-- الإيم بوت (Combat Aimbot)
 local function getClosestPlayer()
     local target = nil
     local shortestDistance = Settings.AimbotRange
@@ -273,4 +267,4 @@ RunService.Heartbeat:Connect(function()
     end
 end)
 
-print("Hiba Hub Ultimate Loaded Successfully!")
+print("Hiba Hub Ultimate V2 Loaded Successfully!")
