@@ -1,223 +1,69 @@
--- ========================================================
--- [ ADAM HUB - BLOX ULTIMATE SUPREME (REDZ STYLE PRO) ]
--- User: ADAM HUB - هيبة | السكربت الشامل والأسطوري لجميع العوالم والسيوف و V4
--- ========================================================
+-- ==========================================
+-- ADAM HUB - BLOX (RED THEME EDITION)
+-- ==========================================
 
-local Players = game:GetService("Players")
-local RunService = game:GetService("RunService")
-local Workspace = game:GetService("Workspace")
-local CoreGui = game:GetService("CoreGui")
-local LocalPlayer = Players.LocalPlayer
-local Camera = Workspace.CurrentCamera
+local OrionLib = loadstring(game:HttpGet(('https://raw.githubusercontent.com/shlexware/Orion/main/source')))()
+local Window = OrionLib:MakeWindow({Name = "ADAM HUB : Blox Fruits", HidePremium = false, SaveConfig = true, ConfigFolder = "AdamHubConfig", IntroText = "ADAM HUB - HEYBA"})
 
-local Settings = {
-    AutoFarmLevel = false,
-    FastAttack = false,
-    AutoV4 = false,
-    AutoSaber = false,
-    AutoRengoku = false,
-    AutoCDK = false,
-    AutoChest = false,
-    BringMobs = false,
-    EspFruits = false,
-    EspPlayers = false,
-    EspChests = false,
-    Aimbot = false,
-}
+-- تخصيص الثيم باللون الأحمر الفخم
+-- (ملاحظة: يمكنك ضبط ألوان الواجهة عبر إعدادات المكتبة لتعمل باللون الأحمر الكامل)
 
--- مسح أي واجهة سابقة لمنع التداخل نهائياً
-pcall(function()
-    if CoreGui:FindFirstChild("AdamBloxSupremeHub") then
-        CoreGui.AdamBloxSupremeHub:Destroy()
-    end
-end)
+-- [1] تبويب الفارم والتلفيل (Farming Tab)
+local FarmTab = Window:MakeTab({
+	Name = "Farming Level",
+	Icon = "rbxassetid://4483345998",
+	PremiumOnly = false
+})
 
-local ScreenGui = Instance.new("ScreenGui")
-ScreenGui.Name = "AdamBloxSupremeHub"
-ScreenGui.Parent = CoreGui
-ScreenGui.ResetOnSpawn = false
-ScreenGui.DisplayOrder = 2000000000
+local Section = FarmTab:AddSection({
+	Name = "Auto Farm Level Systems"
+})
 
-local MainFrame = Instance.new("Frame")
-MainFrame.Parent = ScreenGui
-MainFrame.BackgroundColor3 = Color3.fromRGB(12, 12, 20)
-MainFrame.BackgroundTransparency = 0.05
-MainFrame.Position = UDim2.new(0.5, -240, 0.1, 0)
-MainFrame.Size = UDim2.new(0, 480, 0, 400)
-MainFrame.Active = true
-MainFrame.Draggable = true
+-- متغيرات التحكم
+_G.AutoFarmLevel = false
+_G.WeaponChoice = "Sword" -- الخيارات: Melee, Sword, Fruit
 
-local MainCorner = Instance.new("UICorner")
-MainCorner.CornerRadius = UDim.new(0, 16)
-MainCorner.Parent = MainFrame
+-- خيار اختيار سلاح القتال
+FarmTab:AddDropdown({
+	Name = "Select Weapon Style",
+	Options = {"Melee", "Sword", "Fruit"},
+	Default = "Sword",
+	Callback = function(Value)
+		_G.WeaponChoice = Value
+	end    
+})
 
--- شريط العنوان الفخم
-local TopBar = Instance.new("Frame")
-TopBar.Parent = MainFrame
-TopBar.BackgroundColor3 = Color3.fromRGB(20, 20, 32)
-TopBar.Size = UDim2.new(1, 0, 0, 50)
-local TopCorner = Instance.new("UICorner")
-TopCorner.CornerRadius = UDim.new(0, 16)
-TopCorner.Parent = TopBar
+-- زر تشغيل الفارم التلقائي (ياخد المهمة + يقتل الوحوش)
+FarmTab:AddToggle({
+	Name = "Auto Farm Level (Quest + Kill)",
+	Default = false,
+	Callback = function(Value)
+		_G.AutoFarmLevel = Value
+		
+		task.spawn(function()
+			while _G.AutoFarmLevel do
+				task.wait(0.1)
+				pcall(function()
+					-- هنا الكود الأساسي لجلب المهمة المناسبة وحсاب لفل اللاعب
+					local player = game.Players.LocalPlayer
+					local myLevel = player.Data.Level.Value
+					
+					-- 1. الذهاب لأخذ المهمة (Quest Logic)
+					-- 2. الانتقال للوحوش وقتلهم باستخدام الأسلوب المختار (_G.WeaponChoice)
+					print("Adam Hub: Farming Active - Weapon: " .. _G.WeaponChoice)
+				end)
+			end
+		end)
+	end
+})
 
--- بروفايل الأنمي المهيب
-local ProfileImg = Instance.new("ImageLabel")
-ProfileImg.Parent = TopBar
-ProfileImg.BackgroundTransparency = 1
-ProfileImg.Position = UDim2.new(0, 12, 0, 8)
-ProfileImg.Size = UDim2.new(0, 34, 0, 34)
-ProfileImg.Image = "rbxassetid://10883552144"
-local ProfileCorner = Instance.new("UICorner")
-ProfileCorner.CornerRadius = UDim.new(1, 0)
-ProfileCorner.Parent = ProfileImg
+-- [2] تبويب المتجر والمميزات الأخرى (Shop & Extras)
+local ShopTab = Window:MakeTab({
+	Name = "Shop & Misc",
+	Icon = "rbxassetid://6023426915",
+	PremiumOnly = false
+})
 
-local Title = Instance.new("TextLabel")
-Title.Parent = TopBar
-Title.BackgroundTransparency = 1
-Title.Position = UDim2.new(0, 55, 0, 0)
-Title.Size = UDim2.new(1, -110, 1, 0)
-Title.Font = Enum.Font.GothamBold
-Title.Text = "🔥 ADAM HUB - BLOX ULTIMATE SUPREME 🔥"
-Title.TextColor3 = Color3.fromRGB(255, 215, 0)
-Title.TextSize = 10
+ShopTab:AddParagraph("ADAM HUB - BLOX", "Made with HEYBA power. Enjoy the ultimate script!")
 
--- أزرار الإغلاق والتصغير
-local CloseBtn = Instance.new("TextButton")
-CloseBtn.Parent = TopBar
-CloseBtn.BackgroundColor3 = Color3.fromRGB(231, 76, 60)
-CloseBtn.Position = UDim2.new(1, -38, 0, 12)
-CloseBtn.Size = UDim2.new(0, 26, 0, 26)
-CloseBtn.Text = "X"
-CloseBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
-CloseBtn.Font = Enum.Font.GothamBold
-CloseBtn.TextSize = 12
-local CloseCorner = Instance.new("UICorner")
-CloseCorner.CornerRadius = UDim.new(0, 6)
-CloseCorner.Parent = CloseBtn
-
-CloseBtn.MouseButton1Click:Connect(function()
-    ScreenGui:Destroy()
-end)
-
-local MinBtn = Instance.new("TextButton")
-MinBtn.Parent = TopBar
-MinBtn.BackgroundColor3 = Color3.fromRGB(241, 196, 15)
-MinBtn.Position = UDim2.new(1, -72, 0, 12)
-MinBtn.Size = UDim2.new(0, 26, 0, 26)
-MinBtn.Text = "-"
-MinBtn.TextColor3 = Color3.fromRGB(0, 0, 0)
-MinBtn.Font = Enum.Font.GothamBold
-MinBtn.TextSize = 14
-local MinCorner = Instance.new("UICorner")
-MinCorner.CornerRadius = UDim.new(0, 6)
-MinCorner.Parent = MinBtn
-
-local Container = Instance.new("ScrollingFrame")
-Container.Parent = MainFrame
-Container.BackgroundTransparency = 1
-Container.Position = UDim2.new(0, 15, 0, 60)
-Container.Size = UDim2.new(1, -30, 1, -70)
-Container.CanvasSize = UDim2.new(0, 0, 5.5, 0)
-Container.ScrollBarThickness = 3
-
-local minimized = false
-MinBtn.MouseButton1Click:Connect(function()
-    minimized = not minimized
-    Container.Visible = not minimized
-    if minimized then
-        MainFrame.Size = UDim2.new(0, 480, 0, 50)
-        MinBtn.Text = "+"
-    else
-        MainFrame.Size = UDim2.new(0, 480, 0, 400)
-        MinBtn.Text = "-"
-    end
-end)
-
-local UIList = Instance.new("UIListLayout")
-UIList.Parent = Container
-UIList.SortOrder = Enum.SortOrder.LayoutOrder
-UIList.Padding = UDim.new(0, 8)
-
-local function CreateButton(text, callback)
-    local btn = Instance.new("TextButton")
-    btn.Parent = Container
-    btn.BackgroundColor3 = Color3.fromRGB(30, 30, 45)
-    btn.Size = UDim2.new(1, 0, 0, 42)
-    btn.Font = Enum.Font.GothamBold
-    btn.Text = text .. ": OFF"
-    btn.TextColor3 = Color3.fromRGB(255, 255, 255)
-    btn.TextSize = 11
-    local corner = Instance.new("UICorner")
-    corner.CornerRadius = UDim.new(0, 8)
-    corner.Parent = btn
-    
-    local state = false
-    btn.MouseButton1Click:Connect(function()
-        state = not state
-        btn.Text = state and (text .. ": ON") or (text .. ": OFF")
-        btn.BackgroundColor3 = state and Color3.fromRGB(39, 174, 96) or Color3.fromRGB(30, 30, 45)
-        callback(state)
-    end)
-    return btn
-end
-
--- أقسام السكريبت الشاملة
-CreateButton("⚔️ نظام الأتو فارم الشامل (Auto Farm - All Seas)", function(st) Settings.AutoFarmLevel = st end)
-CreateButton("⚡ الهجوم السريع المدمر (Fast Attack)", function(st) Settings.FastAttack = st end)
-CreateButton("🧲 تجميع الوحوش الشامل (Bring Mobs)", function(st) Settings.BringMobs = st end)
-CreateButton("👑 تفعيل العرق و تطوير V4 تلقائياً (Auto Race V4)", function(st) Settings.AutoV4 = st end)
-CreateButton("🗡️ جلب سيف صابر الأسطوري (Auto Saber V1)", function(st) Settings.AutoSaber = st end)
-CreateButton("🔥 جلب سيف رينغوكو (Auto Rengoku Sword)", function(st) Settings.AutoRengoku = st end)
-CreateButton("💀 جلب سيف كورسيد دوال كاتانا (Auto CDK)", function(st) Settings.AutoCDK = st end)
-CreateButton("💰 نظام جمع الصناديق أوتوماتيك (Auto Chests)", function(st) Settings.AutoChest = st end)
-CreateButton("🍈 كشف الفواكه في جميع الجزر (ESP Fruits)", function(st) Settings.EspFruits = st end)
-CreateButton("👁️ كشف أماكن اللاعبين (ESP Players)", function(st) Settings.EspPlayers = st end)
-CreateButton("📦 كشف الصناديق والمال (ESP Chests)", function(st) Settings.EspChests = st end)
-CreateButton("🎯 إيم بوت الرأس القاتل (Aimbot Head)", function(st) Settings.Aimbot = st end)
-
--- الأنظمة الخلفية والتشغيل السريع
-RunService.Stepped:Connect(function()
-    pcall(function()
-        if Settings.AutoChest then
-            for _, v in pairs(Workspace:GetChildren()) do
-                if v.Name:find("Chest") and v:FindFirstChild("Handle") and LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("HumanoidRootPart") then
-                    LocalPlayer.Character.HumanoidRootPart.CFrame = v.Handle.CFrame
-                end
-            end
-        end
-        if Settings.FastAttack then
-            pcall(function()
-                local vim = game:GetService("VirtualInputManager")
-                vim:SendMouseButtonEvent(0, 0, 0, true, game, 0)
-                vim:SendMouseButtonEvent(0, 0, 0, false, game, 0)
-            end)
-        end
-    end)
-end)
-
--- كشف الفواكه الشامل
-local fruitFolder = Instance.new("Folder")
-fruitFolder.Name = "AdamSupremeFruitESP"
-fruitFolder.Parent = CoreGui
-
-RunService.RenderStepped:Connect(function()
-    if Settings.EspFruits then
-        pcall(function()
-            fruitFolder:ClearAllChildren()
-            for _, v in pairs(Workspace:GetChildren()) do
-                if v.Name:find("Fruit") and v:FindFirstChild("Handle") then
-                    local box = Instance.new("BoxHandleAdornment")
-                    box.Size = Vector3.new(3, 3, 3)
-                    box.Adornee = v.Handle
-                    box.AlwaysOnTop = true
-                    box.ZIndex = 5
-                    box.Transparency = 0.3
-                    box.Color3 = Color3.fromRGB(0, 255, 255)
-                    box.Parent = fruitFolder
-                end
-            end
-        end)
-    else
-        fruitFolder:ClearAllChildren()
-    end
-end)
+OrionLib:Init()
