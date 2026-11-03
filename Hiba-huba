@@ -1,5 +1,5 @@
 -- ========================================================
--- [ ADAM HUB - HIBA ULTIMATE & TROLL EDITION ]
+-- [ ADAM HUB - HIBA ULTIMATE & FIXED HITBOX ]
 -- User: ADAM HUB - هيبة
 -- ========================================================
 
@@ -36,7 +36,7 @@ MainFrame.Parent = ScreenGui
 MainFrame.BackgroundColor3 = Color3.fromRGB(20, 20, 32)
 MainFrame.BackgroundTransparency = 0.05
 MainFrame.Position = UDim2.new(0.5, -160, 0.22, 0)
-MainFrame.Size = UDim2.new(0, 320, 0, 440)
+MainFrame.Size = UDim2.new(0, 320, 0, 410)
 MainFrame.Active = true
 MainFrame.Draggable = true
 
@@ -87,7 +87,7 @@ Container.Parent = MainFrame
 Container.BackgroundTransparency = 1
 Container.Position = UDim2.new(0, 10, 0, 55)
 Container.Size = UDim2.new(1, -20, 1, -65)
-Container.CanvasSize = UDim2.new(0, 0, 2.3, 0)
+Container.CanvasSize = UDim2.new(0, 0, 2.1, 0)
 Container.ScrollBarThickness = 3
 
 local UIList = Instance.new("UIListLayout")
@@ -166,7 +166,7 @@ RunService.RenderStepped:Connect(function()
     end
 end)
 
--- 3. زر تفعيل Hitbox الرأس الواسع (تضرب حدا اللاعب وتحسب هيد)
+-- 3. زر تفعيل Hitbox الرأس الواسع (المصحح والفعال 100%)
 local HitboxBtn = Instance.new("TextButton")
 HitboxBtn.Parent = Container
 HitboxBtn.BackgroundColor3 = Color3.fromRGB(45, 45, 65)
@@ -185,22 +185,20 @@ HitboxBtn.MouseButton1Click:Connect(function()
     HitboxBtn.BackgroundColor3 = Settings.HitboxEnabled and Color3.fromRGB(39, 174, 96) or Color3.fromRGB(45, 45, 65)
 end)
 
-task.spawn(function()
-    while true do
-        task.wait(0.4)
-        if Settings.HitboxEnabled then
-            pcall(function()
-                for _, p in pairs(Players:GetPlayers()) do
-                    if p ~= LocalPlayer and p.Character and p.Character:FindFirstChild("Head") then
-                        local head = p.Character.Head
-                        head.Size = Vector3.new(5, 5, 5)
-                        head.Color = Settings.HitboxColor
-                        head.Transparency = 0.5
-                        head.CanCollide = false
-                    end
+RunService.RenderStepped:Connect(function()
+    if Settings.HitboxEnabled then
+        pcall(function()
+            for _, p in pairs(Players:GetPlayers()) do
+                if p ~= LocalPlayer and p.Character and p.Character:FindFirstChild("Head") then
+                    local head = p.Character.Head
+                    head.Size = Vector3.new(6, 6, 6) -- حجم كبير باش فين ما ضربت تحسب هيد
+                    head.Color = Settings.HitboxColor
+                    head.Transparency = 0.4
+                    head.CanCollide = false
+                    head.Massless = true
                 end
-            end)
-        end
+            end
+        end)
     end
 end)
 
@@ -239,7 +237,7 @@ ColorBtn.MouseButton1Click:Connect(function()
     end
 end)
 
--- 5. زر مقالب الدوران (Troll: Spin Mode)
+-- 5. زر مقالب الدوران (Troll Spin)
 local TrollSpinBtn = Instance.new("TextButton")
 TrollSpinBtn.Parent = Container
 TrollSpinBtn.BackgroundColor3 = Color3.fromRGB(45, 45, 65)
@@ -263,13 +261,13 @@ RunService.RenderStepped:Connect(function()
         pcall(function()
             local char = LocalPlayer.Character
             if char and char:FindFirstChild("HumanoidRootPart") then
-                char.HumanoidRootPart.CFrame = char.HumanoidRootPart.CFrame * CFrame.Angles(0, math.rad(30), 0)
+                char.HumanoidRootPart.CFrame = char.HumanoidRootPart.CFrame * CFrame.Angles(0, math.rad(35), 0)
             end
         end)
     end
 end)
 
--- 6. زر مقالب الطفو (Troll: Float Mode)
+-- 6. زر مقالب الطفو (Troll Float)
 local TrollFloatBtn = Instance.new("TextButton")
 TrollFloatBtn.Parent = Container
 TrollFloatBtn.BackgroundColor3 = Color3.fromRGB(45, 45, 65)
@@ -283,3 +281,18 @@ TFCorn.CornerRadius = UDim.new(0, 8)
 TFCorn.Parent = TrollFloatBtn
 
 TrollFloatBtn.MouseButton1Click:Connect(function()
+    Settings.TrollFloat = not Settings.TrollFloat
+    TrollFloatBtn.Text = Settings.TrollFloat and "🛸 مقلب الطفو فالهواء (Float): ON" or "🛸 مقلب الطفو فالهواء (Float): OFF"
+    TrollFloatBtn.BackgroundColor3 = Settings.TrollFloat and Color3.fromRGB(39, 174, 96) or Color3.fromRGB(45, 45, 65)
+end)
+
+RunService.RenderStepped:Connect(function()
+    if Settings.TrollFloat then
+        pcall(function()
+            local char = LocalPlayer.Character
+            if char and char:FindFirstChild("HumanoidRootPart") then
+                char.HumanoidRootPart.Velocity = Vector3.new(0, 6, 0)
+            end
+        end)
+    end
+end)
