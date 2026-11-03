@@ -1,6 +1,6 @@
 -- ==========================================================
--- [ ADAM HUB | Ultimate Naruto Egg & Combat Script ]
--- إيم بوت 100م + كشف أماكن 300م + أوتو فارم البيض + سرعة خارقة
+-- [ HIBA HUB | Anime Girls Edition - Egg & Combat Script ]
+-- واجهة أنمي بنات فخمة + أوتو فارم البيض + سرعة + إيم بوت + ESP
 -- ==========================================================
 
 local Players = game:GetService("Players")
@@ -9,19 +9,227 @@ local Workspace = game:GetService("Workspace")
 local LocalPlayer = Players.LocalPlayer
 local Camera = Workspace.CurrentCamera
 
--- إعدادات السكربت الخارقة
 local Settings = {
-    AutoFarmEggs = true,     -- جمع البيض تلقائياً
-    SpeedBoost = true,       -- سرعة خارقة لجمع البيض بسرعة
-    CustomSpeed = 50,        -- سرعة اللاعب
-    AimbotEnabled = true,    -- إيم بوت
-    AimbotRange = 100,       -- مدى الإيم بوت 100 متر
-    Smoothness = 4,          -- سلاسة التدوير
-    EspEnabled = true,       -- كشف الأماكن
-    EspRange = 300           -- مدى الكشف 300 متر
+    AutoFarmEggs = false,
+    SpeedBoost = false,
+    CustomSpeed = 50,
+    AimbotEnabled = false,
+    AimbotRange = 100,
+    Smoothness = 4,
+    EspEnabled = false,
+    EspRange = 300
 }
 
--- 1. وظيفة السرعة الخارقة وأوتو فارم البيض بدون لمس
+-- إزالة الواجهة القديمة إذا كانت موجودة
+if game.CoreGui:FindFirstChild("HibaAnimeGui") then
+    game.CoreGui.HibaAnimeGui:Destroy()
+end
+
+-- إنشاء واجهة المستخدم (GUI)
+local ScreenGui = Instance.new("ScreenGui")
+ScreenGui.Name = "HibaAnimeGui"
+ScreenGui.Parent = game.CoreGui
+
+local MainFrame = Instance.new("Frame")
+MainFrame.Size = UDim2.new(0, 320, 0, 420)
+MainFrame.Position = UDim2.new(0.5, -160, 0.5, -210)
+MainFrame.BackgroundColor3 = Color3.fromRGB(30, 20, 35)
+MainFrame.BorderSizePixel = 0
+MainFrame.Active = true
+MainFrame.Draggable = true
+MainFrame.Parent = ScreenGui
+
+local UICorner = Instance.new("UICorner")
+UICorner.CornerRadius = UDim.new(0, 14)
+UICorner.Parent = MainFrame
+
+-- خلفية أنمي بنات كيوت داخل الواجهة
+local AnimeBg = Instance.new("ImageLabel")
+AnimeBg.Size = UDim2.new(1, 0, 0, 130)
+AnimeBg.BackgroundColor3 = Color3.fromRGB(40, 25, 50)
+AnimeBg.Image = "rbxassetid://8888421112" -- صورة أنمي بنات مميزة
+AnimeBg.ScaleType = Enum.ScaleType.Slice
+AnimeBg.Parent = MainFrame
+
+local BgCorner = Instance.new("UICorner")
+BgCorner.CornerRadius = UDim.new(0, 14)
+BgCorner.Parent = AnimeBg
+
+-- شريط العنوان العلوي
+local TopBar = Instance.new("Frame")
+TopBar.Size = UDim2.new(1, 0, 0, 40)
+TopBar.BackgroundTransparency = 0.3
+TopBar.BackgroundColor3 = Color3.fromRGB(20, 10, 25)
+TopBar.BorderSizePixel = 0
+TopBar.Parent = MainFrame
+
+local Title = Instance.new("TextLabel")
+Title.Size = UDim2.new(0, 200, 1, 0)
+Title.Position = UDim2.new(0, 12, 0, 0)
+Title.BackgroundTransparency = 1
+Title.Text = "🌸 هيبة هوب | HIBA HUB 🌸"
+Title.TextColor3 = Color3.fromRGB(255, 150, 220)
+Title.TextSize = 14
+Title.Font = Enum.Font.SourceSansBold
+Title.TextXAlignment = Enum.TextXAlignment.Left
+Title.Parent = TopBar
+
+-- زر إغلاق الواجهة (X)
+local CloseBtn = Instance.new("TextButton")
+CloseBtn.Size = UDim2.new(0, 32, 0, 32)
+CloseBtn.Position = UDim2.new(1, -38, 0, 4)
+CloseBtn.BackgroundColor3 = Color3.fromRGB(220, 60, 100)
+CloseBtn.Text = "X"
+CloseBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
+CloseBtn.TextSize = 14
+CloseBtn.Font = Enum.Font.SourceSansBold
+CloseBtn.Parent = TopBar
+
+local CloseCorner = Instance.new("UICorner")
+CloseCorner.CornerRadius = UDim.new(0, 8)
+CloseCorner.Parent = CloseBtn
+
+CloseBtn.MouseButton1Click:Connect(function()
+    ScreenGui:Destroy()
+end)
+
+-- زر تصغير الواجهة (-)
+local MinimizeBtn = Instance.new("TextButton")
+MinimizeBtn.Size = UDim2.new(0, 32, 0, 32)
+MinimizeBtn.Position = UDim2.new(1, -76, 0, 4)
+MinimizeBtn.BackgroundColor3 = Color3.fromRGB(80, 50, 90)
+MinimizeBtn.Text = "-"
+MinimizeBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
+MinimizeBtn.TextSize = 18
+MinimizeBtn.Font = Enum.Font.SourceSansBold
+MinimizeBtn.Parent = TopBar
+
+local MinCorner = Instance.new("UICorner")
+MinCorner.CornerRadius = UDim.new(0, 8)
+MinCorner.Parent = MinimizeBtn
+
+local minimized = false
+MinimizeBtn.MouseButton1Click:Connect(function()
+    minimized = not minimized
+    for _, child in pairs(MainFrame:GetChildren()) do
+        if child ~= AnimeBg and child ~= TopBar and child ~= UICorner then
+            child.Visible = not minimized
+        end
+    end
+    if minimized then
+        MainFrame.Size = UDim2.new(0, 320, 0, 40)
+        AnimeBg.Visible = false
+    else
+        MainFrame.Size = UDim2.new(0, 320, 0, 420)
+        AnimeBg.Visible = true
+    end
+end)
+
+-- زر أوتو فارم البيض
+local EggBtn = Instance.new("TextButton")
+EggBtn.Size = UDim2.new(0, 290, 0, 42)
+EggBtn.Position = UDim2.new(0.5, -145, 0, 140)
+EggBtn.BackgroundColor3 = Color3.fromRGB(60, 35, 75)
+EggBtn.Text = "Auto Farm Eggs: OFF"
+EggBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
+EggBtn.TextSize = 14
+EggBtn.Font = Enum.Font.SourceSansBold
+EggBtn.Parent = MainFrame
+
+local EggCorner = Instance.new("UICorner")
+EggCorner.CornerRadius = UDim.new(0, 8)
+EggCorner.Parent = EggBtn
+
+EggBtn.MouseButton1Click:Connect(function()
+    Settings.AutoFarmEggs = not Settings.AutoFarmEggs
+    if Settings.AutoFarmEggs then
+        EggBtn.Text = "Auto Farm Eggs: ON"
+        EggBtn.BackgroundColor3 = Color3.fromRGB(180, 50, 150)
+    else
+        EggBtn.Text = "Auto Farm Eggs: OFF"
+        EggBtn.BackgroundColor3 = Color3.fromRGB(60, 35, 75)
+    end
+end)
+
+-- زر السرعة الخارقة
+local SpeedBtn = Instance.new("TextButton")
+SpeedBtn.Size = UDim2.new(0, 290, 0, 42)
+SpeedBtn.Position = UDim2.new(0.5, -145, 0, 190)
+SpeedBtn.BackgroundColor3 = Color3.fromRGB(60, 35, 75)
+SpeedBtn.Text = "Speed Boost (50): OFF"
+SpeedBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
+SpeedBtn.TextSize = 14
+SpeedBtn.Font = Enum.Font.SourceSansBold
+SpeedBtn.Parent = MainFrame
+
+local SpeedCorner = Instance.new("UICorner")
+SpeedCorner.CornerRadius = UDim.new(0, 8)
+SpeedCorner.Parent = SpeedBtn
+
+SpeedBtn.MouseButton1Click:Connect(function()
+    Settings.SpeedBoost = not Settings.SpeedBoost
+    if Settings.SpeedBoost then
+        SpeedBtn.Text = "Speed Boost (50): ON"
+        SpeedBtn.BackgroundColor3 = Color3.fromRGB(180, 50, 150)
+    else
+        SpeedBtn.Text = "Speed Boost (50): OFF"
+        SpeedBtn.BackgroundColor3 = Color3.fromRGB(60, 35, 75)
+    end
+end)
+
+-- زر الإيم بوت (100 متر)
+local AimbotBtn = Instance.new("TextButton")
+AimbotBtn.Size = UDim2.new(0, 290, 0, 42)
+AimbotBtn.Position = UDim2.new(0.5, -145, 0, 240)
+AimbotBtn.BackgroundColor3 = Color3.fromRGB(60, 35, 75)
+AimbotBtn.Text = "Aimbot (100m): OFF"
+AimbotBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
+AimbotBtn.TextSize = 14
+AimbotBtn.Font = Enum.Font.SourceSansBold
+AimbotBtn.Parent = MainFrame
+
+local AimCorner = Instance.new("UICorner")
+AimCorner.CornerRadius = UDim.new(0, 8)
+AimCorner.Parent = AimbotBtn
+
+AimbotBtn.MouseButton1Click:Connect(function()
+    Settings.AimbotEnabled = not Settings.AimbotEnabled
+    if Settings.AimbotEnabled then
+        AimbotBtn.Text = "Aimbot (100m): ON"
+        AimbotBtn.BackgroundColor3 = Color3.fromRGB(180, 50, 150)
+    else
+        AimbotBtn.Text = "Aimbot (100m): OFF"
+        AimbotBtn.BackgroundColor3 = Color3.fromRGB(60, 35, 75)
+    end
+end)
+
+-- زر كشف الأماكن (ESP)
+local EspBtn = Instance.new("TextButton")
+EspBtn.Size = UDim2.new(0, 290, 0, 42)
+EspBtn.Position = UDim2.new(0.5, -145, 0, 290)
+EspBtn.BackgroundColor3 = Color3.fromRGB(60, 35, 75)
+EspBtn.Text = "ESP (300m): OFF"
+EspBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
+EspBtn.TextSize = 14
+EspBtn.Font = Enum.Font.SourceSansBold
+EspBtn.Parent = MainFrame
+
+local EspCorner = Instance.new("UICorner")
+EspCorner.CornerRadius = UDim.new(0, 8)
+EspCorner.Parent = EspBtn
+
+EspBtn.MouseButton1Click:Connect(function()
+    Settings.EspEnabled = not Settings.EspEnabled
+    if Settings.EspEnabled then
+        EspBtn.Text = "ESP (300m): ON"
+        EspBtn.BackgroundColor3 = Color3.fromRGB(180, 50, 150)
+    else
+        EspBtn.Text = "ESP (300m): OFF"
+        EspBtn.BackgroundColor3 = Color3.fromRGB(60, 35, 75)
+    end
+end)
+
+-- الوظائف البرمجية
 RunService.RenderStepped:Connect(function()
     if LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("Humanoid") then
         if Settings.SpeedBoost then
@@ -29,7 +237,6 @@ RunService.RenderStepped:Connect(function()
         end
     end
 
-    -- أوتو فارم البيض أو الصناديق في الماب
     if Settings.AutoFarmEggs and LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("HumanoidRootPart") then
         pcall(function()
             for _, obj in pairs(Workspace:GetDescendants()) do
@@ -45,16 +252,13 @@ RunService.RenderStepped:Connect(function()
     end
 end)
 
--- 2. وظيفة الإيم بوت المطور (100 متر)
 local function getClosestPlayer()
     local target = nil
     local shortestDistance = Settings.AimbotRange
-
     for _, v in pairs(Players:GetPlayers()) do
         if v ~= LocalPlayer and v.Character and v.Character:FindFirstChild("HumanoidRootPart") and v.Character:FindFirstChild("Humanoid") and v.Character.Humanoid.Health > 0 then
             local rootPart = v.Character.HumanoidRootPart
             local distance = (LocalPlayer.Character.HumanoidRootPart.Position - rootPart.Position).Magnitude
-            
             if distance < shortestDistance then
                 shortestDistance = distance
                 target = rootPart
@@ -74,26 +278,24 @@ RunService.RenderStepped:Connect(function()
     end
 end)
 
--- 3. كشف الأماكن المتطور (ESP بمدى 300 متر)
 RunService.Heartbeat:Connect(function()
     if Settings.EspEnabled and LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("HumanoidRootPart") then
         for _, v in pairs(Players:GetPlayers()) do
             if v ~= LocalPlayer and v.Character and v.Character:FindFirstChild("HumanoidRootPart") then
                 local rootPart = v.Character.HumanoidRootPart
                 local distance = (LocalPlayer.Character.HumanoidRootPart.Position - rootPart.Position).Magnitude
-                
                 if distance <= Settings.EspRange then
-                    if not v.Character:FindFirstChild("AdamHighlight") then
+                    if not v.Character:FindFirstChild("HibaAnimeHighlight") then
                         local highlight = Instance.new("Highlight")
-                        highlight.Name = "AdamHighlight"
+                        highlight.Name = "HibaAnimeHighlight"
                         highlight.Adornee = v.Character
-                        highlight.FillColor = Color3.fromRGB(255, 69, 0) -- لون برتقالي ناري (ستايل ناروتو)
+                        highlight.FillColor = Color3.fromRGB(255, 100, 200)
                         highlight.OutlineColor = Color3.fromRGB(255, 255, 255)
                         highlight.Parent = v.Character
                     end
                 else
-                    if v.Character:FindFirstChild("AdamHighlight") then
-                        v.Character.AdamHighlight:Destroy()
+                    if v.Character:FindFirstChild("HibaAnimeHighlight") then
+                        v.Character.HibaAnimeHighlight:Destroy()
                     end
                 end
             end
@@ -101,4 +303,4 @@ RunService.Heartbeat:Connect(function()
     end
 end)
 
-print("Adam Ultimate Naruto Egg Hub Loaded Successfully!")
+print("Hiba Anime Hub Loaded Successfully!")
