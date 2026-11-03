@@ -1,255 +1,204 @@
--- ==========================================================
--- [ HIBA HUB | Anime Edition - Safe Speed & Head Aimbot ]
--- واجهة أنيمي بنات فخمة + سرعة آمنة بدون رجوع للخلف + إيم بوت رأس
--- ==========================================================
+-- ========================================================
+-- [ ADAM-HUB / HIBA HUB - ULTIMATE PRO EDITION ]
+-- User: ADAM HUB - هيبة
+-- ========================================================
 
 local Players = game:GetService("Players")
 local RunService = game:GetService("RunService")
 local Workspace = game:GetService("Workspace")
+local CoreGui = game:GetService("CoreGui")
 local LocalPlayer = Players.LocalPlayer
 local Camera = Workspace.CurrentCamera
 
 local Settings = {
     SpeedBoost = false,
-    CustomSpeed = 35,    -- سرعة آمنة ومستقرة تماماً داخل الماب باش ما يرجعكش anti-cheat اللور
+    CustomSpeed = 1000, -- سرعة 1000 الآمنة الثابتة
     AimbotEnabled = false,
-    AimbotRange = 100,
-    Smoothness = 4,
+    HitboxEnabled = false, -- تفعيل Hitbox الرأس الواسع
     EspEnabled = false,
-    EspRange = 300,
     TrollSpin = false,
     TrollFloat = false,
-    TrollJumpscare = false
 }
 
--- إزالة الواجهة القديمة إذا كانت موجودة
-if game.CoreGui:FindFirstChild("HibaHubUltimateGui") then
-    game.CoreGui.HibaHubUltimateGui:Destroy()
+-- إزالة الواجهة القديمة إذا كانت موجودة لمنع التداخل
+if CoreGui:FindFirstChild("HibaHubUltimateGui") then
+    CoreGui.HibaHubUltimateGui:Destroy()
 end
 
--- إنشاء واجهة المستخدم (GUI)
 local ScreenGui = Instance.new("ScreenGui")
 ScreenGui.Name = "HibaHubUltimateGui"
-ScreenGui.Parent = game.CoreGui
+ScreenGui.Parent = CoreGui
+ScreenGui.ResetOnSpawn = false
+ScreenGui.DisplayOrder = 2000000000
 
 local MainFrame = Instance.new("Frame")
-MainFrame.Size = UDim2.new(0, 320, 0, 480)
-MainFrame.Position = UDim2.new(0.5, -160, 0.5, -240)
-MainFrame.BackgroundColor3 = Color3.fromRGB(30, 20, 35)
-MainFrame.BorderSizePixel = 0
+MainFrame.Parent = ScreenGui
+MainFrame.BackgroundColor3 = Color3.fromRGB(15, 15, 25)
+MainFrame.BackgroundTransparency = 0.05
+MainFrame.Position = UDim2.new(0.5, -160, 0.3, 0)
+MainFrame.Size = UDim2.new(0, 320, 0, 380)
 MainFrame.Active = true
 MainFrame.Draggable = true
-MainFrame.Parent = ScreenGui
 
-local UICorner = Instance.new("UICorner")
-UICorner.CornerRadius = UDim.new(0, 14)
-UICorner.Parent = MainFrame
+local Corner = Instance.new("UICorner")
+Corner.CornerRadius = UDim.new(0, 14)
+Corner.Parent = MainFrame
 
--- خلفية أنمي بنات كيوت داخل الواجهة
-local AnimeBg = Instance.new("ImageLabel")
-AnimeBg.Size = UDim2.new(1, 0, 0, 110)
-AnimeBg.BackgroundColor3 = Color3.fromRGB(40, 25, 50)
-AnimeBg.Image = "rbxassetid://8888421112"
-AnimeBg.ScaleType = Enum.ScaleType.Slice
-AnimeBg.Parent = MainFrame
-
-local BgCorner = Instance.new("UICorner")
-BgCorner.CornerRadius = UDim.new(0, 14)
-BgCorner.Parent = AnimeBg
-
--- شريط العنوان العلوي
+-- شريط العنوان
 local TopBar = Instance.new("Frame")
-TopBar.Size = UDim2.new(1, 0, 0, 38)
-TopBar.BackgroundTransparency = 0.3
-TopBar.BackgroundColor3 = Color3.fromRGB(20, 10, 25)
-TopBar.BorderSizePixel = 0
 TopBar.Parent = MainFrame
+TopBar.BackgroundColor3 = Color3.fromRGB(25, 25, 40)
+TopBar.Size = UDim2.new(1, 0, 0, 45)
+local TopCorner = Instance.new("UICorner")
+TopCorner.CornerRadius = UDim.new(0, 14)
+TopCorner.Parent = TopBar
 
 local Title = Instance.new("TextLabel")
-Title.Size = UDim2.new(0, 200, 1, 0)
-Title.Position = UDim2.new(0, 12, 0, 0)
-Title.BackgroundTransparency = 1
-Title.Text = "🌸 هيبة هوب | HIBA HUB 🌸"
-Title.TextColor3 = Color3.fromRGB(255, 150, 220)
-Title.TextSize = 13
-Title.Font = Enum.Font.SourceSansBold
-Title.TextXAlignment = Enum.TextXAlignment.Left
 Title.Parent = TopBar
+Title.BackgroundTransparency = 1
+Title.Position = UDim2.new(0, 12, 0, 0)
+Title.Size = UDim2.new(1, -50, 1, 0)
+Title.Font = Enum.Font.GothamBold
+Title.Text = "🔥 ADAM HUB - هيبة (Ultimate) 🔥"
+Title.TextColor3 = Color3.fromRGB(255, 215, 0)
+Title.TextSize = 12
 
--- زر إغلاق الواجهة (X)
+-- زر الإغلاق (X)
 local CloseBtn = Instance.new("TextButton")
-CloseBtn.Size = UDim2.new(0, 30, 0, 30)
-CloseBtn.Position = UDim2.new(1, -35, 0, 4)
-CloseBtn.BackgroundColor3 = Color3.fromRGB(220, 60, 100)
+CloseBtn.Parent = TopBar
+CloseBtn.BackgroundColor3 = Color3.fromRGB(231, 76, 60)
+CloseBtn.Position = UDim2.new(1, -38, 0, 10)
+CloseBtn.Size = UDim2.new(0, 25, 0, 25)
+CloseBtn.Font = Enum.Font.GothamBold
 CloseBtn.Text = "X"
 CloseBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
-CloseBtn.TextSize = 13
-CloseBtn.Font = Enum.Font.SourceSansBold
-CloseBtn.Parent = TopBar
-
+CloseBtn.TextSize = 12
 local CloseCorner = Instance.new("UICorner")
-CloseCorner.CornerRadius = UDim.new(0, 8)
+CloseCorner.CornerRadius = UDim.new(0, 6)
 CloseCorner.Parent = CloseBtn
 
 CloseBtn.MouseButton1Click:Connect(function()
     ScreenGui:Destroy()
 end)
 
--- زر تصغير الواجهة (-)
-local MinimizeBtn = Instance.new("TextButton")
-MinimizeBtn.Size = UDim2.new(0, 30, 0, 30)
-MinimizeBtn.Position = UDim2.new(1, -70, 0, 4)
-MinimizeBtn.BackgroundColor3 = Color3.fromRGB(80, 50, 90)
-MinimizeBtn.Text = "-"
-MinimizeBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
-MinimizeBtn.TextSize = 16
-MinimizeBtn.Font = Enum.Font.SourceSansBold
-MinimizeBtn.Parent = TopBar
+-- حاوية الأزرار
+local Container = Instance.new("ScrollingFrame")
+Container.Parent = MainFrame
+Container.BackgroundTransparency = 1
+Container.Position = UDim2.new(0, 10, 0, 55)
+Container.Size = UDim2.new(1, -20, 1, -65)
+Container.CanvasSize = UDim2.new(0, 0, 1.8, 0)
+Container.ScrollBarThickness = 3
 
-local MinCorner = Instance.new("UICorner")
-MinCorner.CornerRadius = UDim.new(0, 8)
-MinCorner.Parent = MinimizeBtn
+local UIList = Instance.new("UIListLayout")
+UIList.Parent = Container
+UIList.SortOrder = Enum.SortOrder.LayoutOrder
+UIList.Padding = UDim.new(0, 8)
 
-local minimized = false
-MinimizeBtn.MouseButton1Click:Connect(function()
-    minimized = not minimized
-    for _, child in pairs(MainFrame:GetChildren()) do
-        if child ~= AnimeBg and child ~= TopBar and child ~= UICorner then
-            child.Visible = not minimized
-        end
-    end
-    if minimized then
-        MainFrame.Size = UDim2.new(0, 320, 0, 38)
-        AnimeBg.Visible = false
-    else
-        MainFrame.Size = UDim2.new(0, 320, 0, 480)
-        AnimeBg.Visible = true
+-- 1. زر تفعيل السرعة 1000
+local SpeedBtn = Instance.new("TextButton")
+SpeedBtn.Parent = Container
+SpeedBtn.BackgroundColor3 = Color3.fromRGB(41, 128, 185)
+SpeedBtn.Size = UDim2.new(1, 0, 0, 40)
+SpeedBtn.Font = Enum.Font.GothamBold
+SpeedBtn.Text = "⚡ سرعة 1000 الآمنة: OFF"
+SpeedBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
+SpeedBtn.TextSize = 12
+local SCorner = Instance.new("UICorner")
+SCorner.CornerRadius = UDim.new(0, 8)
+SCorner.Parent = SpeedBtn
+
+SpeedBtn.MouseButton1Click:Connect(function()
+    Settings.SpeedBoost = not Settings.SpeedBoost
+    SpeedBtn.Text = Settings.SpeedBoost and "⚡ سرعة 1000 الآمنة: ON" or "⚡ سرعة 1000 الآمنة: OFF"
+    SpeedBtn.BackgroundColor3 = Settings.SpeedBoost and Color3.fromRGB(39, 174, 96) or Color3.fromRGB(41, 128, 185)
+end)
+
+RunService.RenderStepped:Connect(function()
+    if Settings.SpeedBoost then
+        pcall(function()
+            LocalPlayer.Character.Humanoid.WalkSpeed = Settings.CustomSpeed
+        end)
     end
 end)
 
--- وظيفة إنشاء الأزرار
-local function createButton(name, posY, callback)
-    local btn = Instance.new("TextButton")
-    btn.Size = UDim2.new(0, 290, 0, 35)
-    btn.Position = UDim2.new(0.5, -145, 0, posY)
-    btn.BackgroundColor3 = Color3.fromRGB(60, 35, 75)
-    btn.Text = name .. ": OFF"
-    btn.TextColor3 = Color3.fromRGB(255, 255, 255)
-    btn.TextSize = 12
-    btn.Font = Enum.Font.SourceSansBold
-    btn.Parent = MainFrame
+-- 2. زر ايم بوت الرأس (100% هيدشوت مباشر)
+local AimBtn = Instance.new("TextButton")
+AimBtn.Parent = Container
+AimBtn.BackgroundColor3 = Color3.fromRGB(142, 68, 173)
+AimBtn.Size = UDim2.new(1, 0, 0, 40)
+AimBtn.Font = Enum.Font.GothamBold
+AimBtn.Text = "🎯 ايم بوت الرأس (100% هيد): OFF"
+AimBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
+AimBtn.TextSize = 12
+local ACorn = Instance.new("UICorner")
+ACorn.CornerRadius = UDim.new(0, 8)
+ACorn.Parent = AimBtn
 
-    local corner = Instance.new("UICorner")
-    corner.CornerRadius = UDim.new(0, 8)
-    corner.Parent = btn
+AimBtn.MouseButton1Click:Connect(function()
+    Settings.AimbotEnabled = not Settings.AimbotEnabled
+    AimBtn.Text = Settings.AimbotEnabled and "🎯 ايم بوت الرأس (100% هيد): ON" or "🎯 ايم بوت الرأس (100% هيد): OFF"
+    AimBtn.BackgroundColor3 = Settings.AimbotEnabled and Color3.fromRGB(39, 174, 96) or Color3.fromRGB(142, 68, 173)
+end)
 
-    local state = false
-    btn.MouseButton1Click:Connect(function()
-        state = not state
-        if state then
-            btn.Text = name .. ": ON"
-            btn.BackgroundColor3 = Color3.fromRGB(180, 50, 150)
-        else
-            btn.Text = name .. ": OFF"
-            btn.BackgroundColor3 = Color3.fromRGB(60, 35, 75)
-        end
-        callback(state)
-    end)
-    return btn
-end
-
--- أزرار الواجهة
-createButton("Safe Speed Boost", 120, function(state) Settings.SpeedBoost = state end)
-createButton("Head Aimbot (100m)", 160, function(state) Settings.AimbotEnabled = state end)
-createButton("ESP (300m)", 200, function(state) Settings.EspEnabled = state end)
-createButton("Troll: Spin Friend", 240, function(state) Settings.TrollSpin = state end)
-createButton("Troll: Float Friend", 280, function(state) Settings.TrollFloat = state end)
-createButton("Troll: Jump Spam", 320, function(state) Settings.TrollJumpscare = state end)
-
--- الوظائف البرمجية
 RunService.RenderStepped:Connect(function()
-    if LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("Humanoid") then
-        if Settings.SpeedBoost then
-            LocalPlayer.Character.Humanoid.WalkSpeed = Settings.CustomSpeed
-        else
-            LocalPlayer.Character.Humanoid.WalkSpeed = 16 -- السرعة العادية للعبة
-        end
-    end
-
-    -- مقالب الأصدقاء
-    if LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("HumanoidRootPart") then
+    if Settings.AimbotEnabled then
         pcall(function()
-            for _, v in pairs(Players:GetPlayers()) do
-                if v ~= LocalPlayer and v.Character and v.Character:FindFirstChild("HumanoidRootPart") then
-                    local dist = (LocalPlayer.Character.HumanoidRootPart.Position - v.Character.HumanoidRootPart.Position).Magnitude
-                    if dist < 15 then
-                        if Settings.TrollSpin then
-                            v.Character.HumanoidRootPart.CFrame = v.Character.HumanoidRootPart.CFrame * CFrame.Angles(0, math.rad(30), 0)
-                        end
-                        if Settings.TrollFloat then
-                            v.Character.HumanoidRootPart.Velocity = Vector3.new(0, 35, 0)
-                        end
-                        if Settings.TrollJumpscare and v.Character:FindFirstChild("Humanoid") then
-                            v.Character.Humanoid.Jump = true
+            local target = nil
+            local minDist = math.huge
+            for _, p in pairs(Players:GetPlayers()) do
+                if p ~= LocalPlayer and p.Character and p.Character:FindFirstChild("Head") and p.Character:FindFirstChild("Humanoid") and p.Character.Humanoid.Health > 0 then
+                    local pos, onScreen = Camera:WorldToViewportPoint(p.Character.Head.Position)
+                    if onScreen then
+                        local mouse = LocalPlayer:GetMouse()
+                        local dist = (Vector2.new(mouse.X, mouse.Y) - Vector2.new(pos.X, pos.Y)).Magnitude
+                        if dist < minDist then
+                            minDist = dist
+                            target = p.Character.Head
                         end
                     end
                 end
+            end
+            if target then
+                Camera.CFrame = CFrame.new(Camera.CFrame.Position, target.Position)
             end
         end)
     end
 end)
 
--- إيم بوت على الرأس (Head Aimbot)
-local function getClosestHead()
-    local target = nil
-    local shortestDistance = Settings.AimbotRange
-    for _, v in pairs(Players:GetPlayers()) do
-        if v ~= LocalPlayer and v.Character and v.Character:FindFirstChild("Head") and v.Character:FindFirstChild("Humanoid") and v.Character.Humanoid.Health > 0 then
-            local headPart = v.Character.Head
-            local distance = (LocalPlayer.Character.HumanoidRootPart.Position - headPart.Position).Magnitude
-            if distance < shortestDistance then
-                shortestDistance = distance
-                target = headPart
-            end
-        end
-    end
-    return target
-end
+-- 3. زر Hitbox الرأس الواسع (تضرب حدا اللاعب وتتحسب هيد)
+local HitboxBtn = Instance.new("TextButton")
+HitboxBtn.Parent = Container
+HitboxBtn.BackgroundColor3 = Color3.fromRGB(192, 57, 43)
+HitboxBtn.Size = UDim2.new(1, 0, 0, 40)
+HitboxBtn.Font = Enum.Font.GothamBold
+HitboxBtn.Text = "📦 Hitbox الرأس الواسع (ضرب قريب): OFF"
+HitboxBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
+HitboxBtn.TextSize = 12
+local HCorner = Instance.new("UICorner")
+HCorner.CornerRadius = UDim.new(0, 8)
+HCorner.Parent = HitboxBtn
 
-RunService.RenderStepped:Connect(function()
-    if Settings.AimbotEnabled and LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("HumanoidRootPart") then
-        local targetHead = getClosestHead()
-        if targetHead then
-            local targetCFrame = CFrame.new(Camera.CFrame.Position, targetHead.Position)
-            Camera.CFrame = Camera.CFrame:Lerp(targetCFrame, 1 / Settings.Smoothness)
-        end
-    end
+HitboxBtn.MouseButton1Click:Connect(function()
+    Settings.HitboxEnabled = not Settings.HitboxEnabled
+    HitboxBtn.Text = Settings.HitboxEnabled and "📦 Hitbox الرأس الواسع (ضرب قريب): ON" or "📦 Hitbox الرأس الواسع (ضرب قريب): OFF"
+    HitboxBtn.BackgroundColor3 = Settings.HitboxEnabled and Color3.fromRGB(39, 174, 96) or Color3.fromRGB(192, 57, 43)
 end)
 
--- كشف الأماكن (ESP)
-RunService.Heartbeat:Connect(function()
-    if Settings.EspEnabled and LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("HumanoidRootPart") then
-        for _, v in pairs(Players:GetPlayers()) do
-            if v ~= LocalPlayer and v.Character and v.Character:FindFirstChild("HumanoidRootPart") then
-                local rootPart = v.Character.HumanoidRootPart
-                local distance = (LocalPlayer.Character.HumanoidRootPart.Position - rootPart.Position).Magnitude
-                if distance <= Settings.EspRange then
-                    if not v.Character:FindFirstChild("HibaAnimeHighlight") then
-                        local highlight = Instance.new("Highlight")
-                        highlight.Name = "HibaAnimeHighlight"
-                        highlight.Adornee = v.Character
-                        highlight.FillColor = Color3.fromRGB(255, 100, 200)
-                        highlight.OutlineColor = Color3.fromRGB(255, 255, 255)
-                        highlight.Parent = v.Character
-                    end
-                else
-                    if v.Character:FindFirstChild("HibaAnimeHighlight") then
-                        v.Character.HibaAnimeHighlight:Destroy()
+task.spawn(function()
+    while true do
+        task.wait(0.4)
+        if Settings.HitboxEnabled then
+            pcall(function()
+                for _, p in pairs(Players:GetPlayers()) do
+                    if p ~= LocalPlayer and p.Character and p.Character:FindFirstChild("Head") then
+                        local head = p.Character.Head
+                        head.Size = Vector3.new(5, 5, 5) -- حجم كبير باش فين ما ضربت تحسب هيد
+                        head.Transparency = 0.6
+                        head.CanCollide = false
                     end
                 end
-            end
+            end)
         end
     end
 end)
-
-print("Hiba Hub Safe Speed Loaded Successfully!")
