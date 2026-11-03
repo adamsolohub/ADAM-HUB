@@ -1,6 +1,6 @@
 -- ========================================================
--- [ ADAM HUB - HIBA ULTIMATE SUPREME EDITION ]
--- User: ADAM HUB - هيبة | الأسطر الخالصة للدمار الشامل
+-- [ ADAM HUB - HIBA ULTIMATE SUPREME & BULLETPROOF ]
+-- User: ADAM HUB - هيبة | الكود النهائي المصلح 100%
 -- ========================================================
 
 local Players = game:GetService("Players")
@@ -21,10 +21,12 @@ local Settings = {
     TrollFloat = false,
 }
 
--- مسح أي واجهة سابقة لمنع التداخل
-if CoreGui:FindFirstChild("AdamSupremeHub") then
-    CoreGui.AdamSupremeHub:Destroy()
-end
+-- مسح أي واجهة سابقة لمنع التداخل نهائياً
+pcall(function()
+    if CoreGui:FindFirstChild("AdamSupremeHub") then
+        CoreGui.AdamSupremeHub:Destroy()
+    end
+end)
 
 local ScreenGui = Instance.new("ScreenGui")
 ScreenGui.Name = "AdamSupremeHub"
@@ -155,7 +157,9 @@ end)
 RunService.RenderStepped:Connect(function()
     if Settings.SpeedBoost then
         pcall(function()
-            LocalPlayer.Character.Humanoid.WalkSpeed = Settings.CustomSpeed
+            if LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("Humanoid") then
+                LocalPlayer.Character.Humanoid.WalkSpeed = Settings.CustomSpeed
+            end
         end)
     end
 end)
@@ -250,7 +254,7 @@ RunService.RenderStepped:Connect(function()
     end
 end)
 
--- 4. زر هيتبوكس مربع متوسط الحجم (Hitbox 3D Box)
+-- 4. زر هيتبوكس مربع متوسط الحجم (Hitbox 3D Box Mended)
 local HitboxBtn = Instance.new("TextButton")
 HitboxBtn.Parent = Container
 HitboxBtn.BackgroundColor3 = Color3.fromRGB(30, 30, 45)
