@@ -1,5 +1,5 @@
 -- ========================================================
--- [ ADAM HUB - HIBA ULTIMATE & FIXED HITBOX ]
+-- [ ADAM HUB - HIBA ULTIMATE & 3D BOX HITBOX ]
 -- User: ADAM HUB - هيبة
 -- ========================================================
 
@@ -36,7 +36,7 @@ MainFrame.Parent = ScreenGui
 MainFrame.BackgroundColor3 = Color3.fromRGB(20, 20, 32)
 MainFrame.BackgroundTransparency = 0.05
 MainFrame.Position = UDim2.new(0.5, -160, 0.22, 0)
-MainFrame.Size = UDim2.new(0, 320, 0, 410)
+MainFrame.Size = UDim2.new(0, 320, 0, 440)
 MainFrame.Active = true
 MainFrame.Draggable = true
 
@@ -53,21 +53,32 @@ local TopCorner = Instance.new("UICorner")
 TopCorner.CornerRadius = UDim.new(0, 14)
 TopCorner.Parent = TopBar
 
+-- صورة البروفايل الأنمي الفخمة بجانب العنوان
+local ProfileImg = Instance.new("ImageLabel")
+ProfileImg.Parent = TopBar
+ProfileImg.BackgroundTransparency = 1
+ProfileImg.Position = UDim2.new(0, 8, 0, 7)
+ProfileImg.Size = UDim2.new(0, 31, 0, 31)
+ProfileImg.Image = "rbxassetid://10883552144"
+local ProfileCorner = Instance.new("UICorner")
+ProfileCorner.CornerRadius = UDim.new(1, 0)
+ProfileCorner.Parent = ProfileImg
+
 local Title = Instance.new("TextLabel")
 Title.Parent = TopBar
 Title.BackgroundTransparency = 1
-Title.Position = UDim2.new(0, 12, 0, 0)
-Title.Size = UDim2.new(1, -50, 1, 0)
+Title.Position = UDim2.new(0, 45, 0, 0)
+Title.Size = UDim2.new(1, -85, 1, 0)
 Title.Font = Enum.Font.GothamBold
-Title.Text = "🔥 ADAM HUB - هيبة (Ultimate) 🔥"
+Title.Text = "🔥 ADAM HUB - هيبة 🔥"
 Title.TextColor3 = Color3.fromRGB(255, 215, 0)
-Title.TextSize = 12
+Title.TextSize = 11
 
 -- زر الإغلاق (X)
 local CloseBtn = Instance.new("TextButton")
 CloseBtn.Parent = TopBar
 CloseBtn.BackgroundColor3 = Color3.fromRGB(231, 76, 60)
-CloseBtn.Position = UDim2.new(1, -38, 0, 10)
+CloseBtn.Position = UDim2.new(1, -35, 0, 10)
 CloseBtn.Size = UDim2.new(0, 25, 0, 25)
 CloseBtn.Font = Enum.Font.GothamBold
 CloseBtn.Text = "X"
@@ -81,14 +92,40 @@ CloseBtn.MouseButton1Click:Connect(function()
     ScreenGui:Destroy()
 end)
 
--- حاوية الأزرار القابلة للتمرير
+-- زر التصغير/التكبير (-)
+local MinBtn = Instance.new("TextButton")
+MinBtn.Parent = TopBar
+MinBtn.BackgroundColor3 = Color3.fromRGB(241, 196, 15)
+MinBtn.Position = UDim2.new(1, -65, 0, 10)
+MinBtn.Size = UDim2.new(0, 25, 0, 25)
+MinBtn.Font = Enum.Font.GothamBold
+MinBtn.Text = "-"
+MinBtn.TextColor3 = Color3.fromRGB(0, 0, 0)
+MinBtn.TextSize = 14
+local MinCorner = Instance.new("UICorner")
+MinCorner.CornerRadius = UDim.new(0, 6)
+MinCorner.Parent = MinBtn
+
 local Container = Instance.new("ScrollingFrame")
 Container.Parent = MainFrame
 Container.BackgroundTransparency = 1
 Container.Position = UDim2.new(0, 10, 0, 55)
 Container.Size = UDim2.new(1, -20, 1, -65)
-Container.CanvasSize = UDim2.new(0, 0, 2.1, 0)
+Container.CanvasSize = UDim2.new(0, 0, 2.3, 0)
 Container.ScrollBarThickness = 3
+
+local minimized = false
+MinBtn.MouseButton1Click:Connect(function()
+    minimized = not minimized
+    Container.Visible = not minimized
+    if minimized then
+        MainFrame.Size = UDim2.new(0, 320, 0, 45)
+        MinBtn.Text = "+"
+    else
+        MainFrame.Size = UDim2.new(0, 320, 0, 440)
+        MinBtn.Text = "-"
+    end
+end)
 
 local UIList = Instance.new("UIListLayout")
 UIList.Parent = Container
@@ -110,189 +147,4 @@ SCorner.Parent = SpeedBtn
 
 SpeedBtn.MouseButton1Click:Connect(function()
     Settings.SpeedBoost = not Settings.SpeedBoost
-    SpeedBtn.Text = Settings.SpeedBoost and "⚡ سرعة 1000 الآمنة: ON" or "⚡ سرعة 1000 الآمنة: OFF"
-    SpeedBtn.BackgroundColor3 = Settings.SpeedBoost and Color3.fromRGB(39, 174, 96) or Color3.fromRGB(45, 45, 65)
-end)
-
-RunService.RenderStepped:Connect(function()
-    if Settings.SpeedBoost then
-        pcall(function()
-            LocalPlayer.Character.Humanoid.WalkSpeed = Settings.CustomSpeed
-        end)
-    end
-end)
-
--- 2. زر ايم بوت الرأس (100% هيدشوت)
-local AimBtn = Instance.new("TextButton")
-AimBtn.Parent = Container
-AimBtn.BackgroundColor3 = Color3.fromRGB(45, 45, 65)
-AimBtn.Size = UDim2.new(1, 0, 0, 42)
-AimBtn.Font = Enum.Font.GothamBold
-AimBtn.Text = "🎯 ايم بوت الرأس (100% هيد): OFF"
-AimBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
-AimBtn.TextSize = 12
-local ACorn = Instance.new("UICorner")
-ACorn.CornerRadius = UDim.new(0, 8)
-ACorn.Parent = AimBtn
-
-AimBtn.MouseButton1Click:Connect(function()
-    Settings.AimbotEnabled = not Settings.AimbotEnabled
-    AimBtn.Text = Settings.AimbotEnabled and "🎯 ايم بوت الرأس (100% هيد): ON" or "🎯 ايم بوت الرأس (100% هيد): OFF"
-    AimBtn.BackgroundColor3 = Settings.AimbotEnabled and Color3.fromRGB(39, 174, 96) or Color3.fromRGB(45, 45, 65)
-end)
-
-RunService.RenderStepped:Connect(function()
-    if Settings.AimbotEnabled then
-        pcall(function()
-            local target = nil
-            local minDist = math.huge
-            for _, p in pairs(Players:GetPlayers()) do
-                if p ~= LocalPlayer and p.Character and p.Character:FindFirstChild("Head") and p.Character:FindFirstChild("Humanoid") and p.Character.Humanoid.Health > 0 then
-                    local pos, onScreen = Camera:WorldToViewportPoint(p.Character.Head.Position)
-                    if onScreen then
-                        local mouse = LocalPlayer:GetMouse()
-                        local dist = (Vector2.new(mouse.X, mouse.Y) - Vector2.new(pos.X, pos.Y)).Magnitude
-                        if dist < minDist then
-                            minDist = dist
-                            target = p.Character.Head
-                        end
-                    end
-                end
-            end
-            if target then
-                Camera.CFrame = CFrame.new(Camera.CFrame.Position, target.Position)
-            end
-        end)
-    end
-end)
-
--- 3. زر تفعيل Hitbox الرأس الواسع (المصحح والفعال 100%)
-local HitboxBtn = Instance.new("TextButton")
-HitboxBtn.Parent = Container
-HitboxBtn.BackgroundColor3 = Color3.fromRGB(45, 45, 65)
-HitboxBtn.Size = UDim2.new(1, 0, 0, 42)
-HitboxBtn.Font = Enum.Font.GothamBold
-HitboxBtn.Text = "📦 Hitbox الرأس الواسع (ضربة قريبة): OFF"
-HitboxBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
-HitboxBtn.TextSize = 12
-local HCorner = Instance.new("UICorner")
-HCorner.CornerRadius = UDim.new(0, 8)
-HCorner.Parent = HitboxBtn
-
-HitboxBtn.MouseButton1Click:Connect(function()
-    Settings.HitboxEnabled = not Settings.HitboxEnabled
-    HitboxBtn.Text = Settings.HitboxEnabled and "📦 Hitbox الرأس الواسع (ضربة قريبة): ON" or "📦 Hitbox الرأس الواسع (ضربة قريبة): OFF"
-    HitboxBtn.BackgroundColor3 = Settings.HitboxEnabled and Color3.fromRGB(39, 174, 96) or Color3.fromRGB(45, 45, 65)
-end)
-
-RunService.RenderStepped:Connect(function()
-    if Settings.HitboxEnabled then
-        pcall(function()
-            for _, p in pairs(Players:GetPlayers()) do
-                if p ~= LocalPlayer and p.Character and p.Character:FindFirstChild("Head") then
-                    local head = p.Character.Head
-                    head.Size = Vector3.new(6, 6, 6) -- حجم كبير باش فين ما ضربت تحسب هيد
-                    head.Color = Settings.HitboxColor
-                    head.Transparency = 0.4
-                    head.CanCollide = false
-                    head.Massless = true
-                end
-            end
-        end)
-    end
-end)
-
--- 4. زر تغيير ألوان الهيتبوكس
-local ColorBtn = Instance.new("TextButton")
-ColorBtn.Parent = Container
-ColorBtn.BackgroundColor3 = Color3.fromRGB(45, 45, 65)
-ColorBtn.Size = UDim2.new(1, 0, 0, 42)
-ColorBtn.Font = Enum.Font.GothamBold
-ColorBtn.Text = "🎨 لون الهيتبوكس: أحمر (اضغط للتغيير)"
-ColorBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
-ColorBtn.TextSize = 12
-local CCorn = Instance.new("UICorner")
-CCorn.CornerRadius = UDim.new(0, 8)
-CCorn.Parent = ColorBtn
-
-local colorMode = 1
-ColorBtn.MouseButton1Click:Connect(function()
-    colorMode = colorMode + 1
-    if colorMode == 1 then
-        Settings.HitboxColor = Color3.fromRGB(255, 0, 0)
-        ColorBtn.Text = "🎨 لون الهيتبوكس: أحمر"
-    elseif colorMode == 2 then
-        Settings.HitboxColor = Color3.fromRGB(0, 255, 0)
-        ColorBtn.Text = "🎨 لون الهيتبوكس: أخضر"
-    elseif colorMode == 3 then
-        Settings.HitboxColor = Color3.fromRGB(0, 150, 255)
-        ColorBtn.Text = "🎨 لون الهيتبوكس: أزرق"
-    elseif colorMode == 4 then
-        Settings.HitboxColor = Color3.fromRGB(255, 255, 0)
-        ColorBtn.Text = "🎨 لون الهيتبوكس: أصفر"
-    elseif colorMode == 5 then
-        colorMode = 0
-        Settings.HitboxColor = Color3.fromRGB(255, 0, 255)
-        ColorBtn.Text = "🎨 لون الهيتبوكس: وردي متوهج"
-    end
-end)
-
--- 5. زر مقالب الدوران (Troll Spin)
-local TrollSpinBtn = Instance.new("TextButton")
-TrollSpinBtn.Parent = Container
-TrollSpinBtn.BackgroundColor3 = Color3.fromRGB(45, 45, 65)
-TrollSpinBtn.Size = UDim2.new(1, 0, 0, 42)
-TrollSpinBtn.Font = Enum.Font.GothamBold
-TrollSpinBtn.Text = "🌀 مقلب الدوران السريع (Troll Spin): OFF"
-TrollSpinBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
-TrollSpinBtn.TextSize = 12
-local TSCorn = Instance.new("UICorner")
-TSCorn.CornerRadius = UDim.new(0, 8)
-TSCorn.Parent = TrollSpinBtn
-
-TrollSpinBtn.MouseButton1Click:Connect(function()
-    Settings.TrollSpin = not Settings.TrollSpin
-    TrollSpinBtn.Text = Settings.TrollSpin and "🌀 مقلب الدوران السريع (Troll Spin): ON" or "🌀 مقلب الدوران السريع (Troll Spin): OFF"
-    TrollSpinBtn.BackgroundColor3 = Settings.TrollSpin and Color3.fromRGB(39, 174, 96) or Color3.fromRGB(45, 45, 65)
-end)
-
-RunService.RenderStepped:Connect(function()
-    if Settings.TrollSpin then
-        pcall(function()
-            local char = LocalPlayer.Character
-            if char and char:FindFirstChild("HumanoidRootPart") then
-                char.HumanoidRootPart.CFrame = char.HumanoidRootPart.CFrame * CFrame.Angles(0, math.rad(35), 0)
-            end
-        end)
-    end
-end)
-
--- 6. زر مقالب الطفو (Troll Float)
-local TrollFloatBtn = Instance.new("TextButton")
-TrollFloatBtn.Parent = Container
-TrollFloatBtn.BackgroundColor3 = Color3.fromRGB(45, 45, 65)
-TrollFloatBtn.Size = UDim2.new(1, 0, 0, 42)
-TrollFloatBtn.Font = Enum.Font.GothamBold
-TrollFloatBtn.Text = "🛸 مقلب الطفو فالهواء (Float): OFF"
-TrollFloatBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
-TrollFloatBtn.TextSize = 12
-local TFCorn = Instance.new("UICorner")
-TFCorn.CornerRadius = UDim.new(0, 8)
-TFCorn.Parent = TrollFloatBtn
-
-TrollFloatBtn.MouseButton1Click:Connect(function()
-    Settings.TrollFloat = not Settings.TrollFloat
-    TrollFloatBtn.Text = Settings.TrollFloat and "🛸 مقلب الطفو فالهواء (Float): ON" or "🛸 مقلب الطفو فالهواء (Float): OFF"
-    TrollFloatBtn.BackgroundColor3 = Settings.TrollFloat and Color3.fromRGB(39, 174, 96) or Color3.fromRGB(45, 45, 65)
-end)
-
-RunService.RenderStepped:Connect(function()
-    if Settings.TrollFloat then
-        pcall(function()
-            local char = LocalPlayer.Character
-            if char and char:FindFirstChild("HumanoidRootPart") then
-                char.HumanoidRootPart.Velocity = Vector3.new(0, 6, 0)
-            end
-        end)
-    end
-end)
+    SpeedBtn.Text = Settings.SpeedBoost and "⚡ سرعة 1000 الآمنة: ON" or "⚡ سرعة 1000
