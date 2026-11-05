@@ -1,13 +1,12 @@
 --================================================================
---          ADAM HUB ARAB | ULTIMATE FIXED BUTTONS V11.0
---          Fixed Button ON/OFF Touch States & Delta Optimized
+--          ADAM HUB ARAB | UNIVERSAL COMBAT V12.0
+--          Supports ALL Maps, Fixed Buttons, POV & Delta Optimized
 --================================================================
 
 local Players = game:GetService("Players")
 local RunService = game:GetService("RunService")
 local Workspace = game:GetService("Workspace")
 local UserInputService = game:GetService("UserInputService")
-local TweenService = game:GetService("TweenService")
 
 local Player = Players.LocalPlayer
 local PlayerGui = Player:WaitForChild("PlayerGui")
@@ -43,8 +42,7 @@ pcall(function()
 end)
 
 -- النافذة الرئيسية الطويلة والمظلمة
-Main = Instance.new("Frame")
-local Main = Main
+local Main = Instance.new("Frame")
 Main.Size = UDim2.fromOffset(360, 500)
 Main.Position = UDim2.new(0.5, -180, 0.5, -250)
 Main.BackgroundColor3 = Dark
@@ -66,7 +64,7 @@ Stroke.Parent = Main
 local Title = Instance.new("TextLabel")
 Title.Size = UDim2.new(1, 0, 0, 45)
 Title.BackgroundColor3 = Light
-Title.Text = "👑 ADAM HUB - V11 FIXED"
+Title.Text = "👑 ADAM HUB - UNIVERSAL V12"
 Title.TextColor3 = White
 Title.TextSize = 14
 Title.Font = Enum.Font.GothamBold
@@ -133,7 +131,7 @@ local function CreateBtn(Name, YPos, DefaultText)
     return Btn
 end
 
--- الأزرار الشاملة
+-- الأزرار الشاملة لجميع المابّات
 local POVBtn = CreateBtn("POV", 0, "🔵 دائرة POV (FOV): OFF")
 local POVSizeBtn = CreateBtn("POVSize", 48, "🎚️ تعديل حجم دائرة POV: 120")
 local HeadAimBtn = CreateBtn("HeadAim", 96, "🎯 ايمبوت الرأس الثابت: OFF")
@@ -141,7 +139,7 @@ local HitboxBtn = CreateBtn("Hitbox", 144, "📦 الهيتبوكس واحتسا
 local GodModeBtn = CreateBtn("GodMode", 192, "🛡️ دم الشخصية (1000 HP): OFF")
 local FlyBtn = CreateBtn("Fly", 240, "✈️ وضع الطيران (Fly): OFF")
 local KillAuraBtn = CreateBtn("KillAura", 288, "⚔️ ايم كيل وضرب تلقائي: OFF")
-local ESPBtn = CreateBtn("ESP", 336, "👁️ كشف الأماكن والأسماء (ESP): OFF")
+local ESPBtn = CreateBtn("ESP", 336, "👁️ كشف الأماكن الشامل (ESP): OFF")
 
 -- إطار عرض معلومات الشخصية والسرعة
 local StatsBox = Instance.new("Frame")
@@ -186,7 +184,7 @@ Status.BackgroundTransparency = 1
 Status.TextColor3 = Color3.fromRGB(100, 255, 150)
 Status.TextSize = 12
 Status.Font = Enum.Font.GothamBold
-Status.Text = "الحالة: الأزرار تعمل بامتياز ⚡"
+Status.Text = "الحالة: متوافق مع جميع المابّات ⚡"
 Status.Parent = Main
 
 local function SaferRun(callback)
@@ -209,16 +207,14 @@ local customWalkSpeed = 16
 local customFlySpeed = 50
 local espObjects = {}
 
--- دالة مضمونة 100% للاستجابة السريعة في دلتا (تعتمد على MouseButton1Down)
+-- دالة استجابة الأزرار السريعة
 local function ConnectButton(btn, callback)
     btn.MouseButton1Down:Connect(callback)
 end
 
 ConnectButton(POVBtn, function()
     povEnabled = not povEnabled
-    if FOVCircle then
-        FOVCircle.Visible = povEnabled
-    end
+    if FOVCircle then FOVCircle.Visible = povEnabled end
     POVBtn.BackgroundColor3 = povEnabled and Color3.fromRGB(0, 200, 100) or Light
     POVBtn.Text = povEnabled and "🔵 دائرة POV (FOV): ON" or "🔵 دائرة POV (FOV): OFF"
 end)
@@ -226,9 +222,7 @@ end)
 ConnectButton(POVSizeBtn, function()
     povRadius = povRadius + 40
     if povRadius > 280 then povRadius = 80 end
-    if FOVCircle then
-        FOVCircle.Radius = povRadius
-    end
+    if FOVCircle then FOVCircle.Radius = povRadius end
     POVSizeBtn.Text = "🎚️ تعديل حجم دائرة POV: " .. tostring(povRadius)
 end)
 
@@ -265,7 +259,7 @@ end)
 ConnectButton(ESPBtn, function()
     espEnabled = not espEnabled
     ESPBtn.BackgroundColor3 = espEnabled and Color3.fromRGB(0, 200, 100) or Light
-    ESPBtn.Text = espEnabled and "👁️ كشف الأماكن والأسماء (ESP): ON" or "👁️ كشف الأماكن والأسماء (ESP): OFF"
+    ESPBtn.Text = espEnabled and "👁️ كشف الأماكن الشامل (ESP): ON" or "👁️ كشف الأماكن الشامل (ESP): OFF"
     if not espEnabled then
         for _, obj in pairs(espObjects) do if obj then obj:Destroy() end end
         espObjects = {}
@@ -304,7 +298,6 @@ ConnectButton(OpenBtn, function()
     OpenBtn.Visible = false
 end)
 
--- وظيفة زر التصغير (-)
 local isMinimized = false
 ConnectButton(MinimizeBtn, function()
     isMinimized = not isMinimized
@@ -318,15 +311,12 @@ ConnectButton(MinimizeBtn, function()
     end
 end)
 
--- وظيفة زر الإغلاق النهائي (X)
 ConnectButton(CloseBtn, function()
-    if FOVCircle then
-        pcall(function() FOVCircle:Remove() end)
-    end
+    if FOVCircle then pcall(function() FOVCircle:Remove() end) end
     GUI:Destroy()
 end)
 
--- الحلقة الأسطورية للتشغيل المستمر
+-- حلقة التشغيل الشاملة المتوافقة مع جميع المابّات (تستهدف الأعداء واللاعبين معاً تلقائياً)
 RunService.RenderStepped:Connect(function()
     SaferRun(function()
         local character = Player.Character
@@ -366,89 +356,103 @@ RunService.RenderStepped:Connect(function()
             end
         end
 
+        -- نظام شامل لجمع الأهداف في أي ماب (سواء في مجلد Enemies أو اللاعبين الآخرين Players)
+        local targets = {}
+        
+        -- فحص مجلد الأعداء إن وجد في الماب
+        local enemiesFolder = Workspace:FindFirstChild("Enemies")
+        if enemiesFolder then
+            for _, v in pairs(enemiesFolder:GetChildren()) do
+                table.insert(targets, v)
+            end
+        end
+        
+        -- فحص اللاعبين الآخرين في الماب (في حالة المابّات القتالية PVP)
+        for _, p in pairs(Players:GetPlayers()) do
+            if p ~= Player and p.Character then
+                table.insert(targets, p.Character)
+            end
+        end
+
+        -- تطبيق ESP الشامل على الأهداف
         if espEnabled then
-            local enemiesFolder = Workspace:FindFirstChild("Enemies")
-            if enemiesFolder then
-                for _, enemy in pairs(enemiesFolder:GetChildren()) do
-                    if enemy:FindFirstChild("HumanoidRootPart") and not enemy:FindFirstChild("AdamFullESP") then
-                        local highlight = Instance.new("Highlight")
-                        highlight.Name = "AdamFullESP"
-                        highlight.Adornee = enemy
-                        highlight.FillColor = Purple
-                        highlight.OutlineColor = White
-                        highlight.Parent = enemy
-                        table.insert(espObjects, highlight)
+            for _, target in pairs(targets) do
+                if target:FindFirstChild("HumanoidRootPart") and not target:FindFirstChild("AdamUniversalESP") then
+                    local highlight = Instance.new("Highlight")
+                    highlight.Name = "AdamUniversalESP"
+                    highlight.Adornee = target
+                    highlight.FillColor = Purple
+                    highlight.OutlineColor = White
+                    highlight.Parent = target
+                    table.insert(espObjects, highlight)
 
-                        local head = enemy:FindFirstChild("Head") or enemy.PrimaryPart
-                        if head then
-                            local bgGui = Instance.new("BillboardGui")
-                            bgGui.Name = "AdamNameESP"
-                            bgGui.Size = UDim2.new(0, 120, 0, 50)
-                            bgGui.StudsOffset = Vector3.new(0, 2.5, 0)
-                            bgGui.AlwaysOnTop = true
-                            bgGui.Parent = enemy
+                    local head = target:FindFirstChild("Head") or target.PrimaryPart
+                    if head then
+                        local bgGui = Instance.new("BillboardGui")
+                        bgGui.Name = "AdamNameESP"
+                        bgGui.Size = UDim2.new(0, 120, 0, 50)
+                        bgGui.StudsOffset = Vector3.new(0, 2.5, 0)
+                        bgGui.AlwaysOnTop = true
+                        bgGui.Parent = target
 
-                            local txt = Instance.new("TextLabel")
-                            txt.Size = UDim2.new(1, 0, 1, 0)
-                            txt.BackgroundTransparency = 1
-                            txt.TextColor3 = White
-                            txt.TextSize = 13
-                            txt.Font = Enum.Font.GothamBold
-                            txt.TextStrokeTransparency = 0
-                            txt.Text = enemy.Name
-                            txt.Parent = bgGui
-                            table.insert(espObjects, bgGui)
+                        local txt = Instance.new("TextLabel")
+                        txt.Size = UDim2.new(1, 0, 1, 0)
+                        txt.BackgroundTransparency = 1
+                        txt.TextColor3 = White
+                        txt.TextSize = 13
+                        txt.Font = Enum.Font.GothamBold
+                        txt.TextStrokeTransparency = 0
+                        txt.Text = target.Name
+                        txt.Parent = bgGui
+                        table.insert(espObjects, bgGui)
+                    end
+                end
+            end
+        end
+
+        -- تطبيق الهيتبوكس، ايم كيل وايمبوت الرأس على أهداف الماب الحالي
+        local closestHead = nil
+        local shortestDist = math.huge
+
+        for _, target in pairs(targets) do
+            local head = target:FindFirstChild("Head")
+            local hum = target:FindFirstChildOfClass("Humanoid")
+            local targetHrp = target:FindFirstChild("HumanoidRootPart")
+
+            if hum and hum.Health > 0 then
+                if hitboxEnabled and targetHrp then
+                    targetHrp.Size = Vector3.new(12, 12, 12)
+                    targetHrp.Transparency = 0.7
+                    targetHrp.CanCollide = false
+                end
+
+                if killAuraEnabled and hrp and targetHrp then
+                    local dist = (hrp.Position - targetHrp.Position).Magnitude
+                    if dist < 25 then
+                        hum.Health = 0
+                    end
+                end
+
+                if headAimEnabled and head then
+                    local screenPoint, onScreen = Camera:WorldToViewportPoint(head.Position)
+                    if onScreen then
+                        local screenCenter = Vector2.new(Camera.ViewportSize.X / 2, Camera.ViewportSize.Y / 2)
+                        local mouseDist = (Vector2.new(screenPoint.X, screenPoint.Y) - screenCenter).Magnitude
+                        
+                        if mouseDist <= povRadius and mouseDist < shortestDist then
+                            shortestDist = mouseDist
+                            closestHead = head
                         end
                     end
                 end
             end
         end
 
-        local enemiesFolder = Workspace:FindFirstChild("Enemies")
-        if enemiesFolder then
-            local closestHead = nil
-            local shortestDist = math.huge
-
-            for _, enemy in pairs(enemiesFolder:GetChildren()) do
-                local head = enemy:FindFirstChild("Head")
-                local hum = enemy:FindFirstChild("Humanoid")
-                local enemyHrp = enemy:FindFirstChild("HumanoidRootPart")
-
-                if hum and hum.Health > 0 then
-                    if hitboxEnabled and enemyHrp then
-                        enemyHrp.Size = Vector3.new(12, 12, 12)
-                        enemyHrp.Transparency = 0.7
-                        enemyHrp.CanCollide = false
-                    end
-
-                    if killAuraEnabled and hrp and enemyHrp then
-                        local dist = (hrp.Position - enemyHrp.Position).Magnitude
-                        if dist < 25 then
-                            hum.Health = 0
-                        end
-                    end
-
-                    if headAimEnabled and head then
-                        local screenPoint, onScreen = Camera:WorldToViewportPoint(head.Position)
-                        if onScreen then
-                            local screenCenter = Vector2.new(Camera.ViewportSize.X / 2, Camera.ViewportSize.Y / 2)
-                            local mouseDist = (Vector2.new(screenPoint.X, screenPoint.Y) - screenCenter).Magnitude
-                            
-                            if mouseDist <= povRadius and mouseDist < shortestDist then
-                                shortestDist = mouseDist
-                                closestHead = head
-                            end
-                        end
-                    end
-                end
-            end
-
-            if headAimEnabled and closestHead then
-                local targetCFrame = CFrame.new(Camera.CFrame.Position, closestHead.Position)
-                Camera.CFrame = Camera.CFrame:Lerp(targetCFrame, 0.4)
-            end
+        if headAimEnabled and closestHead then
+            local targetCFrame = CFrame.new(Camera.CFrame.Position, closestHead.Position)
+            Camera.CFrame = Camera.CFrame:Lerp(targetCFrame, 0.4)
         end
     end)
 end)
 
-print("ADAM HUB - V11 Fixed Buttons Loaded Successfully!")
+print("ADAM HUB - Universal Version V12.0 Loaded Successfully for ALL Maps!")
