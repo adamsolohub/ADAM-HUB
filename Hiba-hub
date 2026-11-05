@@ -1,11 +1,13 @@
-
 --================================================
 --              ADAM HUB ARAB
---                  VERSION 1.0
+--              GOD TIER EDITION
 --              PURPLE & BLACK
 --================================================
 
 local Players = game:GetService("Players")
+local RunService = game:GetService("RunService")
+local Workspace = game:GetService("Workspace")
+local VirtualUser = game:GetService("VirtualUser")
 local TweenService = game:GetService("TweenService")
 
 local Player = Players.LocalPlayer
@@ -27,11 +29,11 @@ Screen.Name = "ADAM_HUB_ARAB"
 Screen.ResetOnSpawn = false
 Screen.Parent = PlayerGui
 
--- النافذة الرئيسية
+-- النافذة الرئيسية (قابلة للتحريك، طويلة، ومظلمة)
 local Main = Instance.new("Frame")
 Main.Name = "Main"
-Main.Size = UDim2.fromOffset(340, 420)
-Main.Position = UDim2.new(0.5, -170, 0.5, -210)
+Main.Size = UDim2.fromOffset(360, 440)
+Main.Position = UDim2.new(0.5, -180, 0.5, -220)
 Main.BackgroundColor3 = Dark
 Main.BorderSizePixel = 0
 Main.Active = true
@@ -49,11 +51,11 @@ Border.Parent = Main
 
 -- العنوان
 local Header = Instance.new("TextLabel")
-Header.Size = UDim2.new(1, 0, 0, 55)
+Header.Size = UDim2.new(1, 0, 0, 50)
 Header.BackgroundColor3 = Light
 Header.Text = "👑 ADAM HUB ARAB"
 Header.TextColor3 = White
-Header.TextSize = 21
+Header.TextSize = 20
 Header.Font = Enum.Font.GothamBold
 Header.Parent = Main
 
@@ -61,34 +63,23 @@ local HeaderCorner = Instance.new("UICorner")
 HeaderCorner.CornerRadius = UDim.new(0, 12)
 HeaderCorner.Parent = Header
 
--- الوصف
-local Subtitle = Instance.new("TextLabel")
-Subtitle.Size = UDim2.new(1, 0, 0, 30)
-Subtitle.Position = UDim2.fromOffset(0, 58)
-Subtitle.BackgroundTransparency = 1
-Subtitle.Text = "مرحباً بك في ADAM HUB"
-Subtitle.TextColor3 = Purple
-Subtitle.TextSize = 14
-Subtitle.Font = Enum.Font.GothamBold
-Subtitle.Parent = Main
-
 -- الحالة
 local Status = Instance.new("TextLabel")
-Status.Size = UDim2.new(1, -20, 0, 35)
-Status.Position = UDim2.new(0, 10, 1, -40)
+Status.Size = UDim2.new(1, -20, 0, 30)
+Status.Position = UDim2.new(0, 10, 1, -35)
 Status.BackgroundTransparency = 1
-Status.Text = "الحالة: جاهز"
+Status.Text = "الحالة: جاهز للعمل ⚡"
 Status.TextColor3 = Color3.fromRGB(100, 255, 150)
 Status.TextSize = 13
 Status.Font = Enum.Font.GothamBold
 Status.Parent = Main
 
--- إنشاء صفحة
+-- إنشاء الصفحات
 local function CreatePage(Name)
     local Page = Instance.new("ScrollingFrame")
     Page.Name = Name
-    Page.Position = UDim2.fromOffset(12, 95)
-    Page.Size = UDim2.new(1, -24, 0, 270)
+    Page.Position = UDim2.fromOffset(12, 65)
+    Page.Size = UDim2.new(1, -24, 0, 330)
     Page.BackgroundTransparency = 1
     Page.BorderSizePixel = 0
     Page.ScrollBarThickness = 4
@@ -102,10 +93,7 @@ local function CreatePage(Name)
     Layout.Parent = Page
 
     Layout:GetPropertyChangedSignal("AbsoluteContentSize"):Connect(function()
-        Page.CanvasSize = UDim2.fromOffset(
-            0,
-            Layout.AbsoluteContentSize.Y + 8
-        )
+        Page.CanvasSize = UDim2.fromOffset(0, Layout.AbsoluteContentSize.Y + 8)
     end)
 
     return Page
@@ -113,17 +101,16 @@ end
 
 local HomePage = CreatePage("HomePage")
 local LevelPage = CreatePage("LevelPage")
-
 HomePage.Visible = true
 
 -- إنشاء الأزرار
 local function CreateButton(Name, Parent, Callback)
     local Button = Instance.new("TextButton")
-    Button.Size = UDim2.new(1, -5, 0, 45)
+    Button.Size = UDim2.new(1, -5, 0, 42)
     Button.BackgroundColor3 = Light
     Button.Text = Name
     Button.TextColor3 = White
-    Button.TextSize = 15
+    Button.TextSize = 14
     Button.Font = Enum.Font.GothamBold
     Button.AutoButtonColor = false
     Button.Parent = Parent
@@ -137,139 +124,126 @@ local function CreateButton(Name, Parent, Callback)
     end)
 
     Button.MouseEnter:Connect(function()
-        TweenService:Create(
-            Button,
-            TweenInfo.new(0.2),
-            {BackgroundColor3 = Purple}
-        ):Play()
+        TweenService:Create(Button, TweenInfo.new(0.2), {BackgroundColor3 = Purple}):Play()
     end)
 
     Button.MouseLeave:Connect(function()
-        TweenService:Create(
-            Button,
-            TweenInfo.new(0.2),
-            {BackgroundColor3 = Light}
-        ):Play()
+        TweenService:Create(Button, TweenInfo.new(0.2), {BackgroundColor3 = Light}):Play()
     end)
 
     return Button
 end
 
--- الانتقال بين الصفحات
 local function ShowPage(Page)
-    HomePage.Visible = Page == HomePage
-    LevelPage.Visible = Page == LevelPage
+    HomePage.Visible = (Page == HomePage)
+    LevelPage.Visible = (Page == LevelPage)
 end
 
--- الصفحة الرئيسية
+-- محتوى الصفحة الرئيسية
 CreateButton("🏠 الرئيسية", HomePage, function()
     ShowPage(HomePage)
     Status.Text = "الحالة: الرئيسية"
 end)
 
-CreateButton("⚔️ المزرعة", HomePage, function()
-    Status.Text = "الحالة: قسم المزرعة"
-end)
-
-CreateButton("📈 المستوى", HomePage, function()
+CreateButton("📈 قسم الأوتو لفل (Auto Level)", HomePage, function()
     ShowPage(LevelPage)
-    Status.Text = "الحالة: قسم المستوى"
+    Status.Text = "الحالة: قسم الأوتو لفل والتطوير"
 end)
 
-CreateButton("👹 الزعماء", HomePage, function()
-    Status.Text = "الحالة: قسم الزعماء"
+CreateButton("👤 معلومات حسابك", HomePage, function()
+    Status.Text = "عمر الحساب: " .. tostring(Player.AccountAge) .. " يوم"
 end)
 
-CreateButton("🍎 الفواكه", HomePage, function()
-    Status.Text = "الحالة: قسم الفواكه"
-end)
-
-CreateButton("🚀 الانتقال", HomePage, function()
-    Status.Text = "الحالة: قسم الانتقال"
-end)
-
-CreateButton("👤 معلومات اللاعب", HomePage, function()
-    Status.Text = "عمر الحساب: " ..
-        tostring(Player.AccountAge) .. " يوم"
-end)
-
-CreateButton("⚙️ الإعدادات", HomePage, function()
-    Status.Text = "الحالة: الإعدادات"
-end)
-
--- نظام تتبع المستوى
-local Running = false
-local LevelConnection = nil
+-- متغيرات نظام الأوتو لفل والمزرعة
+local autoLevelActive = false
+local QuestGiverCFrame = CFrame.new(1059.2, 16.9, 1549.5) -- إحداثيات مهمة البانديت بالعالم الأول
 
 local function StopTracking()
-    Running = false
-
-    if LevelConnection then
-        LevelConnection:Disconnect()
-        LevelConnection = nil
-    end
-
-    Status.Text = "الحالة: تم إيقاف التتبع"
+    autoLevelActive = false
+    Status.Text = "الحالة: تم إيقاف أوتو لفل"
 end
 
--- START
-CreateButton("▶ START AUTO LEVEL", LevelPage, function()
-
-    if Running then
-        Status.Text = "النظام يعمل بالفعل"
+-- أزرار صفحة المستوى
+CreateButton("▶ START AUTO LEVEL & FARM", LevelPage, function()
+    if autoLevelActive then
+        Status.Text = "النظام يعمل بالفعل!"
         return
     end
 
-    local Stats = Player:FindFirstChild("leaderstats")
-    local Level = Stats and Stats:FindFirstChild("Level")
+    autoLevelActive = true
+    Status.Text = "الحالة: يعمل أوتو لفل (طيران وقتل فردي)"
 
-    if not Level then
-        Status.Text = "المستوى غير متاح"
-        return
-    end
+    task.spawn(function()
+        while autoLevelActive do
+            pcall(function()
+                local char = Player.Character
+                if not char or not char:FindFirstChild("HumanoidRootPart") then return end
+                local hrp = char.HumanoidRootPart
 
-    Running = true
+                -- فحص واجهة المهمة
+                local playerGui = Player:FindFirstChild("PlayerGui")
+                local questGui = playerGui and playerGui:FindFirstChild("Quest")
+                local hasQuest = false
+                if questGui then
+                    local container = questGui:FindFirstChild("Container")
+                    if container and container.Visible == true then
+                        hasQuest = true
+                    end
+                end
 
-    Status.Text = "المستوى الحالي: " .. tostring(Level.Value)
-
-    if Level.Value >= 2800 then
-        StopTracking()
-        Status.Text = "وصلت إلى المستوى 2800!"
-        return
-    end
-
-    LevelConnection = Level:GetPropertyChangedSignal("Value"):Connect(function()
-
-        Status.Text = "المستوى الحالي: " .. tostring(Level.Value)
-
-        if Level.Value >= 2800 then
-            StopTracking()
-            Status.Text = "وصلت إلى المستوى 2800!"
+                if not hasQuest then
+                    -- الذهاب لأخذ المهمة تلقائياً
+                    hrp.CFrame = QuestGiverCFrame
+                    task.wait(1)
+                else
+                    -- البحث عن البانديت وقتلهم واحد بواحد مع الطيران فوقهم
+                    for _, enemy in pairs(Workspace.Enemies:GetChildren()) do
+                        if not autoLevelActive then break end
+                        if enemy:FindFirstChild("HumanoidRootPart") and enemy:FindFirstChild("Humanoid") and enemy.Humanoid.Health > 0 then
+                            if enemy.Name == "Bandit" then
+                                hrp.CFrame = enemy.HumanoidRootPart.CFrame * CFrame.new(0, 4, 1)
+                                
+                                -- تفعيل السلاح والضرب الفوري
+                                local tool = char:FindFirstChildOfClass("Tool")
+                                if not tool then
+                                    for _, t in pairs(Player.Backpack:GetChildren()) do
+                                        if t:IsA("Tool") then
+                                            char.Humanoid:EquipTool(t)
+                                            break
+                                        end
+                                    end
+                                else
+                                    tool:Activate()
+                                    VirtualUser:Button1Down(Vector2.new(0,0), Workspace.CurrentCamera.CFrame)
+                                end
+                                task.wait(0.2)
+                            end
+                        end
+                    end
+                end
+            end)
+            task.wait()
         end
-
     end)
-
 end)
 
--- STOP
 CreateButton("⏹ STOP AUTO LEVEL", LevelPage, function()
     StopTracking()
 end)
 
--- الرجوع
-CreateButton("🔙 رجوع", LevelPage, function()
+CreateButton("🔙 رجوع للقائمة", LevelPage, function()
     ShowPage(HomePage)
     Status.Text = "الحالة: الرئيسية"
 end)
 
--- إخفاء الواجهة
+-- زر إخفاء / إظهار الواجهة
 local Open = Instance.new("TextButton")
-Open.Size = UDim2.fromOffset(130, 45)
+Open.Size = UDim2.fromOffset(130, 40)
 Open.Position = UDim2.new(0, 15, 0.5, 0)
 Open.BackgroundColor3 = Purple
 Open.Text = "👑 ADAM HUB"
 Open.TextColor3 = White
-Open.TextSize = 14
+Open.TextSize = 13
 Open.Font = Enum.Font.GothamBold
 Open.Visible = false
 Open.Parent = Screen
@@ -292,4 +266,4 @@ Main:GetPropertyChangedSignal("Visible"):Connect(function()
     Open.Visible = not Main.Visible
 end)
 
-print("ADAM HUB ARAB V1.0 loaded!")
+print("ADAM HUB ARAB - Loaded Successfully!")
