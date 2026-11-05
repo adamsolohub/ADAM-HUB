@@ -11,11 +11,9 @@ local TweenService = game:GetService("TweenService")
 local Player = Players.LocalPlayer
 local PlayerGui = Player:WaitForChild("PlayerGui")
 
--- منع تكرار الواجهة
+-- تنظيف الواجهة القديمة
 local Old = PlayerGui:FindFirstChild("ADAM_HUB_ARAB")
-if Old then
-    Old:Destroy()
-end
+if Old then Old:Destroy() end
 
 -- الألوان
 local Purple = Color3.fromRGB(155, 75, 230)
@@ -23,7 +21,7 @@ local Dark = Color3.fromRGB(17, 12, 25)
 local Light = Color3.fromRGB(38, 27, 51)
 local White = Color3.fromRGB(255, 255, 255)
 
--- الواجهة
+-- ScreenGui
 local Screen = Instance.new("ScreenGui")
 Screen.Name = "ADAM_HUB_ARAB"
 Screen.ResetOnSpawn = false
@@ -31,8 +29,9 @@ Screen.Parent = PlayerGui
 
 -- النافذة الرئيسية
 local Main = Instance.new("Frame")
-Main.Size = UDim2.fromOffset(340, 400)
-Main.Position = UDim2.new(0.5, -170, 0.5, -200)
+Main.Name = "Main"
+Main.Size = UDim2.fromOffset(340, 420)
+Main.Position = UDim2.new(0.5, -170, 0.5, -210)
 Main.BackgroundColor3 = Dark
 Main.BorderSizePixel = 0
 Main.Active = true
@@ -73,32 +72,10 @@ Subtitle.TextSize = 14
 Subtitle.Font = Enum.Font.GothamBold
 Subtitle.Parent = Main
 
--- مساحة الأزرار
-local Container = Instance.new("ScrollingFrame")
-Container.Position = UDim2.fromOffset(12, 95)
-Container.Size = UDim2.new(1, -24, 0, 245)
-Container.BackgroundTransparency = 1
-Container.BorderSizePixel = 0
-Container.ScrollBarThickness = 4
-Container.ScrollBarImageColor3 = Purple
-Container.CanvasSize = UDim2.new(0, 0, 0, 0)
-Container.Parent = Main
-
-local Layout = Instance.new("UIListLayout")
-Layout.Padding = UDim.new(0, 8)
-Layout.Parent = Container
-
-Layout:GetPropertyChangedSignal("AbsoluteContentSize"):Connect(function()
-    Container.CanvasSize = UDim2.fromOffset(
-        0,
-        Layout.AbsoluteContentSize.Y + 8
-    )
-end)
-
 -- الحالة
 local Status = Instance.new("TextLabel")
 Status.Size = UDim2.new(1, -20, 0, 35)
-Status.Position = UDim2.new(0, 10, 1, -43)
+Status.Position = UDim2.new(0, 10, 1, -40)
 Status.BackgroundTransparency = 1
 Status.Text = "الحالة: جاهز"
 Status.TextColor3 = Color3.fromRGB(100, 255, 150)
@@ -106,22 +83,58 @@ Status.TextSize = 13
 Status.Font = Enum.Font.GothamBold
 Status.Parent = Main
 
--- إنشاء الأزرار
-local function CreateButton(Name, Callback)
-    local Button = Instance.new("TextButton")
+-- إنشاء صفحة
+local function CreatePage(Name)
+    local Page = Instance.new("ScrollingFrame")
+    Page.Name = Name
+    Page.Position = UDim2.fromOffset(12, 95)
+    Page.Size = UDim2.new(1, -24, 0, 270)
+    Page.BackgroundTransparency = 1
+    Page.BorderSizePixel = 0
+    Page.ScrollBarThickness = 4
+    Page.ScrollBarImageColor3 = Purple
+    Page.CanvasSize = UDim2.new(0, 0, 0, 0)
+    Page.Visible = false
+    Page.Parent = Main
 
-    Button.Size = UDim2.new(1, -5, 0, 42)
+    local Layout = Instance.new("UIListLayout")
+    Layout.Padding = UDim.new(0, 8)
+    Layout.Parent = Page
+
+    Layout:GetPropertyChangedSignal("AbsoluteContentSize"):Connect(function()
+        Page.CanvasSize = UDim2.fromOffset(
+            0,
+            Layout.AbsoluteContentSize.Y + 8
+        )
+    end)
+
+    return Page
+end
+
+local HomePage = CreatePage("HomePage")
+local LevelPage = CreatePage("LevelPage")
+
+HomePage.Visible = true
+
+-- إنشاء الأزرار
+local function CreateButton(Name, Parent, Callback)
+    local Button = Instance.new("TextButton")
+    Button.Size = UDim2.new(1, -5, 0, 45)
     Button.BackgroundColor3 = Light
     Button.Text = Name
     Button.TextColor3 = White
     Button.TextSize = 15
     Button.Font = Enum.Font.GothamBold
     Button.AutoButtonColor = false
-    Button.Parent = Container
+    Button.Parent = Parent
 
     local C = Instance.new("UICorner")
     C.CornerRadius = UDim.new(0, 9)
     C.Parent = Button
+
+    Button.Activated:Connect(function()
+        Callback()
+    end)
 
     Button.MouseEnter:Connect(function()
         TweenService:Create(
@@ -139,60 +152,119 @@ local function CreateButton(Name, Callback)
         ):Play()
     end)
 
-    Button.Activated:Connect(Callback)
-
     return Button
 end
 
--- الأقسام
-CreateButton("🏠 الرئيسية", function()
+-- الانتقال بين الصفحات
+local function ShowPage(Page)
+    HomePage.Visible = Page == HomePage
+    LevelPage.Visible = Page == LevelPage
+end
+
+-- الصفحة الرئيسية
+CreateButton("🏠 الرئيسية", HomePage, function()
+    ShowPage(HomePage)
     Status.Text = "الحالة: الرئيسية"
 end)
 
-CreateButton("⚔️ المزرعة", function()
+CreateButton("⚔️ المزرعة", HomePage, function()
     Status.Text = "الحالة: قسم المزرعة"
 end)
 
-CreateButton("📈 المستوى", function()
-    local Leaderstats = Player:FindFirstChild("leaderstats")
-    local Level = Leaderstats and Leaderstats:FindFirstChild("Level")
-
-    if Level then
-        Status.Text = "المستوى: " .. tostring(Level.Value)
-    else
-        Status.Text = "المستوى غير متاح"
-    end
+CreateButton("📈 المستوى", HomePage, function()
+    ShowPage(LevelPage)
+    Status.Text = "الحالة: قسم المستوى"
 end)
 
-CreateButton("👹 الزعماء", function()
+CreateButton("👹 الزعماء", HomePage, function()
     Status.Text = "الحالة: قسم الزعماء"
 end)
 
-CreateButton("🍎 الفواكه", function()
+CreateButton("🍎 الفواكه", HomePage, function()
     Status.Text = "الحالة: قسم الفواكه"
 end)
 
-CreateButton("🚀 الانتقال", function()
-    Status.Text = "الحالة: أدوات الانتقال"
+CreateButton("🚀 الانتقال", HomePage, function()
+    Status.Text = "الحالة: قسم الانتقال"
 end)
 
-CreateButton("👤 معلومات اللاعب", function()
+CreateButton("👤 معلومات اللاعب", HomePage, function()
     Status.Text = "عمر الحساب: " ..
         tostring(Player.AccountAge) .. " يوم"
 end)
 
-CreateButton("⚙️ الإعدادات", function()
+CreateButton("⚙️ الإعدادات", HomePage, function()
     Status.Text = "الحالة: الإعدادات"
 end)
 
--- زر الإخفاء
-local Hide = CreateButton("🙈 إخفاء الواجهة", function()
-    Main.Visible = false
+-- نظام تتبع المستوى
+local Running = false
+local LevelConnection = nil
+
+local function StopTracking()
+    Running = false
+
+    if LevelConnection then
+        LevelConnection:Disconnect()
+        LevelConnection = nil
+    end
+
+    Status.Text = "الحالة: تم إيقاف التتبع"
+end
+
+-- START
+CreateButton("▶ START AUTO LEVEL", LevelPage, function()
+
+    if Running then
+        Status.Text = "النظام يعمل بالفعل"
+        return
+    end
+
+    local Stats = Player:FindFirstChild("leaderstats")
+    local Level = Stats and Stats:FindFirstChild("Level")
+
+    if not Level then
+        Status.Text = "المستوى غير متاح"
+        return
+    end
+
+    Running = true
+
+    Status.Text = "المستوى الحالي: " .. tostring(Level.Value)
+
+    if Level.Value >= 2800 then
+        StopTracking()
+        Status.Text = "وصلت إلى المستوى 2800!"
+        return
+    end
+
+    LevelConnection = Level:GetPropertyChangedSignal("Value"):Connect(function()
+
+        Status.Text = "المستوى الحالي: " .. tostring(Level.Value)
+
+        if Level.Value >= 2800 then
+            StopTracking()
+            Status.Text = "وصلت إلى المستوى 2800!"
+        end
+
+    end)
+
 end)
 
--- زر إظهار الواجهة
+-- STOP
+CreateButton("⏹ STOP AUTO LEVEL", LevelPage, function()
+    StopTracking()
+end)
+
+-- الرجوع
+CreateButton("🔙 رجوع", LevelPage, function()
+    ShowPage(HomePage)
+    Status.Text = "الحالة: الرئيسية"
+end)
+
+-- إخفاء الواجهة
 local Open = Instance.new("TextButton")
-Open.Size = UDim2.fromOffset(125, 43)
+Open.Size = UDim2.fromOffset(130, 45)
 Open.Position = UDim2.new(0, 15, 0.5, 0)
 Open.BackgroundColor3 = Purple
 Open.Text = "👑 ADAM HUB"
@@ -206,12 +278,18 @@ local OpenCorner = Instance.new("UICorner")
 OpenCorner.CornerRadius = UDim.new(0, 10)
 OpenCorner.Parent = Open
 
-Main:GetPropertyChangedSignal("Visible"):Connect(function()
-    Open.Visible = not Main.Visible
+CreateButton("🙈 إخفاء الواجهة", HomePage, function()
+    Main.Visible = false
+    Open.Visible = true
 end)
 
 Open.Activated:Connect(function()
     Main.Visible = true
+    Open.Visible = false
+end)
+
+Main:GetPropertyChangedSignal("Visible"):Connect(function()
+    Open.Visible = not Main.Visible
 end)
 
 print("ADAM HUB ARAB V1.0 loaded!")
