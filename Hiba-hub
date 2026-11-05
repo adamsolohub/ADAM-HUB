@@ -1,6 +1,6 @@
 --================================================================
---          ADAM HUB ARAB | LEGENDARY POV & HITBOX V7.2
---          Fixed Button Layout, Scrolling & Delta Optimized
+--          ADAM HUB ARAB | ULTIMATE ESP & COMBAT V7.5
+--          Full ESP (Names, Distance, Highlights), Smooth Aim & Delta
 --================================================================
 
 local Players = game:GetService("Players")
@@ -13,7 +13,7 @@ local Player = Players.LocalPlayer
 local PlayerGui = Player:WaitForChild("PlayerGui")
 local Camera = Workspace.CurrentCamera
 
--- تنظيف الواجهة القديمة تماماً لتجنب التكرار
+-- تنظيف الواجهة القديمة تماماً
 local old = PlayerGui:FindFirstChild("ADAM_HUB_COMBAT")
 if old then
     old:Destroy()
@@ -29,7 +29,7 @@ GUI.Name = "ADAM_HUB_COMBAT"
 GUI.ResetOnSpawn = false
 GUI.Parent = PlayerGui
 
--- إنشاء دائرة POV / FOV بصرية على الشاشة
+-- دائرة الـ POV / FOV البصرية على الشاشة
 local FOVCircle = Drawing.new("Circle")
 FOVCircle.Visible = false
 FOVCircle.Radius = 120
@@ -39,7 +39,7 @@ FOVCircle.Filled = false
 FOVCircle.Transparency = 0.8
 FOVCircle.Position = Vector2.new(Camera.ViewportSize.X / 2, Camera.ViewportSize.Y / 2)
 
--- النافذة الرئيسية الطويلة والمظلمة (قابلة للتحريك)
+-- النافذة الرئيسية القابلة للتحريك
 local Main = Instance.new("Frame")
 Main.Size = UDim2.fromOffset(360, 480)
 Main.Position = UDim2.new(0.5, -180, 0.5, -240)
@@ -62,7 +62,7 @@ Stroke.Parent = Main
 local Title = Instance.new("TextLabel")
 Title.Size = UDim2.new(1, 0, 0, 45)
 Title.BackgroundColor3 = Light
-Title.Text = "👑 ADAM HUB - POV & HITBOX V7.2"
+Title.Text = "👑 ADAM HUB - FULL ESP V7.5"
 Title.TextColor3 = White
 Title.TextSize = 14
 Title.Font = Enum.Font.GothamBold
@@ -72,7 +72,7 @@ local TitleCorner = Instance.new("UICorner")
 TitleCorner.CornerRadius = UDim.new(0, 14)
 TitleCorner.Parent = Title
 
--- لوحة التمرير الداخلية مع مساحة كافية لجميع الأزرار
+-- لوحة التمرير الداخلية
 local Scrolling = Instance.new("ScrollingFrame")
 Scrolling.Position = UDim2.fromOffset(12, 55)
 Scrolling.Size = UDim2.new(1, -24, 1, -110)
@@ -80,19 +80,22 @@ Scrolling.BackgroundTransparency = 1
 Scrolling.BorderSizePixel = 0
 Scrolling.ScrollBarThickness = 4
 Scrolling.ScrollBarImageColor3 = Purple
-Scrolling.CanvasSize = UDim2.new(0, 0, 0, 680)
+Scrolling.CanvasSize = UDim2.new(0, 0, 0, 720)
+Scrolling.Active = true
 Scrolling.Parent = Main
 
 local function CreateBtn(Name, YPos, DefaultText)
     local Btn = Instance.new("TextButton")
     Btn.Name = Name
     Btn.Position = UDim2.fromOffset(0, YPos)
-    Btn.Size = UDim2.new(1, 0, 0, 40)
+    Btn.Size = UDim2.new(1, 0, 0, 42)
     Btn.BackgroundColor3 = Light
     Btn.Text = DefaultText
     Btn.TextColor3 = White
     Btn.TextSize = 12
     Btn.Font = Enum.Font.GothamBold
+    Btn.Active = true
+    Btn.Selectable = true
     Btn.Parent = Scrolling
     
     local C = Instance.new("UICorner")
@@ -102,19 +105,19 @@ local function CreateBtn(Name, YPos, DefaultText)
     return Btn
 end
 
--- ترتيت الأزرار بمسافات مضبوطة بدقة لعدم التداخل
+-- أزرار التحكم مرتبة بدقة
 local POVBtn = CreateBtn("POV", 0, "🔵 دائرة POV (FOV): OFF")
-local POVSizeBtn = CreateBtn("POVSize", 45, "🎚️ تعديل حجم دائرة POV: 120")
-local HeadAimBtn = CreateBtn("HeadAim", 90, "🎯 ايمبوت الرأس (Head Aimbot): OFF")
-local HitboxBtn = CreateBtn("Hitbox", 135, "📦 توسيع الهيتبوكس والمربع: OFF")
-local GodModeBtn = CreateBtn("GodMode", 180, "🛡️ دم الشخصية (1000 HP): OFF")
-local FlyBtn = CreateBtn("Fly", 225, "✈️ وضع الطيران (Fly): OFF")
-local KillAuraBtn = CreateBtn("KillAura", 270, "⚔️ ايم كيل وضرب تلقائي: OFF")
-local ESPBtn = CreateBtn("ESP", 315, "👁️ كشف الأماكن (ESP): OFF")
+local POVSizeBtn = CreateBtn("POVSize", 48, "🎚️ تعديل حجم دائرة POV: 120")
+local HeadAimBtn = CreateBtn("HeadAim", 96, "🎯 ايمبوت الرأس السلس: OFF")
+local HitboxBtn = CreateBtn("Hitbox", 144, "📦 الهيتبوكس واحتساب المربع: OFF")
+local GodModeBtn = CreateBtn("GodMode", 192, "🛡️ دم الشخصية (1000 HP): OFF")
+local FlyBtn = CreateBtn("Fly", 240, "✈️ وضع الطيران (Fly): OFF")
+local KillAuraBtn = CreateBtn("KillAura", 288, "⚔️ ايم كيل وضرب تلقائي: OFF")
+local ESPBtn = CreateBtn("ESP", 336, "👁️ كشف الأماكن والأسماء (ESP): OFF")
 
 -- إطار عرض المعلومات والسرعة
 local StatsBox = Instance.new("Frame")
-StatsBox.Position = UDim2.fromOffset(0, 365)
+StatsBox.Position = UDim2.fromOffset(0, 384)
 StatsBox.Size = UDim2.new(1, 0, 0, 75)
 StatsBox.BackgroundColor3 = Color3.fromRGB(25, 18, 35)
 StatsBox.Parent = Scrolling
@@ -129,9 +132,4 @@ HealthLabel.Position = UDim2.fromOffset(5, 4)
 HealthLabel.BackgroundTransparency = 1
 HealthLabel.TextColor3 = White
 HealthLabel.TextSize = 12
-HealthLabel.Font = Enum.Font.GothamBold
-HealthLabel.Text = "❤️ HP: جاري التحميل..."
-HealthLabel.Parent = StatsBox
-
-local SpeedLabel = Instance.new("TextLabel")
-SpeedLabel.Size = UDim
+HealthLabel.Font = Enum.Font
