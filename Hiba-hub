@@ -1,6 +1,6 @@
 --================================================================
---          ADAM HUB ARAB | LEGENDARY POV & HITBOX V7.1
---          Fixed GUI Parent & Delta Mobile Optimized
+--          ADAM HUB ARAB | LEGENDARY POV & HITBOX V7.2
+--          Fixed Button Layout, Scrolling & Delta Optimized
 --================================================================
 
 local Players = game:GetService("Players")
@@ -13,7 +13,7 @@ local Player = Players.LocalPlayer
 local PlayerGui = Player:WaitForChild("PlayerGui")
 local Camera = Workspace.CurrentCamera
 
--- تنظيف الواجهة القديمة تماماً
+-- تنظيف الواجهة القديمة تماماً لتجنب التكرار
 local old = PlayerGui:FindFirstChild("ADAM_HUB_COMBAT")
 if old then
     old:Destroy()
@@ -27,7 +27,7 @@ local White = Color3.fromRGB(255, 255, 255)
 local GUI = Instance.new("ScreenGui")
 GUI.Name = "ADAM_HUB_COMBAT"
 GUI.ResetOnSpawn = false
-GUI.Parent = PlayerGui -- التصحيح هنا باش تطلع الواجهة في شاشتك
+GUI.Parent = PlayerGui
 
 -- إنشاء دائرة POV / FOV بصرية على الشاشة
 local FOVCircle = Drawing.new("Circle")
@@ -39,7 +39,7 @@ FOVCircle.Filled = false
 FOVCircle.Transparency = 0.8
 FOVCircle.Position = Vector2.new(Camera.ViewportSize.X / 2, Camera.ViewportSize.Y / 2)
 
--- النافذة الرئيسية الطويلة والمظلمة
+-- النافذة الرئيسية الطويلة والمظلمة (قابلة للتحريك)
 local Main = Instance.new("Frame")
 Main.Size = UDim2.fromOffset(360, 480)
 Main.Position = UDim2.new(0.5, -180, 0.5, -240)
@@ -62,7 +62,7 @@ Stroke.Parent = Main
 local Title = Instance.new("TextLabel")
 Title.Size = UDim2.new(1, 0, 0, 45)
 Title.BackgroundColor3 = Light
-Title.Text = "👑 ADAM HUB - POV & HITBOX V7"
+Title.Text = "👑 ADAM HUB - POV & HITBOX V7.2"
 Title.TextColor3 = White
 Title.TextSize = 14
 Title.Font = Enum.Font.GothamBold
@@ -72,7 +72,7 @@ local TitleCorner = Instance.new("UICorner")
 TitleCorner.CornerRadius = UDim.new(0, 14)
 TitleCorner.Parent = Title
 
--- لوحة التمرير الداخلية
+-- لوحة التمرير الداخلية مع مساحة كافية لجميع الأزرار
 local Scrolling = Instance.new("ScrollingFrame")
 Scrolling.Position = UDim2.fromOffset(12, 55)
 Scrolling.Size = UDim2.new(1, -24, 1, -110)
@@ -80,14 +80,14 @@ Scrolling.BackgroundTransparency = 1
 Scrolling.BorderSizePixel = 0
 Scrolling.ScrollBarThickness = 4
 Scrolling.ScrollBarImageColor3 = Purple
-Scrolling.CanvasSize = UDim2.new(0, 0, 0, 560)
+Scrolling.CanvasSize = UDim2.new(0, 0, 0, 680)
 Scrolling.Parent = Main
 
 local function CreateBtn(Name, YPos, DefaultText)
     local Btn = Instance.new("TextButton")
     Btn.Name = Name
     Btn.Position = UDim2.fromOffset(0, YPos)
-    Btn.Size = UDim2.new(1, 0, 0, 42)
+    Btn.Size = UDim2.new(1, 0, 0, 40)
     Btn.BackgroundColor3 = Light
     Btn.Text = DefaultText
     Btn.TextColor3 = White
@@ -102,19 +102,19 @@ local function CreateBtn(Name, YPos, DefaultText)
     return Btn
 end
 
--- الأزرار الأساسية للتحكم
+-- ترتيت الأزرار بمسافات مضبوطة بدقة لعدم التداخل
 local POVBtn = CreateBtn("POV", 0, "🔵 دائرة POV (FOV): OFF")
-local POVSizeBtn = CreateBtn("POVSize", 50, "🎚️ تعديل حجم دائرة POV: 120")
-local HeadAimBtn = CreateBtn("HeadAim", 100, "🎯 ايمبوت الرأس (Head Aimbot): OFF")
-local HitboxBtn = CreateBtn("Hitbox", 150, "📦 توسيع الهيتبوكس والمربع: OFF")
-local GodModeBtn = CreateBtn("GodMode", 200, "🛡️ دم الشخصية (1000 HP): OFF")
-local FlyBtn = CreateBtn("Fly", 250, "✈️ وضع الطيران (Fly): OFF")
-local KillAuraBtn = CreateBtn("KillAura", 300, "⚔️ ايم كيل وضرب تلقائي: OFF")
-local ESPBtn = CreateBtn("ESP", 350, "👁️ كشف الأماكن (ESP): OFF")
+local POVSizeBtn = CreateBtn("POVSize", 45, "🎚️ تعديل حجم دائرة POV: 120")
+local HeadAimBtn = CreateBtn("HeadAim", 90, "🎯 ايمبوت الرأس (Head Aimbot): OFF")
+local HitboxBtn = CreateBtn("Hitbox", 135, "📦 توسيع الهيتبوكس والمربع: OFF")
+local GodModeBtn = CreateBtn("GodMode", 180, "🛡️ دم الشخصية (1000 HP): OFF")
+local FlyBtn = CreateBtn("Fly", 225, "✈️ وضع الطيران (Fly): OFF")
+local KillAuraBtn = CreateBtn("KillAura", 270, "⚔️ ايم كيل وضرب تلقائي: OFF")
+local ESPBtn = CreateBtn("ESP", 315, "👁️ كشف الأماكن (ESP): OFF")
 
 -- إطار عرض المعلومات والسرعة
 local StatsBox = Instance.new("Frame")
-StatsBox.Position = UDim2.fromOffset(0, 400)
+StatsBox.Position = UDim2.fromOffset(0, 365)
 StatsBox.Size = UDim2.new(1, 0, 0, 75)
 StatsBox.BackgroundColor3 = Color3.fromRGB(25, 18, 35)
 StatsBox.Parent = Scrolling
@@ -134,230 +134,4 @@ HealthLabel.Text = "❤️ HP: جاري التحميل..."
 HealthLabel.Parent = StatsBox
 
 local SpeedLabel = Instance.new("TextLabel")
-SpeedLabel.Size = UDim2.new(1, -10, 0, 32)
-SpeedLabel.Position = UDim2.fromOffset(5, 36)
-SpeedLabel.BackgroundTransparency = 1
-SpeedLabel.TextColor3 = White
-SpeedLabel.TextSize = 12
-SpeedLabel.Font = Enum.Font.GothamBold
-SpeedLabel.Text = "⚡ WalkSpeed: 16 | FlySpeed: 50"
-SpeedLabel.Parent = StatsBox
-
-local SpeedUpBtn = CreateBtn("SpeedUp", 485, "🚀 زيادة سرعة المشي والطيران")
-local RefreshBtn = CreateBtn("Refresh", 535, "🔄 تحديث المعلومات")
-
--- شريط الحالة السفلي
-local Status = Instance.new("TextLabel")
-Status.Size = UDim2.new(1, -24, 0, 35)
-Status.Position = UDim2.new(0, 12, 1, -40)
-Status.BackgroundTransparency = 1
-Status.TextColor3 = Color3.fromRGB(100, 255, 150)
-Status.TextSize = 12
-Status.Font = Enum.Font.GothamBold
-Status.Text = "الحالة: جاهز للسيطرة المطلقة ⚡"
-Status.Parent = Main
-
-local function SaferRun(callback)
-    local success, err = pcall(callback)
-    if not success then
-        warn("[ADAM COMBAT ERROR]:", err)
-    end
-    return success
-end
-
--- متغيرات تفعيل الميزات
-local povEnabled = false
-local povRadius = 120
-local headAimEnabled = false
-local hitboxEnabled = false
-local godModeEnabled = false
-local flyEnabled = false
-local killAuraEnabled = false
-local espEnabled = false
-local customWalkSpeed = 16
-local customFlySpeed = 50
-local espHighlights = {}
-
-POVBtn.MouseButton1Click:Connect(function()
-    povEnabled = not povEnabled
-    FOVCircle.Visible = povEnabled
-    POVBtn.BackgroundColor3 = povEnabled and Color3.fromRGB(0, 200, 100) or Light
-    POVBtn.Text = povEnabled and "🔵 دائرة POV (FOV): ON" or "🔵 دائرة POV (FOV): OFF"
-end)
-
-POVSizeBtn.MouseButton1Click:Connect(function()
-    povRadius = povRadius + 40
-    if povRadius > 280 then povRadius = 80 end
-    FOVCircle.Radius = povRadius
-    POVSizeBtn.Text = "🎚️ تعديل حجم دائرة POV: " .. tostring(povRadius)
-end)
-
-HeadAimBtn.MouseButton1Click:Connect(function()
-    headAimEnabled = not headAimEnabled
-    HeadAimBtn.BackgroundColor3 = headAimEnabled and Color3.fromRGB(0, 200, 100) or Light
-    HeadAimBtn.Text = headAimEnabled and "🎯 ايمبوت الرأس: ON" or "🎯 ايمبوت الرأس: OFF"
-end)
-
-HitboxBtn.MouseButton1Click:Connect(function()
-    hitboxEnabled = not hitboxEnabled
-    HitboxBtn.BackgroundColor3 = hitboxEnabled and Color3.fromRGB(0, 200, 100) or Light
-    HitboxBtn.Text = hitboxEnabled and "📦 توسيع الهيتبوكس والمربع: ON" or "📦 توسيع الهيتبوكس والمربع: OFF"
-end)
-
-GodModeBtn.MouseButton1Click:Connect(function()
-    godModeEnabled = not godModeEnabled
-    GodModeBtn.BackgroundColor3 = godModeEnabled and Color3.fromRGB(0, 200, 100) or Light
-    GodModeBtn.Text = godModeEnabled and "🛡️ دم الشخصية (1000 HP): ON" or "🛡️ دم الشخصية (1000 HP): OFF"
-end)
-
-FlyBtn.MouseButton1Click:Connect(function()
-    flyEnabled = not flyEnabled
-    FlyBtn.BackgroundColor3 = flyEnabled and Color3.fromRGB(0, 200, 100) or Light
-    FlyBtn.Text = flyEnabled and "✈️ وضع الطيران (Fly): ON" or "✈️ وضع الطيران (Fly): OFF"
-end)
-
-KillAuraBtn.MouseButton1Click:Connect(function()
-    killAuraEnabled = not killAuraEnabled
-    KillAuraBtn.BackgroundColor3 = killAuraEnabled and Color3.fromRGB(0, 200, 100) or Light
-    KillAuraBtn.Text = killAuraEnabled and "⚔️ ايم كيل وضرب تلقائي: ON" or "⚔️ ايم كيل وضرب تلقائي: OFF"
-end)
-
-ESPBtn.MouseButton1Click:Connect(function()
-    espEnabled = not espEnabled
-    ESPBtn.BackgroundColor3 = espEnabled and Color3.fromRGB(0, 200, 100) or Light
-    ESPBtn.Text = espEnabled and "👁️ كشف الأماكن (ESP): ON" or "👁️ كشف الأماكن (ESP): OFF"
-    if not espEnabled then
-        for _, h in pairs(espHighlights) do if h then h:Destroy() end end
-        espHighlights = {}
-    end
-end)
-
-SpeedUpBtn.MouseButton1Click:Connect(function()
-    customWalkSpeed = customWalkSpeed + 8
-    customFlySpeed = customFlySpeed + 25
-    if customWalkSpeed > 60 then customWalkSpeed = 16 end
-    if customFlySpeed > 150 then customFlySpeed = 50 end
-    SpeedLabel.Text = string.format("⚡ WalkSpeed: %d | FlySpeed: %d", customWalkSpeed, customFlySpeed)
-end)
-
--- زر إخفاء وإظهار الواجهة
-local OpenBtn = Instance.new("TextButton")
-OpenBtn.Size = UDim2.fromOffset(130, 40)
-OpenBtn.Position = UDim2.new(0, 15, 0.5, 0)
-OpenBtn.BackgroundColor3 = Purple
-OpenBtn.Text = "👑 ADAM COMBAT"
-OpenBtn.TextColor3 = White
-OpenBtn.TextSize = 12
-OpenBtn.Font = Enum.Font.GothamBold
-OpenBtn.Visible = false
-OpenBtn.Parent = GUI
-
-local HideBtn = CreateBtn("Hide", 585, "🙈 إخفاء الواجهة")
-HideBtn.MouseButton1Click:Connect(function()
-    Main.Visible = false
-    OpenBtn.Visible = true
-end)
-
-OpenBtn.Activated:Connect(function()
-    Main.Visible = true
-    OpenBtn.Visible = false
-end)
-
-RunService.RenderStepped:Connect(function()
-    SaferRun(function()
-        local character = Player.Character
-        local humanoid = character and character:FindFirstChildOfClass("Humanoid")
-        local hrp = character and character:FindFirstChild("HumanoidRootPart")
-
-        if povEnabled then
-            FOVCircle.Position = Vector2.new(Camera.ViewportSize.X / 2, Camera.ViewportSize.Y / 2)
-            FOVCircle.Visible = true
-        else
-            FOVCircle.Visible = false
-        end
-
-        if humanoid then
-            if godModeEnabled then
-                humanoid.MaxHealth = 1000
-                humanoid.Health = 1000
-            end
-            HealthLabel.Text = string.format("❤️ HP: %d / %d", humanoid.Health, humanoid.MaxHealth)
-            humanoid.WalkSpeed = customWalkSpeed
-        end
-
-        if flyEnabled and hrp then
-            local bv = hrp:FindFirstChild("AdamFlyForce")
-            if not bv then
-                bv = Instance.new("BodyVelocity")
-                bv.Name = "AdamFlyForce"
-                bv.MaxForce = Vector3.new(math.huge, math.huge, math.huge)
-                bv.Velocity = Vector3.new(0, 0, 0)
-                bv.Parent = hrp
-            end
-            bv.Velocity = Camera.CFrame.LookVector * customFlySpeed
-        else
-            if hrp then
-                local bv = hrp:FindFirstChild("AdamFlyForce")
-                if bv then bv:Destroy() end
-            end
-        end
-
-        if espEnabled then
-            local enemiesFolder = Workspace:FindFirstChild("Enemies")
-            if enemiesFolder then
-                for _, enemy in pairs(enemiesFolder:GetChildren()) do
-                    if not enemy:FindFirstChild("AdamCombatESP") and enemy:FindFirstChild("HumanoidRootPart") then
-                        local highlight = Instance.new("Highlight")
-                        highlight.Name = "AdamCombatESP"
-                        highlight.Adornee = enemy
-                        highlight.FillColor = Purple
-                        highlight.OutlineColor = White
-                        highlight.Parent = enemy
-                        table.insert(espHighlights, highlight)
-                    end
-                end
-            end
-        end
-
-        local enemiesFolder = Workspace:FindFirstChild("Enemies")
-        if enemiesFolder then
-            local closestHead = nil
-            local shortestDist = math.huge
-
-            for _, enemy in pairs(enemiesFolder:GetChildren()) do
-                local head = enemy:FindFirstChild("Head")
-                local hum = enemy:FindFirstChild("Humanoid")
-                local enemyHrp = enemy:FindFirstChild("HumanoidRootPart")
-
-                if hum and hum.Health > 0 then
-                    if hitboxEnabled and enemyHrp then
-                        enemyHrp.Size = Vector3.new(9, 9, 9)
-                        enemyHrp.Transparency = 0.8
-                        enemyHrp.CanCollide = false
-                    end
-
-                    if killAuraEnabled and hrp and enemyHrp then
-                        local dist = (hrp.Position - enemyHrp.Position).Magnitude
-                        if dist < 18 then
-                            hum.Health = 0
-                        end
-                    end
-
-                    if headAimEnabled and head and hrp then
-                        local dist = (hrp.Position - head.Position).Magnitude
-                        if dist < shortestDist then
-                            shortestDist = dist
-                            closestHead = head
-                        end
-                    end
-                end
-            end
-
-            if headAimEnabled and closestHead then
-                Camera.CFrame = CFrame.new(Camera.CFrame.Position, closestHead.Position)
-            end
-        end
-    end)
-end)
-
-print("ADAM HUB - POV & Hitbox V7.1 Loaded Successfully!")
+SpeedLabel.Size = UDim
