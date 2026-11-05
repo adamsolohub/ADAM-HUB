@@ -1,1 +1,404 @@
+هذا سكربت **Adam Hub 1.1** الجديد كاملًا. اضغط زر النسخ أعلى مربع الكود. لم يُختبر داخل Roblox.
 
+```lua
+-- Adam Hub 1.1 | Standalone Luau client interface for Blox Fruits.
+-- See README.md for compatibility, limitations, and GitHub installation.
+local Players = game:GetService("Players")
+local UIS = game:GetService("UserInputService")
+local RunService = game:GetService("RunService")
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local TweenService = game:GetService("TweenService")
+local TeleportService = game:GetService("TeleportService")
+local player = Players.LocalPlayer
+assert(player, "يجب تشغيل Adam Hub على العميل")
+local seas = {[2753915549] = 1, [4442272183] = 2, [7449423635] = 3}
+local sea = seas[game.PlaceId]
+assert(sea, "Adam Hub: هذا المكان ليس بحرًا مدعومًا في بلوكس فروت")
+local playerGui = player:WaitForChild("PlayerGui")
+local old = playerGui:FindFirstChild("AdamHub")
+if old then
+    local stop = old:FindFirstChild("Shutdown")
+    if stop then stop:Fire() else old:Destroy() end
+end
+local alive, connections, tasks = true, {}, {}
+local activeTweens = {}
+local flags = {farm = false, haki = false, stats = false, noclip = false, movement = false}
+local selectedTool, enemyFilter, selectedStat = "", "", "Melee"
+local walkSpeed, jumpPower, statAmount = 32, 70, 1
+local originalHumanoid, originalMovement
+local collisions = {}
+local colors = {bg = Color3.fromRGB(22, 24, 29), panel = Color3.fromRGB(31, 34, 41),
+    green = Color3.fromRGB(39, 145, 101), red = Color3.fromRGB(201, 69, 74), text = Color3.fromRGB(237, 235, 230), muted = Color3.fromRGB(161, 164, 174)}
+local function create(class, props, parent)
+    local instance = Instance.new(class)
+    for key, value in pairs(props) do instance[key] = value end
+    if parent and parent:FindFirstChildOfClass("UIListLayout") and instance:IsA("GuiObject") then
+        local order = parent:GetAttribute("NextOrder") or 0
+        instance.LayoutOrder = order
+        parent:SetAttribute("NextOrder", order + 1)
+    end
+    instance.Parent = parent
+    return instance
+end
+local function connect(signal, callback)
+    local connection = signal:Connect(callback)
+    table.insert(connections, connection)
+    return connection
+end
+local function round(instance, radius)
+    create("UICorner", {CornerRadius = UDim.new(0, radius or 8)}, instance)
+end
+local gui = create("ScreenGui", {Name = "AdamHub", ResetOnSpawn = false, ZIndexBehavior = Enum.ZIndexBehavior.Sibling}, playerGui)
+local shutdown = create("BindableEvent", {Name = "Shutdown"}, gui)
+local window = create("Frame", {Size = UDim2.fromOffset(720, 500), Position = UDim2.fromScale(.5, .5), AnchorPoint = Vector2.new(.5, .5), BackgroundColor3 = colors.bg, BorderSizePixel = 0}, gui)
+round(window, 12)
+create("UIStroke", {Color = colors.red, Transparency = .5, Thickness = 1}, window)
+create("UIGradient", {Color = ColorSequence.new(Color3.new(1, 1, 1), Color3.fromRGB(205, 190, 215)), Rotation = 35}, window)
+local minimized, userScale = false, 1
+local pages, tabs, toggleButtons = {}, {}, {}
+local function clampWindow()
+    local camera = workspace.CurrentCamera
+    if not camera then return end
+    local viewport = gui.AbsoluteSize
+    local half = Vector2.new(window.Size.X.Offset, window.Size.Y.Offset) * window.UIScale.Scale / 2
+    local x = math.clamp(window.Position.X.Scale * viewport.X + window.Position.X.Offset, half.X + 8, math.max(half.X + 8, viewport.X - half.X - 8))
+    local y = math.clamp(window.Position.Y.Scale * viewport.Y + window.Position.Y.Offset, half.Y + 8, math.max(half.Y + 8, viewport.Y - half.Y - 8))
+    window.Position = UDim2.fromOffset(x, y)
+end
+local scale = create("UIScale", {}, window)
+local function fit()
+    local camera = workspace.CurrentCamera
+    if camera then
+        scale.Scale = math.max(.05, math.min(userScale, (gui.AbsoluteSize.X - 24) / window.Size.X.Offset, (gui.AbsoluteSize.Y - 24) / window.Size.Y.Offset))
+        clampWindow()
+    end
+end
+fit()
+local function label(parent, text, size, position, fontSize, color)
+    return create("TextLabel", {Text = text, Size = size, Position = position or UDim2.new(), BackgroundTransparency = 1,
+        Font = Enum.Font.Arial, TextSize = fontSize or 14, TextColor3 = color or colors.text, TextXAlignment = Enum.TextXAlignment.Right}, parent)
+end
+local header = create("Frame", {Size = UDim2.new(1, 0, 0, 66), BackgroundTransparency = 1, Active = true}, window)
+label(header, "ADAM", UDim2.fromOffset(83, 34), UDim2.fromOffset(22, 10), 23)
+label(header, "HUB", UDim2.fromOffset(70, 34), UDim2.fromOffset(106, 10), 23, colors.red)
+label(header, "بلوكس فروت  /  البحر " .. sea, UDim2.fromOffset(220, 18), UDim2.fromOffset(23, 44), 10, colors.muted)
+local function button(parent, text, callback, size, position)
+    local b = create("TextButton", {Text = text, Size = size or UDim2.new(1, 0, 0, 36), Position = position or UDim2.new(),
+        BackgroundColor3 = colors.panel, BorderSizePixel = 0, TextColor3 = colors.text, Font = Enum.Font.Arial, TextSize = 13, AutoButtonColor = true}, parent)
+    round(b, 7)
+    connect(b.Activated, callback)
+    local stroke = create("UIStroke", {ApplyStrokeMode = Enum.ApplyStrokeMode.Border, Color = colors.text, Transparency = 1, Thickness = 1}, b)
+    local function hover(transparency)
+        if activeTweens[b] then activeTweens[b]:Cancel() end
+        local tween = TweenService:Create(stroke, TweenInfo.new(.15), {Transparency = transparency})
+        activeTweens[b] = tween
+        tween:Play()
+    end
+    connect(b.MouseEnter, function() hover(.65) end)
+    connect(b.MouseLeave, function() hover(1) end)
+    return b
+end
+local status = label(window, "جاهز • جميع الخيارات التلقائية متوقفة", UDim2.new(1, -38, 0, 28), UDim2.new(0, 20, 1, -32), 12, colors.muted)
+status.TextTruncate = Enum.TextTruncate.AtEnd
+local function notify(text)
+    if alive then status.Text = tostring(text) end
+end
+local function character()
+    local char = player.Character
+    return char, char and char:FindFirstChild("HumanoidRootPart"), char and char:FindFirstChildOfClass("Humanoid")
+end
+local function remote(...)
+    local remotes = ReplicatedStorage:FindFirstChild("Remotes")
+    local comm = remotes and remotes:FindFirstChild("CommF_")
+    if not comm or not comm:IsA("RemoteFunction") then error("واجهة اللعبة المطلوبة غير متاحة") end
+    return comm:InvokeServer(...)
+end
+local function restoreMovement()
+    if originalHumanoid and originalHumanoid.Parent and originalMovement then
+        originalHumanoid.WalkSpeed = originalMovement[1]
+        originalHumanoid.JumpPower = originalMovement[2]
+        originalHumanoid.JumpHeight = originalMovement[3]
+    end
+    originalHumanoid, originalMovement = nil, nil
+end
+local function restoreCollisions()
+    for part, value in pairs(collisions) do
+        if part.Parent then part.CanCollide = value end
+    end
+    table.clear(collisions)
+end
+local function destroy()
+    if not alive then return end
+    alive = false
+    for key in pairs(flags) do flags[key] = false end
+    for _, connection in ipairs(connections) do connection:Disconnect() end
+    for _, thread in ipairs(tasks) do pcall(task.cancel, thread) end
+    for _, tween in pairs(activeTweens) do tween:Cancel() end
+    table.clear(activeTweens)
+    restoreMovement()
+    restoreCollisions()
+    gui:Destroy()
+end
+connect(shutdown.Event, destroy)
+local function setMinimized(value)
+    minimized = value
+    window.Size = UDim2.fromOffset(minimized and 360 or 720, minimized and 66 or 500)
+    status.Visible = not minimized
+    for _, item in pairs(pages) do item.Visible = not minimized and item.Name == window:GetAttribute("ActiveTab") end
+    local sidebar = window:FindFirstChild("Sidebar")
+    if sidebar then sidebar.Visible = not minimized end
+    fit()
+end
+local minimizeButton
+minimizeButton = button(header, "− تصغير", function()
+    setMinimized(not minimized)
+    minimizeButton.Text = minimized and "+ تكبير" or "− تصغير"
+end, UDim2.fromOffset(76, 32), UDim2.new(1, -164, 0, 17))
+minimizeButton.BackgroundColor3 = colors.green
+local closeButton = button(header, "× إغلاق", destroy, UDim2.fromOffset(72, 32), UDim2.new(1, -80, 0, 17))
+closeButton.BackgroundColor3 = colors.red
+local reopen = button(gui, "ADAM HUB • إظهار", function() window.Visible = not window.Visible end, UDim2.fromOffset(154, 38), UDim2.fromOffset(12, 12))
+reopen.BackgroundColor3 = colors.red
+local sidebar = create("Frame", {Name = "Sidebar", Size = UDim2.new(0, 150, 1, -124), Position = UDim2.new(1, -166, 0, 84), BackgroundTransparency = 1}, window)
+create("UIListLayout", {Padding = UDim.new(0, 9), SortOrder = Enum.SortOrder.LayoutOrder}, sidebar)
+local tabTitles = {Overview = "الرئيسية", Farming = "الفارم والقتال", Player = "إعدادات اللاعب", Stats = "توزيع النقاط", Travel = "التنقل والجزر", Utilities = "الأدوات والواجهة"}
+local function page(name)
+    local p = create("ScrollingFrame", {Name = name, Size = UDim2.new(1, -204, 1, -128), Position = UDim2.fromOffset(20, 84), BackgroundTransparency = 1,
+        BorderSizePixel = 0, ScrollBarThickness = 3, ScrollBarImageColor3 = colors.red, CanvasSize = UDim2.new(), AutomaticCanvasSize = Enum.AutomaticSize.Y, Visible = false}, window)
+    create("UIListLayout", {Padding = UDim.new(0, 8), SortOrder = Enum.SortOrder.LayoutOrder}, p)
+    create("UIPadding", {PaddingRight = UDim.new(0, 9), PaddingBottom = UDim.new(0, 8)}, p)
+    pages[name] = p
+    tabs[name] = button(sidebar, tabTitles[name], function()
+        window:SetAttribute("ActiveTab", name)
+        for key, item in pairs(pages) do item.Visible = key == name; tabs[key].BackgroundColor3 = key == name and colors.red or colors.panel end
+    end)
+    tabs[name].Size = UDim2.new(1, 0, 0, 42)
+    return p
+end
+local function note(parent, text)
+    local l = label(parent, text, UDim2.new(1, 0, 0, 0), nil, 14, colors.muted)
+    l.AutomaticSize = Enum.AutomaticSize.Y
+    l.TextYAlignment = Enum.TextYAlignment.Top
+    l.TextWrapped = true
+    return l
+end
+local function refreshToggle(key)
+    local entry = toggleButtons[key]
+    if not entry then return end
+    entry.button.Text = entry.title .. (flags[key] and "  [ مفعّل ]" or "  [ متوقف ]")
+    entry.button.BackgroundColor3 = flags[key] and colors.green or colors.panel
+end
+local function stopAll()
+    for key in pairs(flags) do flags[key] = false; refreshToggle(key) end
+    restoreMovement()
+    restoreCollisions()
+    notify("تم إيقاف جميع الخيارات واستعادة خصائص الشخصية")
+end
+local function toggle(parent, title, key, description)
+    local b = button(parent, "", function()
+        flags[key] = not flags[key]
+        refreshToggle(key)
+        if key == "movement" and not flags[key] then restoreMovement() end
+        if key == "noclip" and not flags[key] then restoreCollisions() end
+        notify(title .. (flags[key] and ": مفعّل" or ": متوقف"))
+    end)
+    toggleButtons[key] = {button = b, title = title}
+    refreshToggle(key)
+    note(parent, description)
+end
+local function input(parent, placeholder, initial, callback)
+    note(parent, placeholder)
+    local box = create("TextBox", {Size = UDim2.new(1, 0, 0, 36), BackgroundColor3 = colors.panel, BorderSizePixel = 0,
+        Text = initial, PlaceholderText = placeholder, PlaceholderColor3 = colors.muted, TextColor3 = colors.text,
+        TextSize = 12, Font = Enum.Font.Arial, TextXAlignment = Enum.TextXAlignment.Right, ClearTextOnFocus = false}, parent)
+    round(box)
+    connect(box.FocusLost, function() callback(box.Text, box) end)
+    return box
+end
+local function numeric(value, fallback, minimum, maximum, integer)
+    local n = tonumber(value)
+    if not n or n ~= n or math.abs(n) == math.huge then n = fallback end
+    if integer then n = math.floor(n) end
+    return math.clamp(n, minimum, maximum)
+end
+local home = page("Overview")
+note(home, "ADAM HUB  /  الإصدار 1.1\nلوحة تحكم عربية • اختر القسم من القائمة اليمنى")
+local info = note(home, "جارٍ قراءة معلومات اللاعب…")
+button(home, "إيقاف جميع الخيارات", stopAll)
+button(home, "إيقاف السكربت وإغلاقه", destroy)
+note(home, "اسحب العنوان بالماوس أو اللمس لتحريك النافذة. زر التصغير الأخضر يحوّلها إلى شريط عنوان؛ الخيارات المفعّلة تستمر. زر الإغلاق الأحمر يوقف السكربت بالكامل. Right Shift أو زر ADAM HUB يخفي النافذة ويظهرها.")
+local farm = page("Farming")
+note(farm, "يستهدف الأعداء المحمّلين بالقرب منك. جهّز سلاحًا أولًا؛ السيرفر يتحكم في قبول الحركة والضرر.")
+input(farm, "اسم السلاح بالإنجليزية كما في الحقيبة (فارغ = الحالي أو أول سلاح)", "", function(value) selectedTool = value end)
+input(farm, "جزء من اسم العدو داخل اللعبة (فارغ = أقرب عدو)", "", function(value) enemyFilter = string.lower(value) end)
+toggle(farm, "فارم أقرب عدو", "farm", "ينتقل قرب أقرب عدو مطابق للبحث، ويجهّز السلاح المحدد ويحاول الهجوم كل 0.35 ثانية.")
+toggle(farm, "هاكي التصلّب التلقائي", "haki", "يحاول تفعيل هاكي التصلّب كل ثانيتين إذا لم يكن مفعّلًا؛ يلزم امتلاكه في اللعبة.")
+note(farm, "الفارم يفعّل أداة السلاح فقط؛ بعض الأسلحة تحتاج مدخلات خاصة. المهام التلقائية والغارات وأدوات الفواكه غير متوفرة في هذا الإصدار.")
+local movement = page("Player")
+input(movement, "سرعة المشي: من 16 إلى 150", "32", function(value, box) walkSpeed = numeric(value, 32, 16, 150); box.Text = tostring(walkSpeed) end)
+input(movement, "قوة القفز: من 50 إلى 150", "70", function(value, box) jumpPower = numeric(value, 70, 50, 150); box.Text = tostring(jumpPower) end)
+toggle(movement, "تطبيق السرعة والقفز", "movement", "يطبّق القيم المكتوبة على شخصيتك أثناء التفعيل ويعيد القيم السابقة عند الإيقاف.")
+toggle(movement, "تعطيل تصادم الشخصية", "noclip", "يعطّل تصادم أجزاء الشخصية أثناء التفعيل ويعيد حالة كل جزء عند الإيقاف.")
+note(movement, "قد يعيد السيرفر تصحيح الحركة. تعطيل الخيار أو إغلاق السكربت يعيد الخصائص الأصلية للشخصية.")
+local stats = page("Stats")
+local statNames, statIndex = {"Melee", "Defense", "Sword", "Gun", "Demon Fruit"}, 1
+local statLabels = {Melee = "القتال", Defense = "الدفاع", Sword = "السيف", Gun = "المسدس", ["Demon Fruit"] = "الفاكهة"}
+local statButton
+statButton = button(stats, "الإحصائية: القتال ← اضغط للتغيير", function() statIndex = statIndex % #statNames + 1; selectedStat = statNames[statIndex]; statButton.Text = "الإحصائية: " .. statLabels[selectedStat] .. " ← اضغط للتغيير" end)
+input(stats, "عدد النقاط لكل دفعة: من 1 إلى 100", "1", function(value, box) statAmount = numeric(value, 1, 1, 100, true); box.Text = tostring(statAmount) end)
+toggle(stats, "توزيع النقاط تلقائيًا", "stats", "يصرف دفعة من النقاط المتاحة كل 1.5 ثانية في الإحصائية المختارة أعلاه حتى توقفه أو تنفد النقاط.")
+note(stats, "التوزيع يستهلك نقاطك المتاحة فعلًا في الإحصائية المختارة؛ لا ينشئ نقاطًا ولا يعيد النقاط المصروفة.")
+local travel = page("Travel")
+note(travel, "الوجهات تخص البحر الحالي. كل زر ينقل الشخصية إلى الجزيرة المكتوبة عليه. أوقف الفارم أولًا؛ قد يرفض السيرفر النقل.")
+local islands = {
+    [1] = {{"بداية القراصنة", 1071, 17, 1426}, {"الغابة", -1612, 37, 149}, {"قرية القراصنة", -1122, 5, 3855}, {"الصحراء", 1094, 7, 4192}, {"القرية المتجمدة", 1198, 27, -1211}, {"قلعة البحرية", -4505, 21, 4260}, {"جزر السماء", -4970, 718, -2622}, {"مدينة النافورة", 5132, 5, 4037}},
+    [2] = {{"مملكة الورود", -390, 73, 303}, {"المنطقة الخضراء", -2448, 73, -3210}, {"المقبرة", -5494, 49, -794}, {"الجبل الثلجي", 561, 402, -5297}, {"الحار والبارد", -6026, 15, -5071}, {"الجزيرة المنسية", -3052, 237, -10148}},
+    [3] = {{"مدينة الميناء", -290, 44, 5580}, {"جزيرة هيدرا", 5229, 604, 345}, {"الشجرة العظيمة", 2276, 25, -6493}, {"السلحفاة العائمة", -13274, 532, -7579}, {"قلعة البحر", -5074, 315, -3153}}
+}
+for _, island in ipairs(islands[sea]) do
+    button(travel, island[1], function()
+        if flags.farm then notify("أوقف الفارم قبل التنقل"); return end
+        local _, root = character()
+        if root then root.CFrame = CFrame.new(island[2], island[3] + 5, island[4]); notify("تم طلب الانتقال إلى " .. island[1]) else notify("الشخصية غير جاهزة") end
+    end)
+end
+local utilities = page("Utilities")
+note(utilities, "استرداد كود: يرسل النص المكتوب إلى اللعبة ويعرض ردها في شريط الحالة. إعادة الانضمام: تحاول إعادتك إلى نفس السيرفر.")
+local code = ""
+local redeemBusy, lastRedeem = false, -math.huge
+input(utilities, "كود الاسترداد: اكتب الكود ثم اضغط زر الاسترداد", "", function(value) code = value end)
+button(utilities, "استرداد الكود", function()
+    if redeemBusy or os.clock() - lastRedeem < 2 then notify("انتظر قليلًا قبل إرسال كود آخر"); return end
+    redeemBusy, lastRedeem = true, os.clock()
+    local thread = task.spawn(function()
+        local ok, result = pcall(function()
+            assert(code ~= "", "أدخل كودًا أولًا")
+            local remotes = ReplicatedStorage:FindFirstChild("Remotes")
+            local redeem = remotes and remotes:FindFirstChild("Redeem")
+            assert(redeem and redeem:IsA("RemoteFunction"), "واجهة استرداد الأكواد غير متاحة")
+            return redeem:InvokeServer(code)
+        end)
+        redeemBusy = false
+        notify(ok and ("رد اللعبة على الكود: " .. tostring(result)) or ("تعذّر استرداد الكود: " .. tostring(result)))
+    end)
+    table.insert(tasks, thread)
+end)
+local lastRejoin = -math.huge
+button(utilities, "إعادة الانضمام للسيرفر الحالي", function()
+    if os.clock() - lastRejoin < 5 then notify("انتظر قبل محاولة إعادة الانضمام مجددًا"); return end
+    lastRejoin = os.clock()
+    local ok, err = pcall(function() TeleportService:TeleportToPlaceInstance(game.PlaceId, game.JobId, player) end)
+    if not ok then notify("تعذّرت إعادة الانضمام: " .. tostring(err)) end
+end)
+note(utilities, "الإعدادات لهذه الجلسة فقط. لا يجمع Adam Hub بيانات الحساب ولا يحفظ بيانات اللاعب.")
+note(utilities, "حجم الواجهة: يغيّر حجم النافذة فقط. يتم ضبطها تلقائيًا لتناسب الشاشة.")
+local sizeButton
+local sizes, sizeIndex = {1, .85, .7}, 1
+sizeButton = button(utilities, "حجم الواجهة: 100%", function()
+    sizeIndex = sizeIndex % #sizes + 1
+    userScale = sizes[sizeIndex]
+    sizeButton.Text = "حجم الواجهة: " .. math.floor(userScale * 100) .. "%"
+    fit()
+end)
+button(utilities, "إيقاف جميع الخيارات", stopAll)
+window:SetAttribute("ActiveTab", "Overview")
+pages.Overview.Visible = true
+tabs.Overview.BackgroundColor3 = colors.red
+local dragging, dragStart, startPosition, dragTouch
+connect(header.InputBegan, function(event)
+    if event.UserInputType == Enum.UserInputType.MouseButton1 or event.UserInputType == Enum.UserInputType.Touch then
+        dragging, dragStart, startPosition, dragTouch = true, event.Position, window.Position, event
+    end
+end)
+connect(UIS.InputChanged, function(event)
+    if dragging and ((dragTouch.UserInputType == Enum.UserInputType.MouseButton1 and event.UserInputType == Enum.UserInputType.MouseMovement) or event == dragTouch) then
+        local delta = event.Position - dragStart
+        window.Position = UDim2.new(startPosition.X.Scale, startPosition.X.Offset + delta.X, startPosition.Y.Scale, startPosition.Y.Offset + delta.Y)
+        clampWindow()
+    end
+end)
+connect(UIS.WindowFocusReleased, function() dragging = false end)
+connect(UIS.InputEnded, function(event)
+    if (event.UserInputType == Enum.UserInputType.MouseButton1 and dragTouch and dragTouch.UserInputType == Enum.UserInputType.MouseButton1) or event == dragTouch then dragging = false end
+end)
+connect(UIS.InputBegan, function(event, processed)
+    if not processed and not UIS:GetFocusedTextBox() and event.KeyCode == Enum.KeyCode.RightShift then window.Visible = not window.Visible end
+end)
+connect(RunService.Stepped, function()
+    if not flags.noclip then return end
+    local char = player.Character
+    if char then
+        for _, part in ipairs(char:GetDescendants()) do
+            if part:IsA("BasePart") then
+                if collisions[part] == nil then collisions[part] = part.CanCollide end
+                part.CanCollide = false
+            end
+        end
+    end
+end)
+connect(player.CharacterRemoving, function() restoreMovement(); restoreCollisions() end)
+local function loop(interval, callback)
+    table.insert(tasks, task.spawn(function()
+        while alive do
+            local ok, err = pcall(callback)
+            if not ok then notify("تعذّر تنفيذ الخيار: " .. tostring(err)) end
+            task.wait(interval)
+        end
+    end))
+end
+loop(.25, function()
+    fit()
+    local _, _, humanoid = character()
+    if flags.movement and humanoid then
+        if originalHumanoid ~= humanoid then
+            restoreMovement()
+            originalHumanoid = humanoid
+            originalMovement = {humanoid.WalkSpeed, humanoid.JumpPower, humanoid.JumpHeight}
+        end
+        humanoid.WalkSpeed = walkSpeed
+        if humanoid.UseJumpPower then humanoid.JumpPower = jumpPower else humanoid.JumpHeight = jumpPower * jumpPower / (2 * math.max(workspace.Gravity, 1)) end
+    end
+end)
+loop(.35, function()
+    if not flags.farm then return end
+    local char, root, humanoid = character()
+    if not root or not humanoid or humanoid.Health <= 0 then return end
+    local enemies = workspace:FindFirstChild("Enemies")
+    if not enemies then notify("مجلد الأعداء غير متاح"); return end
+    local target, distance = nil, math.huge
+    for _, enemy in ipairs(enemies:GetChildren()) do
+        local health, enemyRoot = enemy:FindFirstChildOfClass("Humanoid"), enemy:FindFirstChild("HumanoidRootPart")
+        if health and health.Health > 0 and enemyRoot and (enemyFilter == "" or string.find(string.lower(enemy.Name), enemyFilter, 1, true)) then
+            local d = (root.Position - enemyRoot.Position).Magnitude
+            if d < distance then target, distance = enemy, d end
+        end
+    end
+    if not target then notify("لا يوجد عدو محمّل يطابق البحث"); return end
+    local tool
+    if selectedTool ~= "" then tool = char:FindFirstChild(selectedTool) else tool = char:FindFirstChildOfClass("Tool") end
+    if not tool or not tool:IsA("Tool") then
+        local backpack = player:FindFirstChildOfClass("Backpack")
+        if backpack then
+            if selectedTool ~= "" then tool = backpack:FindFirstChild(selectedTool) else tool = backpack:FindFirstChildOfClass("Tool") end
+        end
+        if tool and tool:IsA("Tool") then humanoid:EquipTool(tool) else notify("جهّز سلاحًا أو تحقق من اسمه"); return end
+    end
+    local targetRoot = target:FindFirstChild("HumanoidRootPart")
+    if targetRoot then
+        root.CFrame = CFrame.lookAt((targetRoot.CFrame * CFrame.new(0, 0, 4)).Position, targetRoot.Position)
+        tool:Activate()
+        notify("الهدف الحالي: " .. target.Name)
+    end
+end)
+loop(2, function()
+    local char = player.Character
+    if flags.haki and char and not char:FindFirstChild("HasBuso") then remote("Buso") end
+end)
+loop(1.5, function()
+    local data = player:FindFirstChild("Data")
+    local points = data and data:FindFirstChild("Points")
+    if flags.stats and points and points.Value > 0 then remote("AddPoint", selectedStat, math.min(statAmount, points.Value)) end
+    local level = data and data:FindFirstChild("Level")
+    info.Text = string.format("اللاعب: %s\nالبحر: %d  •  المستوى: %s  •  النقاط المتاحة: %s", player.DisplayName, sea, level and tostring(level.Value) or "?", points and tostring(points.Value) or "?")
+end)
+```
