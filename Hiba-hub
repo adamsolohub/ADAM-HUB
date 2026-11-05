@@ -1,176 +1,217 @@
--- ========================================================
---     ADAM HUB PRO | BLOX FRUITS (GOD TIER AUTO LEVEL)
---     Advanced Remote Quest & 1-by-1 Flying Farm Engine
--- ========================================================
+
+--================================================
+--              ADAM HUB ARAB
+--                  VERSION 1.0
+--              PURPLE & BLACK
+--================================================
 
 local Players = game:GetService("Players")
-local LocalPlayer = Players.LocalPlayer
-local RunService = game:GetService("RunService")
-local Workspace = game:GetService("Workspace")
-local VirtualUser = game:GetService("VirtualUser")
+local TweenService = game:GetService("TweenService")
 
--- تنظيف الواجهة القديمة إن وجدت
-if LocalPlayer.PlayerGui:FindFirstChild("AdamHubGodTierGUI") then
-    LocalPlayer.PlayerGui.AdamHubGodTierGUI:Destroy()
+local Player = Players.LocalPlayer
+local PlayerGui = Player:WaitForChild("PlayerGui")
+
+-- منع تكرار الواجهة
+local Old = PlayerGui:FindFirstChild("ADAM_HUB_ARAB")
+if Old then
+    Old:Destroy()
 end
 
--- واجهة مستخدم مظلمة، طويلة، ومخصصة للهاتف (بدون أزرار إغلاق أو تصغير)
-local ScreenGui = Instance.new("ScreenGui")
-ScreenGui.Name = "AdamHubGodTierGUI"
-ScreenGui.Parent = LocalPlayer.PlayerGui
-ScreenGui.ResetOnSpawn = false
+-- الألوان
+local Purple = Color3.fromRGB(155, 75, 230)
+local Dark = Color3.fromRGB(17, 12, 25)
+local Light = Color3.fromRGB(38, 27, 51)
+local White = Color3.fromRGB(255, 255, 255)
 
-local MainFrame = Instance.new("Frame")
-MainFrame.Name = "MainFrame"
-MainFrame.Parent = ScreenGui
-MainFrame.BackgroundColor3 = Color3.fromRGB(10, 10, 15)
-MainFrame.Position = UDim2.new(0.5, -200, 0.5, -180)
-MainFrame.Size = UDim2.new(0, 400, 0, 340)
-MainFrame.Active = true
-MainFrame.Draggable = true -- قابلة للتحريك بحرية في الشاشة
+-- الواجهة
+local Screen = Instance.new("ScreenGui")
+Screen.Name = "ADAM_HUB_ARAB"
+Screen.ResetOnSpawn = false
+Screen.Parent = PlayerGui
 
-local UICorner = Instance.new("UICorner")
-UICorner.CornerRadius = UDim.new(0, 14)
-UICorner.Parent = MainFrame
+-- النافذة الرئيسية
+local Main = Instance.new("Frame")
+Main.Size = UDim2.fromOffset(340, 400)
+Main.Position = UDim2.new(0.5, -170, 0.5, -200)
+Main.BackgroundColor3 = Dark
+Main.BorderSizePixel = 0
+Main.Active = true
+Main.Draggable = true
+Main.Parent = Screen
 
-local UIStroke = Instance.new("UIStroke")
-UIStroke.Color = Color3.fromRGB(255, 40, 40)
-UIStroke.Thickness = 2.5
-UIStroke.Parent = MainFrame
+local Corner = Instance.new("UICorner")
+Corner.CornerRadius = UDim.new(0, 14)
+Corner.Parent = Main
 
-local Title = Instance.new("TextLabel")
-Title.Parent = MainFrame
-Title.BackgroundColor3 = Color3.fromRGB(18, 18, 25)
-Title.Size = UDim2.new(1, 0, 0, 50)
-Title.Font = Enum.Font.GothamBold
-Title.Text = "⚡ ADAM HUB PRO - GOD TIER ⚡"
-Title.TextColor3 = Color3.fromRGB(255, 255, 255)
-Title.TextSize = 14
+local Border = Instance.new("UIStroke")
+Border.Color = Purple
+Border.Thickness = 2
+Border.Parent = Main
 
-local TitleCorner = Instance.new("UICorner")
-TitleCorner.CornerRadius = UDim.new(0, 14)
-TitleCorner.Parent = Title
+-- العنوان
+local Header = Instance.new("TextLabel")
+Header.Size = UDim2.new(1, 0, 0, 55)
+Header.BackgroundColor3 = Light
+Header.Text = "👑 ADAM HUB ARAB"
+Header.TextColor3 = White
+Header.TextSize = 21
+Header.Font = Enum.Font.GothamBold
+Header.Parent = Main
 
-local UIListLayout = Instance.new("UIListLayout")
-UIListLayout.Parent = MainFrame
-UIListLayout.SortOrder = Enum.SortOrder.LayoutOrder
-UIListLayout.Padding = UDim.new(0, 10)
-UIListLayout.HorizontalAlignment = Enum.HorizontalAlignment.Center
+local HeaderCorner = Instance.new("UICorner")
+HeaderCorner.CornerRadius = UDim.new(0, 12)
+HeaderCorner.Parent = Header
 
-local PaddingFrame = Instance.new("Frame")
-PaddingFrame.Parent = MainFrame
-PaddingFrame.BackgroundTransparency = 1
-PaddingFrame.Size = UDim2.new(1, 0, 0, 55)
-PaddingFrame.LayoutOrder = 1
+-- الوصف
+local Subtitle = Instance.new("TextLabel")
+Subtitle.Size = UDim2.new(1, 0, 0, 30)
+Subtitle.Position = UDim2.fromOffset(0, 58)
+Subtitle.BackgroundTransparency = 1
+Subtitle.Text = "مرحباً بك في ADAM HUB"
+Subtitle.TextColor3 = Purple
+Subtitle.TextSize = 14
+Subtitle.Font = Enum.Font.GothamBold
+Subtitle.Parent = Main
 
-local function CreateButton(text)
-    local btn = Instance.new("TextButton")
-    btn.Parent = MainFrame
-    btn.BackgroundColor3 = Color3.fromRGB(25, 25, 38)
-    btn.Size = UDim2.new(0.92, 0, 0, 45)
-    btn.Font = Enum.Font.GothamBold
-    btn.Text = text
-    btn.TextColor3 = Color3.fromRGB(255, 90, 90)
-    btn.TextSize = 13
-    
-    local corner = Instance.new("UICorner")
-    corner.CornerRadius = UDim.new(0, 8)
-    corner.Parent = btn
-    
-    local stroke = Instance.new("UIStroke")
-    stroke.Color = Color3.fromRGB(255, 90, 90)
-    stroke.Thickness = 1
-    stroke.Transparency = 0.4
-    stroke.Parent = btn
-    
-    return btn, stroke
-end
+-- مساحة الأزرار
+local Container = Instance.new("ScrollingFrame")
+Container.Position = UDim2.fromOffset(12, 95)
+Container.Size = UDim2.new(1, -24, 0, 245)
+Container.BackgroundTransparency = 1
+Container.BorderSizePixel = 0
+Container.ScrollBarThickness = 4
+Container.ScrollBarImageColor3 = Purple
+Container.CanvasSize = UDim2.new(0, 0, 0, 0)
+Container.Parent = Main
 
-local AutoLevelBtn, BtnStroke = CreateButton("Auto Level & Quest (God Mode): OFF ❌")
-local FastAttackBtn, FastStroke = CreateButton("Fast Attack & Equip Tool: OFF ❌")
-local AntiStunBtn, AntiStroke = CreateButton("Anti-Stun & No Damage: OFF ❌")
+local Layout = Instance.new("UIListLayout")
+Layout.Padding = UDim.new(0, 8)
+Layout.Parent = Container
 
-local autoLevelActive = false
-local fastAttackActive = false
-local antiStunActive = false
-
-AutoLevelBtn.MouseButton1Click:Connect(function()
-    autoLevelActive = not autoLevelActive
-    AutoLevelBtn.Text = autoLevelActive and "Auto Level & Quest (God Mode): ON ✅" or "Auto Level & Quest (God Mode): OFF ❌"
-    AutoLevelBtn.TextColor3 = autoLevelActive and Color3.fromRGB(90, 255, 90) or Color3.fromRGB(255, 90, 90)
-    BtnStroke.Color = autoLevelActive and Color3.fromRGB(90, 255, 90) or Color3.fromRGB(255, 90, 90)
+Layout:GetPropertyChangedSignal("AbsoluteContentSize"):Connect(function()
+    Container.CanvasSize = UDim2.fromOffset(
+        0,
+        Layout.AbsoluteContentSize.Y + 8
+    )
 end)
 
-FastAttackBtn.MouseButton1Click:Connect(function()
-    fastAttackActive = not fastAttackActive
-    FastAttackBtn.Text = fastAttackActive and "Fast Attack & Equip Tool: ON ✅" or "Fast Attack & Equip Tool: OFF ❌"
-    FastAttackBtn.TextColor3 = fastAttackActive and Color3.fromRGB(90, 255, 90) or Color3.fromRGB(255, 90, 90)
-    FastStroke.Color = fastAttackActive and Color3.fromRGB(90, 255, 90) or Color3.fromRGB(255, 90, 90)
-end)
+-- الحالة
+local Status = Instance.new("TextLabel")
+Status.Size = UDim2.new(1, -20, 0, 35)
+Status.Position = UDim2.new(0, 10, 1, -43)
+Status.BackgroundTransparency = 1
+Status.Text = "الحالة: جاهز"
+Status.TextColor3 = Color3.fromRGB(100, 255, 150)
+Status.TextSize = 13
+Status.Font = Enum.Font.GothamBold
+Status.Parent = Main
 
-AntiStunBtn.MouseButton1Click:Connect(function()
-    antiStunActive = not antiStunActive
-    AntiStunBtn.Text = antiStunActive and "Anti-Stun & No Damage: ON ✅" or "Anti-Stun & No Damage: OFF ❌"
-    AntiStunBtn.TextColor3 = antiStunActive and Color3.fromRGB(90, 255, 90) or Color3.fromRGB(255, 90, 90)
-    AntiStroke.Color = antiStunActive and Color3.fromRGB(90, 255, 90) or Color3.fromRGB(255, 90, 90)
-end)
+-- إنشاء الأزرار
+local function CreateButton(Name, Callback)
+    local Button = Instance.new("TextButton")
 
--- المحرك الرئيسي الخارق (Flying Farm & Auto Quest & Kill 1 by 1)
-RunService.Stepped:Connect(function()
-    pcall(function()
-        local char = LocalPlayer.Character
-        if not char or not char:FindFirstChild("HumanoidRootPart") then return end
-        local hrp = char.HumanoidRootPart
+    Button.Size = UDim2.new(1, -5, 0, 42)
+    Button.BackgroundColor3 = Light
+    Button.Text = Name
+    Button.TextColor3 = White
+    Button.TextSize = 15
+    Button.Font = Enum.Font.GothamBold
+    Button.AutoButtonColor = false
+    Button.Parent = Container
 
-        -- حماية ضد التوقف والـ Stun
-        if antiStunActive and char:FindFirstChild("Humanoid") then
-            char.Humanoid.PlatformStand = false
-            if char:FindFirstChild("Stun") then
-                char.Stun:Destroy()
-            end
-        end
+    local C = Instance.new("UICorner")
+    C.CornerRadius = UDim.new(0, 9)
+    C.Parent = Button
 
-        if autoLevelActive then
-            local playerGui = LocalPlayer:FindFirstChild("PlayerGui")
-            local questGui = playerGui and playerGui:FindFirstChild("Quest")
-            local hasQuest = false
-            if questGui then
-                local container = questGui:FindFirstChild("Container")
-                if container and container.Visible == true then
-                    hasQuest = true
-                end
-            end
-
-            if not hasQuest then
-                hrp.CFrame = CFrame.new(1059.2, 16.9, 1549.5)
-                task.wait(0.6)
-            else
-                for _, enemy in pairs(Workspace.Enemies:GetChildren()) do
-                    if enemy:FindFirstChild("HumanoidRootPart") and enemy:FindFirstChild("Humanoid") and enemy.Humanoid.Health > 0 then
-                        if enemy.Name == "Bandit" then
-                            hrp.CFrame = enemy.HumanoidRootPart.CFrame * CFrame.new(0, 4, 1)
-                            
-                            if fastAttackActive then
-                                local tool = char:FindFirstChildOfClass("Tool")
-                                if not tool then
-                                    for _, t in pairs(LocalPlayer.Backpack:GetChildren()) do
-                                        if t:IsA("Tool") then
-                                            LocalPlayer.Character.Humanoid:EquipTool(t)
-                                            break
-                                        end
-                                    end
-                                else
-                                    tool:Activate()
-                                    VirtualUser:Button1Down(Vector2.new(0,0), Workspace.CurrentCamera.CFrame)
-                                end
-                            end
-                            break
-                        end
-                    end
-                end
-            end
-        end
+    Button.MouseEnter:Connect(function()
+        TweenService:Create(
+            Button,
+            TweenInfo.new(0.2),
+            {BackgroundColor3 = Purple}
+        ):Play()
     end)
+
+    Button.MouseLeave:Connect(function()
+        TweenService:Create(
+            Button,
+            TweenInfo.new(0.2),
+            {BackgroundColor3 = Light}
+        ):Play()
+    end)
+
+    Button.Activated:Connect(Callback)
+
+    return Button
+end
+
+-- الأقسام
+CreateButton("🏠 الرئيسية", function()
+    Status.Text = "الحالة: الرئيسية"
 end)
 
-print("Adam Hub God Tier Ultimate Loaded Successfully!")
+CreateButton("⚔️ المزرعة", function()
+    Status.Text = "الحالة: قسم المزرعة"
+end)
+
+CreateButton("📈 المستوى", function()
+    local Leaderstats = Player:FindFirstChild("leaderstats")
+    local Level = Leaderstats and Leaderstats:FindFirstChild("Level")
+
+    if Level then
+        Status.Text = "المستوى: " .. tostring(Level.Value)
+    else
+        Status.Text = "المستوى غير متاح"
+    end
+end)
+
+CreateButton("👹 الزعماء", function()
+    Status.Text = "الحالة: قسم الزعماء"
+end)
+
+CreateButton("🍎 الفواكه", function()
+    Status.Text = "الحالة: قسم الفواكه"
+end)
+
+CreateButton("🚀 الانتقال", function()
+    Status.Text = "الحالة: أدوات الانتقال"
+end)
+
+CreateButton("👤 معلومات اللاعب", function()
+    Status.Text = "عمر الحساب: " ..
+        tostring(Player.AccountAge) .. " يوم"
+end)
+
+CreateButton("⚙️ الإعدادات", function()
+    Status.Text = "الحالة: الإعدادات"
+end)
+
+-- زر الإخفاء
+local Hide = CreateButton("🙈 إخفاء الواجهة", function()
+    Main.Visible = false
+end)
+
+-- زر إظهار الواجهة
+local Open = Instance.new("TextButton")
+Open.Size = UDim2.fromOffset(125, 43)
+Open.Position = UDim2.new(0, 15, 0.5, 0)
+Open.BackgroundColor3 = Purple
+Open.Text = "👑 ADAM HUB"
+Open.TextColor3 = White
+Open.TextSize = 14
+Open.Font = Enum.Font.GothamBold
+Open.Visible = false
+Open.Parent = Screen
+
+local OpenCorner = Instance.new("UICorner")
+OpenCorner.CornerRadius = UDim.new(0, 10)
+OpenCorner.Parent = Open
+
+Main:GetPropertyChangedSignal("Visible"):Connect(function()
+    Open.Visible = not Main.Visible
+end)
+
+Open.Activated:Connect(function()
+    Main.Visible = true
+end)
+
+print("ADAM HUB ARAB V1.0 loaded!")
