@@ -1,6 +1,6 @@
 -- ========================================================
---     ADAM HUB PRO | BLOX FRUITS (CLEAN AUTO LEVEL)
---     Quest Taker & 1-by-1 Bandit Killer (No Bring Mobs)
+--     ADAM HUB PRO | BLOX FRUITS (FIXED AUTO LEVEL)
+--     Precise Quest Giver & 1-by-1 Bandit Killer
 -- ========================================================
 
 local Players = game:GetService("Players")
@@ -41,9 +41,9 @@ Title.Parent = MainFrame
 Title.BackgroundColor3 = Color3.fromRGB(20, 20, 30)
 Title.Size = UDim2.new(1, 0, 0, 50)
 Title.Font = Enum.Font.GothamBold
-Title.Text = "⚡ ADAM HUB PRO - CLEAN AUTO LEVEL ⚡"
+Title.Text = "⚡ ADAM HUB PRO - FIXED AUTO LEVEL ⚡"
 Title.TextColor3 = Color3.fromRGB(255, 255, 255)
-Title.TextSize = 14
+Title.TextSize = 13
 
 local TitleCorner = Instance.new("UICorner")
 TitleCorner.CornerRadius = UDim.new(0, 14)
@@ -96,7 +96,8 @@ AutoLevelBtn.MouseButton1Click:Connect(function()
     end
 end)
 
-local QuestGiverCFrame = CFrame.new(1059, 16, 1549)
+-- الإحداثيات الدقيقة لمكان أخذ المهمة (Bandit Quest Giver) في العالم الأول
+local QuestGiverCFrame = CFrame.new(1059.2, 16.9, 1549.5)
 
 RunService.Stepped:Connect(function()
     if autoLevelActive then
@@ -105,6 +106,7 @@ RunService.Stepped:Connect(function()
             if not char or not char:FindFirstChild("HumanoidRootPart") then return end
             local hrp = char.HumanoidRootPart
 
+            -- فحص واجهة المهام بطريقة أدق
             local playerGui = LocalPlayer:FindFirstChild("PlayerGui")
             local questGui = playerGui and playerGui:FindFirstChild("Quest")
             
@@ -117,14 +119,18 @@ RunService.Stepped:Connect(function()
             end
 
             if not hasQuest then
+                -- الذهاب لمكان أخذ المهمة مباشرة
                 hrp.CFrame = QuestGiverCFrame
-                task.wait(0.5)
+                task.wait(1) -- الانتظار قليلاً لتثبيت الشخصية واكتساب المهمة
             else
+                -- البحث عن الأعداء وقتلهم واحد تلو الآخر
                 for _, enemy in pairs(Workspace.Enemies:GetChildren()) do
                     if enemy:FindFirstChild("HumanoidRootPart") and enemy:FindFirstChild("Humanoid") and enemy.Humanoid.Health > 0 then
                         if enemy.Name == "Bandit" then
+                            -- الانتقال فوق العدو بمسافة آمنة ومناسبة للضرب
                             hrp.CFrame = enemy.HumanoidRootPart.CFrame * CFrame.new(0, 3, 1)
                             
+                            -- تجهيز السلاح أو الفاكهة والضرب التلقائي الفوري
                             local tool = char:FindFirstChildOfClass("Tool")
                             if not tool then
                                 for _, t in pairs(LocalPlayer.Backpack:GetChildren()) do
@@ -146,4 +152,4 @@ RunService.Stepped:Connect(function()
     end
 end)
 
-print("Adam Hub Clean Auto Level Loaded!")
+print("Adam Hub Fixed Auto Level Loaded Successfully!")
