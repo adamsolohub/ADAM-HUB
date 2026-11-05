@@ -1,32 +1,31 @@
 -- ========================================================
---     ADAM HUB PRO | BLOX FRUITS (GOD MODE EDITION)
---     All-in-One Mobile Exploiting & Auto-Farm Engine
+--     ADAM HUB PRO | BLOX FRUITS (CLEAN AUTO LEVEL)
+--     Quest Taker & 1-by-1 Bandit Killer (No Bring Mobs)
 -- ========================================================
 
 local Players = game:GetService("Players")
 local LocalPlayer = Players.LocalPlayer
 local RunService = game:GetService("RunService")
 local Workspace = game:GetService("Workspace")
+local VirtualUser = game:GetService("VirtualUser")
 
--- تنظيف أي واجهة سابقة لتجنب التكرار
-if LocalPlayer.PlayerGui:FindFirstChild("AdamHubGodModeGUI") then
-    LocalPlayer.PlayerGui.AdamHubGodModeGUI:Destroy()
+if LocalPlayer.PlayerGui:FindFirstChild("AdamHubCleanLevelGUI") then
+    LocalPlayer.PlayerGui.AdamHubCleanLevelGUI:Destroy()
 end
 
--- إنشاء الواجهة الرئيسية المظلمة والفخمة (بدون أزرار إغلاق أو تصغير)
 local ScreenGui = Instance.new("ScreenGui")
-ScreenGui.Name = "AdamHubGodModeGUI"
+ScreenGui.Name = "AdamHubCleanLevelGUI"
 ScreenGui.Parent = LocalPlayer.PlayerGui
 ScreenGui.ResetOnSpawn = false
 
 local MainFrame = Instance.new("Frame")
 MainFrame.Name = "MainFrame"
 MainFrame.Parent = ScreenGui
-MainFrame.BackgroundColor3 = Color3.fromRGB(10, 10, 15)
+MainFrame.BackgroundColor3 = Color3.fromRGB(12, 12, 18)
 MainFrame.Position = UDim2.new(0.5, -200, 0.5, -160)
-MainFrame.Size = UDim2.new(0, 400, 0, 320)
+MainFrame.Size = UDim2.new(0, 400, 0, 260)
 MainFrame.Active = true
-MainFrame.Draggable = true -- سحب الواجهة وتحريكها في أي مكان بالشاشة
+MainFrame.Draggable = true
 
 local UICorner = Instance.new("UICorner")
 UICorner.CornerRadius = UDim.new(0, 14)
@@ -37,132 +36,95 @@ UIStroke.Color = Color3.fromRGB(255, 30, 30)
 UIStroke.Thickness = 2.5
 UIStroke.Parent = MainFrame
 
--- العنوان الرئيسي للسكربت
 local Title = Instance.new("TextLabel")
 Title.Parent = MainFrame
-Title.BackgroundColor3 = Color3.fromRGB(18, 18, 25)
+Title.BackgroundColor3 = Color3.fromRGB(20, 20, 30)
 Title.Size = UDim2.new(1, 0, 0, 50)
 Title.Font = Enum.Font.GothamBold
-Title.Text = "🔥 ADAM HUB PRO - GOD MODE 🔥"
+Title.Text = "⚡ ADAM HUB PRO - CLEAN AUTO LEVEL ⚡"
 Title.TextColor3 = Color3.fromRGB(255, 255, 255)
-Title.TextSize = 15
+Title.TextSize = 14
 
 local TitleCorner = Instance.new("UICorner")
 TitleCorner.CornerRadius = UDim.new(0, 14)
 TitleCorner.Parent = Title
 
--- ترتيب الأزرار تلقائياً
 local UIListLayout = Instance.new("UIListLayout")
 UIListLayout.Parent = MainFrame
 UIListLayout.SortOrder = Enum.SortOrder.LayoutOrder
-UIListLayout.Padding = UDim.new(0, 8)
+UIListLayout.Padding = UDim.new(0, 12)
 UIListLayout.HorizontalAlignment = Enum.HorizontalAlignment.Center
 
 local PaddingFrame = Instance.new("Frame")
 PaddingFrame.Parent = MainFrame
 PaddingFrame.BackgroundTransparency = 1
-PaddingFrame.Size = UDim2.new(1, 0, 0, 55)
+PaddingFrame.Size = UDim2.new(1, 0, 0, 50)
 PaddingFrame.LayoutOrder = 1
 
--- دالة مخصصة لإنشاء الأزرار باحترافية
-local function CreateMenuButton(name, text, color)
-    local btn = Instance.new("TextButton")
-    btn.Name = name
-    btn.Parent = MainFrame
-    btn.BackgroundColor3 = Color3.fromRGB(25, 25, 38)
-    btn.Size = UDim2.new(0.92, 0, 0, 42)
-    btn.Font = Enum.Font.GothamBold
-    btn.Text = text
-    btn.TextColor3 = color
-    btn.TextSize = 13
-    
-    local corner = Instance.new("UICorner")
-    corner.CornerRadius = UDim.new(0, 8)
-    corner.Parent = btn
-    
-    local stroke = Instance.new("UIStroke")
-    stroke.Color = color
-    stroke.Thickness = 1
-    stroke.Transparency = 0.4
-    stroke.Parent = btn
-    
-    return btn
-end
+local AutoLevelBtn = Instance.new("TextButton")
+AutoLevelBtn.Name = "AutoLevelBtn"
+AutoLevelBtn.Parent = MainFrame
+AutoLevelBtn.BackgroundColor3 = Color3.fromRGB(28, 28, 40)
+AutoLevelBtn.Size = UDim2.new(0.92, 0, 0, 48)
+AutoLevelBtn.Font = Enum.Font.GothamBold
+AutoLevelBtn.Text = "Auto Level (1 by 1): OFF ❌"
+AutoLevelBtn.TextColor3 = Color3.fromRGB(255, 90, 90)
+AutoLevelBtn.TextSize = 13
 
--- الأزرار الخاصة بالوظائف الكبرى
-local AutoFarmBtn = CreateMenuButton("AutoFarmBtn", "Auto Farm Bandits: OFF ❌", Color3.fromRGB(255, 90, 90))
-local BringMobsBtn = CreateMenuButton("BringMobsBtn", "Bring Mobs (Collect Enemies): OFF ❌", Color3.fromRGB(255, 90, 90))
-local FastAttackBtn = CreateMenuButton("FastAttackBtn", "Fast Attack & Equip Weapon: OFF ❌", Color3.fromRGB(255, 90, 90))
-local AntiStunBtn = CreateMenuButton("AntiStunBtn", "Anti-Stun / No Knockback: OFF ❌", Color3.fromRGB(255, 90, 90))
+local BtnCorner = Instance.new("UICorner")
+BtnCorner.CornerRadius = UDim.new(0, 8)
+BtnCorner.Parent = AutoLevelBtn
 
--- حالات التشغيل
-local autoFarmActive = false
-local bringMobsActive = false
-local fastAttackActive = false
-local antiStunActive = false
+local BtnStroke = Instance.new("UIStroke")
+BtnStroke.Color = Color3.fromRGB(255, 90, 90)
+BtnStroke.Thickness = 1
+BtnStroke.Transparency = 0.4
+BtnStroke.Parent = AutoLevelBtn
 
--- ربط الأزرار بتفعيل وتعطيل الميزات
-AutoFarmBtn.MouseButton1Click:Connect(function()
-    autoFarmActive = not autoFarmActive
-    AutoFarmBtn.Text = autoFarmActive and "Auto Farm Bandits: ON ✅" or "Auto Farm Bandits: OFF ❌"
-    AutoFarmBtn.TextColor3 = autoFarmActive and Color3.fromRGB(90, 255, 90) or Color3.fromRGB(255, 90, 90)
+local autoLevelActive = false
+
+AutoLevelBtn.MouseButton1Click:Connect(function()
+    autoLevelActive = not autoLevelActive
+    if autoLevelActive then
+        AutoLevelBtn.Text = "Auto Level (1 by 1): ON ✅"
+        AutoLevelBtn.TextColor3 = Color3.fromRGB(90, 255, 90)
+        BtnStroke.Color = Color3.fromRGB(90, 255, 90)
+    else
+        AutoLevelBtn.Text = "Auto Level (1 by 1): OFF ❌"
+        AutoLevelBtn.TextColor3 = Color3.fromRGB(255, 90, 90)
+        BtnStroke.Color = Color3.fromRGB(255, 90, 90)
+    end
 end)
 
-BringMobsBtn.MouseButton1Click:Connect(function()
-    bringMobsActive = not bringMobsActive
-    BringMobsBtn.Text = bringMobsActive and "Bring Mobs (Collect Enemies): ON ✅" or "Bring Mobs (Collect Enemies): OFF ❌"
-    BringMobsBtn.TextColor3 = bringMobsActive and Color3.fromRGB(90, 255, 90) or Color3.fromRGB(255, 90, 90)
-end)
+local QuestGiverCFrame = CFrame.new(1059, 16, 1549)
 
-FastAttackBtn.MouseButton1Click:Connect(function()
-    fastAttackActive = not fastAttackActive
-    FastAttackBtn.Text = fastAttackActive and "Fast Attack & Equip Weapon: ON ✅" or "Fast Attack & Equip Weapon: OFF ❌"
-    FastAttackBtn.TextColor3 = fastAttackActive and Color3.fromRGB(90, 255, 90) or Color3.fromRGB(255, 90, 90)
-end)
-
-AntiStunBtn.MouseButton1Click:Connect(function()
-    antiStunActive = not antiStunActive
-    AntiStunBtn.Text = antiStunActive and "Anti-Stun / No Knockback: ON ✅" or "Anti-Stun / No Knockback: OFF ❌"
-    AntiStunBtn.TextColor3 = antiStunActive and Color3.fromRGB(90, 255, 90) or Color3.fromRGB(255, 90, 90)
-end)
-
--- محرك التشغيل السريع والذكي في الخلفية (بدون أخطاء أو لاغ)
 RunService.Stepped:Connect(function()
-    pcall(function()
-        local char = LocalPlayer.Character
-        if not char or not char:FindFirstChild("HumanoidRootPart") then return end
-        local hrp = char.HumanoidRootPart
+    if autoLevelActive then
+        pcall(function()
+            local char = LocalPlayer.Character
+            if not char or not char:FindFirstChild("HumanoidRootPart") then return end
+            local hrp = char.HumanoidRootPart
 
-        -- 1. منع التوقف والتعرض للضرب (Anti-Stun)
-        if antiStunActive and char:FindFirstChild("Humanoid") then
-            char.Humanoid.PlatformStand = false
-            if char:FindFirstChild("Stun") then
-                char.Stun:Destroy()
-            end
-        end
-
-        -- 2. نظام تجميع الأعداء (Bring Mobs) لجمعهم بقربك
-        if bringMobsActive then
-            for _, enemy in pairs(Workspace.Enemies:GetChildren()) do
-                if enemy:FindFirstChild("HumanoidRootPart") and enemy:FindFirstChild("Humanoid") and enemy.Humanoid.Health > 0 then
-                    if enemy.Name == "Bandit" then
-                        enemy.HumanoidRootPart.CFrame = hrp.CFrame * CFrame.new(0, 0, -2)
-                        enemy.HumanoidRootPart.CanCollide = false
-                    end
+            local playerGui = LocalPlayer:FindFirstChild("PlayerGui")
+            local questGui = playerGui and playerGui:FindFirstChild("Quest")
+            
+            local hasQuest = false
+            if questGui then
+                local container = questGui:FindFirstChild("Container")
+                if container and container.Visible == true then
+                    hasQuest = true
                 end
             end
-        end
 
-        -- 3. نظام الزراعة التلقائية المطور (Auto-Farm)
-        if autoFarmActive then
-            for _, enemy in pairs(Workspace.Enemies:GetChildren()) do
-                if enemy:FindFirstChild("HumanoidRootPart") and enemy:FindFirstChild("Humanoid") and enemy.Humanoid.Health > 0 then
-                    if enemy.Name == "Bandit" then
-                        -- الانتقال فوق العدو بمسافة آمنة تمنع ضرر الأعداء عنك
-                        hrp.CFrame = enemy.HumanoidRootPart.CFrame * CFrame.new(0, 4, 1)
-                        
-                        -- تجهيز السلاح والضرب التلقائي
-                        if fastAttackActive then
+            if not hasQuest then
+                hrp.CFrame = QuestGiverCFrame
+                task.wait(0.5)
+            else
+                for _, enemy in pairs(Workspace.Enemies:GetChildren()) do
+                    if enemy:FindFirstChild("HumanoidRootPart") and enemy:FindFirstChild("Humanoid") and enemy.Humanoid.Health > 0 then
+                        if enemy.Name == "Bandit" then
+                            hrp.CFrame = enemy.HumanoidRootPart.CFrame * CFrame.new(0, 3, 1)
+                            
                             local tool = char:FindFirstChildOfClass("Tool")
                             if not tool then
                                 for _, t in pairs(LocalPlayer.Backpack:GetChildren()) do
@@ -173,14 +135,15 @@ RunService.Stepped:Connect(function()
                                 end
                             else
                                 tool:Activate()
+                                VirtualUser:Button1Down(Vector2.new(0,0), Workspace.CurrentCamera.CFrame)
                             end
+                            break
                         end
-                        break
                     end
                 end
             end
-        end
-    end)
+        end)
+    end
 end)
 
-print("Adam Hub Pro God Mode Loaded Successfully!")
+print("Adam Hub Clean Auto Level Loaded!")
