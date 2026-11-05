@@ -1,6 +1,6 @@
 --================================================================
---          ADAM HUB ARAB | LEGENDARY POV & HITBOX V7.0
---          FOV Circle, 1000 HP, Head Aimbot, Hitbox & Delta Optimized
+--          ADAM HUB ARAB | LEGENDARY POV & HITBOX V7.1
+--          Fixed GUI Parent & Delta Mobile Optimized
 --================================================================
 
 local Players = game:GetService("Players")
@@ -27,7 +27,7 @@ local White = Color3.fromRGB(255, 255, 255)
 local GUI = Instance.new("ScreenGui")
 GUI.Name = "ADAM_HUB_COMBAT"
 GUI.ResetOnSpawn = false
-GUI.Parent = GUI
+GUI.Parent = PlayerGui -- التصحيح هنا باش تطلع الواجهة في شاشتك
 
 -- إنشاء دائرة POV / FOV بصرية على الشاشة
 local FOVCircle = Drawing.new("Circle")
@@ -178,7 +178,6 @@ local customWalkSpeed = 16
 local customFlySpeed = 50
 local espHighlights = {}
 
--- تفعيل وتعديل دائرة الـ POV
 POVBtn.MouseButton1Click:Connect(function()
     povEnabled = not povEnabled
     FOVCircle.Visible = povEnabled
@@ -264,14 +263,12 @@ OpenBtn.Activated:Connect(function()
     OpenBtn.Visible = false
 end)
 
--- الحلقة التلقائية للتشغيل (POV, HeadAim, Hitbox, 1000 HP, Fly)
 RunService.RenderStepped:Connect(function()
     SaferRun(function()
         local character = Player.Character
         local humanoid = character and character:FindFirstChildOfClass("Humanoid")
         local hrp = character and character:FindFirstChild("HumanoidRootPart")
 
-        -- تحديث مكان دائرة الـ POV وسط الشاشة
         if povEnabled then
             FOVCircle.Position = Vector2.new(Camera.ViewportSize.X / 2, Camera.ViewportSize.Y / 2)
             FOVCircle.Visible = true
@@ -280,7 +277,6 @@ RunService.RenderStepped:Connect(function()
         end
 
         if humanoid then
-            -- رفع الهيلث والدم إلى 1000
             if godModeEnabled then
                 humanoid.MaxHealth = 1000
                 humanoid.Health = 1000
@@ -289,7 +285,6 @@ RunService.RenderStepped:Connect(function()
             humanoid.WalkSpeed = customWalkSpeed
         end
 
-        -- نظام الطيران
         if flyEnabled and hrp then
             local bv = hrp:FindFirstChild("AdamFlyForce")
             if not bv then
@@ -307,7 +302,6 @@ RunService.RenderStepped:Connect(function()
             end
         end
 
-        -- كشف الأماكن ESP
         if espEnabled then
             local enemiesFolder = Workspace:FindFirstChild("Enemies")
             if enemiesFolder then
@@ -325,7 +319,6 @@ RunService.RenderStepped:Connect(function()
             end
         end
 
-        -- معالجة الهيتبوكس واستهداف الرأس داخل النطاق والمربع
         local enemiesFolder = Workspace:FindFirstChild("Enemies")
         if enemiesFolder then
             local closestHead = nil
@@ -337,7 +330,6 @@ RunService.RenderStepped:Connect(function()
                 local enemyHrp = enemy:FindFirstChild("HumanoidRootPart")
 
                 if hum and hum.Health > 0 then
-                    -- توسيع الهيتبوكس واحتساب الدمج في المربع المحيط بالعدو
                     if hitboxEnabled and enemyHrp then
                         enemyHrp.Size = Vector3.new(9, 9, 9)
                         enemyHrp.Transparency = 0.8
@@ -368,4 +360,4 @@ RunService.RenderStepped:Connect(function()
     end)
 end)
 
-print("ADAM HUB - POV & Hitbox V7 Loaded Successfully!")
+print("ADAM HUB - POV & Hitbox V7.1 Loaded Successfully!")
