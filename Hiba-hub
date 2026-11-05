@@ -1,6 +1,6 @@
 --================================================================
---          ADAM HUB ARAB | GOD TIER ULTIMATE V5
---          Dynamic Levels, Auto Quest, & Death Handler
+--          ADAM HUB ARAB | GOD TIER ULTIMATE V9
+--          Secure Level Tracker, SaferRun & Delta Optimized
 --================================================================
 
 local Players = game:GetService("Players")
@@ -22,15 +22,15 @@ local Light = Color3.fromRGB(35, 24, 48)
 local White = Color3.fromRGB(255, 255, 255)
 
 local Screen = Instance.new("ScreenGui")
-Screen.Name = "ADAM HUB ARAB"
+Screen.Name = "ADAM_HUB_ARAB"
 Screen.ResetOnSpawn = false
 Screen.Parent = PlayerGui
 
 -- النافذة الرئيسية (قابلة للتحريك، مظلمة، وطويلة)
 local Main = Instance.new("Frame")
 Main.Name = "Main"
-Main.Size = UDim2.fromOffset(360, 460)
-Main.Position = UDim2.new(0.5, -180, 0.5, -230)
+Main.Size = UDim2.fromOffset(360, 470)
+Main.Position = UDim2.new(0.5, -180, 0.5, -235)
 Main.BackgroundColor3 = Dark
 Main.BorderSizePixel = 0
 Main.Active = true
@@ -50,7 +50,7 @@ Border.Parent = Main
 local Header = Instance.new("TextLabel")
 Header.Size = UDim2.new(1, 0, 0, 50)
 Header.BackgroundColor3 = Light
-Header.Text = "👑 ADAM HUB ARAB - V5"
+Header.Text = "👑 ADAM HUB ARAB - V9"
 Header.TextColor3 = White
 Header.TextSize = 17
 Header.Font = Enum.Font.GothamBold
@@ -60,18 +60,28 @@ local HeaderCorner = Instance.new("UICorner")
 HeaderCorner.CornerRadius = UDim.new(0, 14)
 HeaderCorner.Parent = Header
 
--- شريط الحالة وتتبع المستوى الحقيقي
+-- شريط الحالة
 local Status = Instance.new("TextLabel")
 Status.Size = UDim2.new(1, -20, 0, 35)
 Status.Position = UDim2.new(0, 10, 1, -40)
 Status.BackgroundTransparency = 1
-Status.Text = "الحالة: جاهز ومستقر ⚡"
+Status.Text = "الحالة: جاهز ومحمي ⚡"
 Status.TextColor3 = Color3.fromRGB(100, 255, 150)
 Status.TextSize = 13
 Status.Font = Enum.Font.GothamBold
 Status.Parent = Main
 
--- نظام الصفحات
+-- نظام التشغيل الآمن (SaferRun) المستخرج من كودك
+local function SaferRun(callback)
+    local success, err = pcall(callback)
+    if not success then
+        Status.Text = "خطأ: " .. tostring(err)
+        warn("[ADAM HUB ERROR]:", err)
+    end
+    return success
+end
+
+-- نظام صفحات القائمة
 local function CreatePage(Name)
     local Page = Instance.new("ScrollingFrame")
     Page.Name = Name
@@ -102,7 +112,7 @@ HomePage.Visible = true
 
 local function CreateButton(Name, Parent, Callback)
     local Button = Instance.new("TextButton")
-    Button.Size = UDim2.new(1, -5, 0, 45)
+    Button.Size = UDim2.new(1, -5, 0, 42)
     Button.BackgroundColor3 = Light
     Button.Text = Name
     Button.TextColor3 = White
@@ -112,7 +122,7 @@ local function CreateButton(Name, Parent, Callback)
     Button.Parent = Parent
 
     local C = Instance.new("UICorner")
-    C.CornerRadius = UDim.new(0, 10)
+    C.CornerRadius = UDim.new(0, 9)
     C.Parent = Button
 
     Button.Activated:Connect(Callback)
@@ -139,44 +149,88 @@ CreateButton("🏠 الرئيسية", HomePage, function()
     Status.Text = "الحالة: الرئيسية"
 end)
 
-CreateButton("📈 نظام الأوتو لفل الذكي (Dynamic Farm)", HomePage, function()
+CreateButton("📈 قسم التتبع والفرم الذكي", HomePage, function()
     ShowPage(LevelPage)
-    local stats = Player:FindFirstChild("leaderstats")
-    local lvl = stats and stats:FindFirstChild("Level")
-    Status.Text = "مستواك الحالي: " .. tostring(lvl and lvl.Value or 1)
+    Status.Text = "الحالة: قسم تتبع المستوى"
 end)
 
 CreateButton("👤 معلومات الحساب", HomePage, function()
     Status.Text = "عمر الحساب: " .. tostring(Player.AccountAge) .. " يوم"
 end)
 
--- نظام تحديد الإحداثيات والمهام حسب المستوى تلقائياً
-local function GetDynamicQuestData(level)
-    if level < 10 then
-        return CFrame.new(1059.2, 16.9, 1549.5), "Bandit"
-    elseif level < 15 then
-        return CFrame.new(-1598.1, 35.7, 153.7), "Monkey"
-    elseif level < 30 then
-        return CFrame.new(-1145.9, 14.7, 3825.2), "Gorilla"
+-- قراءة مستوى اللاعب بدقة وآمان (GetPlayerLevel)
+local function GetPlayerLevel()
+    local leaderstats = Player:FindFirstChild("leaderstats")
+    if not leaderstats then return nil end
+    local level = leaderstats:FindFirstChild("Level")
+    if level and (level:IsA("IntValue") or level:IsA("NumberValue")) then
+        return level.Value
+    end
+    return nil
+end
+
+-- إضافة عنصر لعرض المستوى مباشرة في الصفحة الخاصة به (LevelPage)
+local LevelLabel = Instance.new("TextLabel")
+LevelLabel.Size = UDim2.new(1, -5, 0, 42)
+LevelLabel.BackgroundColor3 = Light
+LevelLabel.TextColor3 = White
+LevelLabel.TextSize = 15
+LevelLabel.Font = Enum.Font.GothamBold
+LevelLabel.Text = "📊 Level: جاري التحميل..."
+LevelLabel.Parent = LevelPage
+
+local LevelLabelCorner = Instance.new("UICorner")
+LevelLabelCorner.CornerRadius = UDim.new(0, 9)
+LevelLabelCorner.Parent = LevelLabel
+
+local function UpdateLevel()
+    local lvl = GetPlayerLevel()
+    if lvl then
+        LevelLabel.Text = "📊 Level: " .. tostring(lvl)
     else
-        return CFrame.new(1059.2, 16.9, 1549.5), "Bandit"
+        LevelLabel.Text = "📊 Level: غير متوفر"
     end
 end
 
-local autoFarmActive = false
+-- تحديث تلقائي للمستوى في الخلفية بأمان
+task.spawn(function()
+    while Screen.Parent do
+        SaferRun(UpdateLevel)
+        task.wait(2)
+    end
+end)
 
-CreateButton("▶ START DYNAMIC AUTO FARM", LevelPage, function()
+-- زر لتحديث المستوى يدوياً
+CreateButton("🔄 تحديث المستوى", LevelPage, function()
+    SaferRun(UpdateLevel)
+    Status.Text = "تم تحديث معلومات المستوى"
+end)
+
+-- دالة فحص الكويست الدقيقة
+local function CheckQuestStatus()
+    local gui = Player:FindFirstChild("PlayerGui")
+    local quest = gui and gui:FindFirstChild("Quest")
+    if not quest then return false end
+    local container = quest:FindFirstChild("Container")
+    if container and container.Visible then return true end
+    return false
+end
+
+local autoFarmActive = false
+local QuestCFrame = CFrame.new(1059.2, 16.9, 1549.5)
+
+CreateButton("▶ START SMART FARM", LevelPage, function()
     if autoFarmActive then
         Status.Text = "النظام يعمل بالفعل!"
         return
     end
 
     autoFarmActive = true
-    Status.Text = "الحالة: يعمل الأوتو لفل الذكي 🚀"
+    Status.Text = "الحالة: الفارم الذكي يعمل 🚀"
 
     task.spawn(function()
         while autoFarmActive do
-            pcall(function()
+            SaferRun(function()
                 local char = Player.Character
                 if not char or not char:FindFirstChild("HumanoidRootPart") or not char:FindFirstChild("Humanoid") then 
                     task.wait(1)
@@ -191,36 +245,21 @@ CreateButton("▶ START DYNAMIC AUTO FARM", LevelPage, function()
                     return
                 end
 
-                -- تحديد المستوى وجلب المهمة والعدو المناسب تلقائياً
-                local stats = Player:FindFirstChild("leaderstats")
-                local lvlStat = stats and stats:FindFirstChild("Level")
-                local currentLevel = lvlStat and lvlStat.Value or 1
+                local hasActiveQuest = CheckQuestStatus()
 
-                Status.Text = "الفل الحالي: " .. tostring(currentLevel)
-                local questPos, targetEnemyName = GetDynamicQuestData(currentLevel)
-
-                -- التحقق من واجهة الكويست
-                local playerGui = Player:FindFirstChild("PlayerGui")
-                local questGui = playerGui and playerGui:FindFirstChild("Quest")
-                local hasQuest = false
-                if questGui then
-                    local container = questGui:FindFirstChild("Container")
-                    if container and container.Visible == true then
-                        hasQuest = true
-                    end
-                end
-
-                if not hasQuest then
-                    hrp.CFrame = questPos
+                if not hasActiveQuest then
+                    Status.Text = "الحالة: جاري أخذ المهمة..."
+                    hrp.CFrame = QuestCFrame
                     task.wait(1.2)
                 else
+                    Status.Text = "الحالة: جاري قتل الأعداء..."
                     local enemiesFolder = Workspace:FindFirstChild("Enemies")
                     if enemiesFolder then
                         for _, enemy in pairs(enemiesFolder:GetChildren()) do
                             if not autoFarmActive then break end
                             if enemy:FindFirstChild("HumanoidRootPart") and enemy:FindFirstChild("Humanoid") and enemy.Humanoid.Health > 0 then
-                                if enemy.Name == targetEnemyName then
-                                    hrp.CFrame = enemy.HumanoidRootPart.CFrame * CFrame.new(0, 4, 1)
+                                if enemy.Name == "Bandit" then
+                                    hrp.CFrame = enemy.HumanoidRootPart.CFrame * CFrame.new(0, 4, 2)
                                     
                                     local tool = char:FindFirstChildOfClass("Tool")
                                     if not tool then
@@ -246,12 +285,12 @@ CreateButton("▶ START DYNAMIC AUTO FARM", LevelPage, function()
     end)
 end)
 
-CreateButton("⏹ STOP AUTO FARM", LevelPage, function()
+CreateButton("⏹ STOP FARM", LevelPage, function()
     autoFarmActive = false
-    Status.Text = "الحالة: تم إيقاف الفارم بأمان"
+    Status.Text = "الحالة: متوقف بأمان"
 end)
 
-CreateButton("🔙 رجوع للقائمة", LevelPage, function()
+CreateButton("🔙 رجوع", LevelPage, function()
     ShowPage(HomePage)
     Status.Text = "الحالة: الرئيسية"
 end)
@@ -286,4 +325,4 @@ Main:GetPropertyChangedSignal("Visible"):Connect(function()
     Open.Visible = not Main.Visible
 end)
 
-print("ADAM HUB ARAB - God Tier V5 Loaded Successfully!")
+print("ADAM HUB ARAB - V9 Loaded Successfully with SaferRun & Level Tracker!")
