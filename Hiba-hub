@@ -1,328 +1,364 @@
 --================================================================
---          ADAM HUB ARAB | GOD TIER ULTIMATE V9
---          Secure Level Tracker, SaferRun & Delta Optimized
+--          ADAM HUB ARAB | GOD TIER COMBAT & GODMODE V6.0
+--          Fly, WalkSpeed, Kill Aura, GodMode & Delta Optimized
 --================================================================
 
 local Players = game:GetService("Players")
 local RunService = game:GetService("RunService")
 local Workspace = game:GetService("Workspace")
-local VirtualUser = game:GetService("VirtualUser")
+local UserInputService = game:GetService("UserInputService")
 local TweenService = game:GetService("TweenService")
 
 local Player = Players.LocalPlayer
 local PlayerGui = Player:WaitForChild("PlayerGui")
+local Camera = Workspace.CurrentCamera
 
--- تنظيف الواجهة القديمة
-local Old = PlayerGui:FindFirstChild("ADAM_HUB_ARAB")
-if Old then Old:Destroy() end
+-- تنظيف الواجهة القديمة تماماً
+local old = PlayerGui:FindFirstChild("ADAM_HUB_COMBAT")
+if old then
+    old:Destroy()
+end
 
 local Purple = Color3.fromRGB(155, 75, 230)
 local Dark = Color3.fromRGB(15, 10, 22)
 local Light = Color3.fromRGB(35, 24, 48)
 local White = Color3.fromRGB(255, 255, 255)
 
-local Screen = Instance.new("ScreenGui")
-Screen.Name = "ADAM_HUB_ARAB"
-Screen.ResetOnSpawn = false
-Screen.Parent = PlayerGui
+local GUI = Instance.new("ScreenGui")
+GUI.Name = "ADAM_HUB_COMBAT"
+GUI.ResetOnSpawn = false
+GUI.Parent = PlayerGui
 
--- النافذة الرئيسية (قابلة للتحريك، مظلمة، وطويلة)
+-- النافذة الرئيسية الطويلة والمظلمة
 local Main = Instance.new("Frame")
-Main.Name = "Main"
 Main.Size = UDim2.fromOffset(360, 470)
 Main.Position = UDim2.new(0.5, -180, 0.5, -235)
 Main.BackgroundColor3 = Dark
 Main.BorderSizePixel = 0
 Main.Active = true
 Main.Draggable = true
-Main.Parent = Screen
+Main.Parent = GUI
 
 local Corner = Instance.new("UICorner")
 Corner.CornerRadius = UDim.new(0, 16)
 Corner.Parent = Main
 
-local Border = Instance.new("UIStroke")
-Border.Color = Purple
-Border.Thickness = 2.5
-Border.Parent = Main
+local Stroke = Instance.new("UIStroke")
+Stroke.Color = Purple
+Stroke.Thickness = 2.5
+Stroke.Parent = Main
 
--- عنوان القائمة
-local Header = Instance.new("TextLabel")
-Header.Size = UDim2.new(1, 0, 0, 50)
-Header.BackgroundColor3 = Light
-Header.Text = "👑 ADAM HUB ARAB - V9"
-Header.TextColor3 = White
-Header.TextSize = 17
-Header.Font = Enum.Font.GothamBold
-Header.Parent = Main
+-- عنوان القائمة يحمل اسمك الأسطوري
+local Title = Instance.new("TextLabel")
+Title.Size = UDim2.new(1, 0, 0, 45)
+Title.BackgroundColor3 = Light
+Title.Text = "👑 ADAM HUB - GOD COMBAT V6"
+Title.TextColor3 = White
+Title.TextSize = 15
+Title.Font = Enum.Font.GothamBold
+Title.Parent = Main
 
-local HeaderCorner = Instance.new("UICorner")
-HeaderCorner.CornerRadius = UDim.new(0, 14)
-HeaderCorner.Parent = Header
+local TitleCorner = Instance.new("UICorner")
+TitleCorner.CornerRadius = UDim.new(0, 14)
+TitleCorner.Parent = Title
 
--- شريط الحالة
+-- لوحة التمرير الداخلية لجميع الميزات
+local Scrolling = Instance.new("ScrollingFrame")
+Scrolling.Position = UDim2.fromOffset(12, 55)
+Scrolling.Size = UDim2.new(1, -24, 1, -110)
+Scrolling.BackgroundTransparency = 1
+Scrolling.BorderSizePixel = 0
+Scrolling.ScrollBarThickness = 4
+Scrolling.ScrollBarImageColor3 = Purple
+Scrolling.CanvasSize = UDim2.new(0, 0, 0, 520)
+Scrolling.Parent = Main
+
+local function CreateBtn(Name, YPos, DefaultText)
+    local Btn = Instance.new("TextButton")
+    Btn.Name = Name
+    Btn.Position = UDim2.fromOffset(0, YPos)
+    Btn.Size = UDim2.new(1, 0, 0, 42)
+    Btn.BackgroundColor3 = Light
+    Btn.Text = DefaultText
+    Btn.TextColor3 = White
+    Btn.TextSize = 12
+    Btn.Font = Enum.Font.GothamBold
+    Btn.Parent = Scrolling
+    
+    local C = Instance.new("UICorner")
+    C.CornerRadius = UDim.new(0, 10)
+    C.Parent = Btn
+    
+    return Btn
+end
+
+-- أزرار القتال الفتاكة والميزات الجديدة
+local GodModeBtn = CreateBtn("GodMode", 0, "🛡️ وضع عدم الموت (GodMode): OFF")
+local FlyBtn = CreateBtn("Fly", 50, "✈️ وضع الطيران (Fly): OFF")
+local KillAuraBtn = CreateBtn("KillAura", 100, "⚔️ ايم كيل وضرب تلقائي (KillAura): OFF")
+local HeadAimBtn = CreateBtn("HeadAim", 150, "🎯 ايمبوت الرأس (Head Aimbot): OFF")
+local ESPBtn = CreateBtn("ESP", 200, "👁️ كشف الأماكن (ESP): OFF")
+local InfEnergyBtn = CreateBtn("InfEnergy", 250, "⚡ طاقة ومهارات بلا توقف: OFF")
+local HitboxBtn = CreateBtn("Hitbox", 300, "📦 توسيع الهيتبوكس الجانبي: OFF")
+
+-- إطار تعديل السرعة والهيلث
+local StatsBox = Instance.new("Frame")
+StatsBox.Position = UDim2.fromOffset(0, 350)
+StatsBox.Size = UDim2.new(1, 0, 0, 80)
+StatsBox.BackgroundColor3 = Color3.fromRGB(25, 18, 35)
+StatsBox.Parent = Scrolling
+
+local StatsCorner = Instance.new("UICorner")
+StatsCorner.CornerRadius = UDim.new(0, 10)
+StatsCorner.Parent = StatsBox
+
+local HealthLabel = Instance.new("TextLabel")
+HealthLabel.Size = UDim2.new(1, -10, 0, 35)
+HealthLabel.Position = UDim2.fromOffset(5, 5)
+HealthLabel.BackgroundTransparency = 1
+HealthLabel.TextColor3 = White
+HealthLabel.TextSize = 12
+HealthLabel.Font = Enum.Font.GothamBold
+HealthLabel.Text = "❤️ HEALTH: جاري التحميل..."
+HealthLabel.Parent = StatsBox
+
+local SpeedLabel = Instance.new("TextLabel")
+SpeedLabel.Size = UDim2.new(1, -10, 0, 35)
+SpeedLabel.Position = UDim2.fromOffset(5, 40)
+SpeedLabel.BackgroundTransparency = 1
+SpeedLabel.TextColor3 = White
+SpeedLabel.TextSize = 12
+SpeedLabel.Font = Enum.Font.GothamBold
+SpeedLabel.Text = "⚡ WalkSpeed: 16 | FlySpeed: 50"
+SpeedLabel.Parent = StatsBox
+
+-- أزرار تغيير السرعة
+local SpeedUpBtn = CreateBtn("SpeedUp", 440, "🚀 زيادة سرعة المشي والطيران")
+local RefreshBtn = CreateBtn("Refresh", 490, "🔄 تحديث المعلومات")
+
+-- شريط الحالة السفلي
 local Status = Instance.new("TextLabel")
-Status.Size = UDim2.new(1, -20, 0, 35)
-Status.Position = UDim2.new(0, 10, 1, -40)
+Status.Size = UDim2.new(1, -24, 0, 35)
+Status.Position = UDim2.new(0, 12, 1, -40)
 Status.BackgroundTransparency = 1
-Status.Text = "الحالة: جاهز ومحمي ⚡"
 Status.TextColor3 = Color3.fromRGB(100, 255, 150)
-Status.TextSize = 13
+Status.TextSize = 12
 Status.Font = Enum.Font.GothamBold
+Status.Text = "الحالة: جاهز للسيطرة المطلقة ⚡"
 Status.Parent = Main
 
--- نظام التشغيل الآمن (SaferRun) المستخرج من كودك
+-- دالة التشغيل الآمن
 local function SaferRun(callback)
     local success, err = pcall(callback)
     if not success then
-        Status.Text = "خطأ: " .. tostring(err)
-        warn("[ADAM HUB ERROR]:", err)
+        warn("[ADAM COMBAT ERROR]:", err)
     end
     return success
 end
 
--- نظام صفحات القائمة
-local function CreatePage(Name)
-    local Page = Instance.new("ScrollingFrame")
-    Page.Name = Name
-    Page.Position = UDim2.fromOffset(12, 60)
-    Page.Size = UDim2.new(1, -24, 0, 350)
-    Page.BackgroundTransparency = 1
-    Page.BorderSizePixel = 0
-    Page.ScrollBarThickness = 4
-    Page.ScrollBarImageColor3 = Purple
-    Page.CanvasSize = UDim2.new(0, 0, 0, 0)
-    Page.Visible = false
-    Page.Parent = Main
+-- متغيرات تفعيل الميزات
+local godModeEnabled = false
+local flyEnabled = false
+local killAuraEnabled = false
+local headAimEnabled = false
+local espEnabled = false
+local infEnergyEnabled = false
+local hitboxEnabled = false
+local customWalkSpeed = 16
+local customFlySpeed = 50
+local espHighlights = {}
 
-    local Layout = Instance.new("UIListLayout")
-    Layout.Padding = UDim.new(0, 10)
-    Layout.Parent = Page
-
-    Layout:GetPropertyChangedSignal("AbsoluteContentSize"):Connect(function()
-        Page.CanvasSize = UDim2.fromOffset(0, Layout.AbsoluteContentSize.Y + 10)
-    end)
-
-    return Page
-end
-
-local HomePage = CreatePage("HomePage")
-local LevelPage = CreatePage("LevelPage")
-HomePage.Visible = true
-
-local function CreateButton(Name, Parent, Callback)
-    local Button = Instance.new("TextButton")
-    Button.Size = UDim2.new(1, -5, 0, 42)
-    Button.BackgroundColor3 = Light
-    Button.Text = Name
-    Button.TextColor3 = White
-    Button.TextSize = 14
-    Button.Font = Enum.Font.GothamBold
-    Button.AutoButtonColor = false
-    Button.Parent = Parent
-
-    local C = Instance.new("UICorner")
-    C.CornerRadius = UDim.new(0, 9)
-    C.Parent = Button
-
-    Button.Activated:Connect(Callback)
-
-    Button.MouseEnter:Connect(function()
-        TweenService:Create(Button, TweenInfo.new(0.2), {BackgroundColor3 = Purple}):Play()
-    end)
-
-    Button.MouseLeave:Connect(function()
-        TweenService:Create(Button, TweenInfo.new(0.2), {BackgroundColor3 = Light}):Play()
-    end)
-
-    return Button
-end
-
-local function ShowPage(Page)
-    HomePage.Visible = (Page == HomePage)
-    LevelPage.Visible = (Page == LevelPage)
-end
-
--- أزرار الصفحة الرئيسية
-CreateButton("🏠 الرئيسية", HomePage, function()
-    ShowPage(HomePage)
-    Status.Text = "الحالة: الرئيسية"
+-- تفعيل وضع عدم الموت
+GodModeBtn.MouseButton1Click:Connect(function()
+    godModeEnabled = not godModeEnabled
+    GodModeBtn.BackgroundColor3 = godModeEnabled and Color3.fromRGB(0, 200, 100) or Light
+    GodModeBtn.Text = godModeEnabled and "🛡️ وضع عدم الموت: ON" or "🛡️ وضع عدم الموت: OFF"
 end)
 
-CreateButton("📈 قسم التتبع والفرم الذكي", HomePage, function()
-    ShowPage(LevelPage)
-    Status.Text = "الحالة: قسم تتبع المستوى"
+-- تفعيل الطيران
+FlyBtn.MouseButton1Click:Connect(function()
+    flyEnabled = not flyEnabled
+    FlyBtn.BackgroundColor3 = flyEnabled and Color3.fromRGB(0, 200, 100) or Light
+    FlyBtn.Text = flyEnabled and "✈️ وضع الطيران: ON" or "✈️ وضع الطيران: OFF"
 end)
 
-CreateButton("👤 معلومات الحساب", HomePage, function()
-    Status.Text = "عمر الحساب: " .. tostring(Player.AccountAge) .. " يوم"
+-- تفعيل ايم كيل / الضرب التلقائي
+KillAuraBtn.MouseButton1Click:Connect(function()
+    killAuraEnabled = not killAuraEnabled
+    KillAuraBtn.BackgroundColor3 = killAuraEnabled and Color3.fromRGB(0, 200, 100) or Light
+    KillAuraBtn.Text = killAuraEnabled and "⚔️ ايم كيل وضرب تلقائي: ON" or "⚔️ ايم كيل وضرب تلقائي: OFF"
 end)
 
--- قراءة مستوى اللاعب بدقة وآمان (GetPlayerLevel)
-local function GetPlayerLevel()
-    local leaderstats = Player:FindFirstChild("leaderstats")
-    if not leaderstats then return nil end
-    local level = leaderstats:FindFirstChild("Level")
-    if level and (level:IsA("IntValue") or level:IsA("NumberValue")) then
-        return level.Value
-    end
-    return nil
-end
+HeadAimBtn.MouseButton1Click:Connect(function()
+    headAimEnabled = not headAimEnabled
+    HeadAimBtn.BackgroundColor3 = headAimEnabled and Color3.fromRGB(0, 200, 100) or Light
+    HeadAimBtn.Text = headAimEnabled and "🎯 ايمبوت الرأس: ON" or "🎯 ايمبوت الرأس: OFF"
+end)
 
--- إضافة عنصر لعرض المستوى مباشرة في الصفحة الخاصة به (LevelPage)
-local LevelLabel = Instance.new("TextLabel")
-LevelLabel.Size = UDim2.new(1, -5, 0, 42)
-LevelLabel.BackgroundColor3 = Light
-LevelLabel.TextColor3 = White
-LevelLabel.TextSize = 15
-LevelLabel.Font = Enum.Font.GothamBold
-LevelLabel.Text = "📊 Level: جاري التحميل..."
-LevelLabel.Parent = LevelPage
-
-local LevelLabelCorner = Instance.new("UICorner")
-LevelLabelCorner.CornerRadius = UDim.new(0, 9)
-LevelLabelCorner.Parent = LevelLabel
-
-local function UpdateLevel()
-    local lvl = GetPlayerLevel()
-    if lvl then
-        LevelLabel.Text = "📊 Level: " .. tostring(lvl)
-    else
-        LevelLabel.Text = "📊 Level: غير متوفر"
-    end
-end
-
--- تحديث تلقائي للمستوى في الخلفية بأمان
-task.spawn(function()
-    while Screen.Parent do
-        SaferRun(UpdateLevel)
-        task.wait(2)
+ESPBtn.MouseButton1Click:Connect(function()
+    espEnabled = not espEnabled
+    ESPBtn.BackgroundColor3 = espEnabled and Color3.fromRGB(0, 200, 100) or Light
+    ESPBtn.Text = espEnabled and "👁️ كشف الأماكن: ON" or "👁️ كشف الأماكن: OFF"
+    if not espEnabled then
+        for _, h in pairs(espHighlights) do if h then h:Destroy() end end
+        espHighlights = {}
     end
 end)
 
--- زر لتحديث المستوى يدوياً
-CreateButton("🔄 تحديث المستوى", LevelPage, function()
-    SaferRun(UpdateLevel)
-    Status.Text = "تم تحديث معلومات المستوى"
+InfEnergyBtn.MouseButton1Click:Connect(function()
+    infEnergyEnabled = not infEnergyEnabled
+    InfEnergyBtn.BackgroundColor3 = infEnergyEnabled and Color3.fromRGB(0, 200, 100) or Light
+    InfEnergyBtn.Text = infEnergyEnabled and "⚡ طاقة بلا توقف: ON" or "⚡ طاقة بلا توقف: OFF"
 end)
 
--- دالة فحص الكويست الدقيقة
-local function CheckQuestStatus()
-    local gui = Player:FindFirstChild("PlayerGui")
-    local quest = gui and gui:FindFirstChild("Quest")
-    if not quest then return false end
-    local container = quest:FindFirstChild("Container")
-    if container and container.Visible then return true end
-    return false
-end
+HitboxBtn.MouseButton1Click:Connect(function()
+    hitboxEnabled = not hitboxEnabled
+    HitboxBtn.BackgroundColor3 = hitboxEnabled and Color3.fromRGB(0, 200, 100) or Light
+    HitboxBtn.Text = hitboxEnabled and "📦 توسيع الهيتبوكس: ON" or "📦 توسيع الهيتبوكس: OFF"
+end)
 
-local autoFarmActive = false
-local QuestCFrame = CFrame.new(1059.2, 16.9, 1549.5)
+-- زر زيادة السرعة تدريجياً
+SpeedUpBtn.MouseButton1Click:Connect(function()
+    customWalkSpeed = customWalkSpeed + 8
+    customFlySpeed = customFlySpeed + 25
+    if customWalkSpeed > 60 then customWalkSpeed = 16 end
+    if customFlySpeed > 150 then customFlySpeed = 50 end
+    SpeedLabel.Text = string.format("⚡ WalkSpeed: %d | FlySpeed: %d", customWalkSpeed, customFlySpeed)
+end)
 
-CreateButton("▶ START SMART FARM", LevelPage, function()
-    if autoFarmActive then
-        Status.Text = "النظام يعمل بالفعل!"
-        return
-    end
+-- زر إخفاء وإظهار الواجهة
+local OpenBtn = Instance.new("TextButton")
+OpenBtn.Size = UDim2.fromOffset(130, 40)
+OpenBtn.Position = UDim2.new(0, 15, 0.5, 0)
+OpenBtn.BackgroundColor3 = Purple
+OpenBtn.Text = "👑 ADAM COMBAT"
+OpenBtn.TextColor3 = White
+OpenBtn.TextSize = 12
+OpenBtn.Font = Enum.Font.GothamBold
+OpenBtn.Visible = false
+OpenBtn.Parent = GUI
 
-    autoFarmActive = true
-    Status.Text = "الحالة: الفارم الذكي يعمل 🚀"
+local OpenCorner = Instance.new("UICorner")
+OpenCorner.CornerRadius = UDim.new(0, 10)
+OpenCorner.Parent = OpenBtn
 
-    task.spawn(function()
-        while autoFarmActive do
-            SaferRun(function()
-                local char = Player.Character
-                if not char or not char:FindFirstChild("HumanoidRootPart") or not char:FindFirstChild("Humanoid") then 
-                    task.wait(1)
-                    return 
+local HideBtn = CreateBtn("Hide", 540, "🙈 إخفاء الواجهة")
+HideBtn.MouseButton1Click:Connect(function()
+    Main.Visible = false
+    OpenBtn.Visible = true
+end)
+
+OpenBtn.Activated:Connect(function()
+    Main.Visible = true
+    OpenBtn.Visible = false
+end)
+
+-- حلقة RenderStepped للتشغيل السريع (GodMode, Fly, KillAura, Aimbot)
+RunService.RenderStepped:Connect(function()
+    SaferRun(function()
+        local character = Player.Character
+        local humanoid = character and character:FindFirstChildOfClass("Humanoid")
+        local hrp = character and character:FindFirstChild("HumanoidRootPart")
+
+        if humanoid then
+            HealthLabel.Text = string.format("❤️ HEALTH: %d / %d", humanoid.Health, humanoid.MaxHealth)
+            
+            -- وضع عدم الموت (GodMode)
+            if godModeEnabled then
+                humanoid.Health = humanoid.MaxHealth
+            end
+
+            -- ضبط سرعة المشي
+            humanoid.WalkSpeed = customWalkSpeed
+        end
+
+        -- نظام الطيران (Fly)
+        if flyEnabled and hrp then
+            local bv = hrp:FindFirstChild("AdamFlyForce")
+            if not bv then
+                bv = Instance.new("BodyVelocity")
+                bv.Name = "AdamFlyForce"
+                bv.MaxForce = Vector3.new(math.huge, math.huge, math.huge)
+                bv.Velocity = Vector3.new(0, 0, 0)
+                bv.Parent = hrp
+            end
+            
+            local camDir = Camera.CFrame.LookVector
+            bv.Velocity = camDir * customFlySpeed
+        else
+            if hrp then
+                local bv = hrp:FindFirstChild("AdamFlyForce")
+                if bv then bv:Destroy() end
+            end
+        end
+
+        -- طاقة لا تفنى
+        if infEnergyEnabled and character then
+            local energy = character:FindFirstChild("Energy")
+            if energy and energy:IsA("NumberValue") then
+                energy.Value = 9999
+            end
+        end
+
+        -- كشف الأماكن ESP
+        if espEnabled then
+            local enemiesFolder = Workspace:FindFirstChild("Enemies")
+            if enemiesFolder then
+                for _, enemy in pairs(enemiesFolder:GetChildren()) do
+                    if not enemy:FindFirstChild("AdamCombatESP") and enemy:FindFirstChild("HumanoidRootPart") then
+                        local highlight = Instance.new("Highlight")
+                        highlight.Name = "AdamCombatESP"
+                        highlight.Adornee = enemy
+                        highlight.FillColor = Purple
+                        highlight.OutlineColor = White
+                        highlight.Parent = enemy
+                        table.insert(espHighlights, highlight)
+                    end
                 end
-                
-                local hrp = char.HumanoidRootPart
-                local humanoid = char.Humanoid
+            end
+        end
 
-                if humanoid.Health <= 0 then
-                    task.wait(2)
-                    return
-                end
+        -- ايم كيل (KillAura) وتوسيع الهيتبوكس واستهداف الرأس
+        local enemiesFolder = Workspace:FindFirstChild("Enemies")
+        if enemiesFolder then
+            local closestHead = nil
+            local shortestDist = math.huge
 
-                local hasActiveQuest = CheckQuestStatus()
+            for _, enemy in pairs(enemiesFolder:GetChildren()) do
+                local head = enemy:FindFirstChild("Head")
+                local hum = enemy:FindFirstChild("Humanoid")
+                local enemyHrp = enemy:FindFirstChild("HumanoidRootPart")
 
-                if not hasActiveQuest then
-                    Status.Text = "الحالة: جاري أخذ المهمة..."
-                    hrp.CFrame = QuestCFrame
-                    task.wait(1.2)
-                else
-                    Status.Text = "الحالة: جاري قتل الأعداء..."
-                    local enemiesFolder = Workspace:FindFirstChild("Enemies")
-                    if enemiesFolder then
-                        for _, enemy in pairs(enemiesFolder:GetChildren()) do
-                            if not autoFarmActive then break end
-                            if enemy:FindFirstChild("HumanoidRootPart") and enemy:FindFirstChild("Humanoid") and enemy.Humanoid.Health > 0 then
-                                if enemy.Name == "Bandit" then
-                                    hrp.CFrame = enemy.HumanoidRootPart.CFrame * CFrame.new(0, 4, 2)
-                                    
-                                    local tool = char:FindFirstChildOfClass("Tool")
-                                    if not tool then
-                                        for _, t in pairs(Player.Backpack:GetChildren()) do
-                                            if t:IsA("Tool") then
-                                                humanoid:EquipTool(t)
-                                                break
-                                            end
-                                        end
-                                    else
-                                        tool:Activate()
-                                        VirtualUser:Button1Down(Vector2.new(0,0), Workspace.CurrentCamera.CFrame)
-                                    end
-                                    task.wait(0.2)
-                                end
-                            end
+                if hum and hum.Health > 0 then
+                    if hitboxEnabled and enemyHrp then
+                        enemyHrp.Size = Vector3.new(8, 8, 8)
+                        enemyHrp.Transparency = 0.8
+                        enemyHrp.CanCollide = false
+                    end
+
+                    -- ايم كيل التلقائي (Kill Aura)
+                    if killAuraEnabled and hrp and enemyHrp then
+                        local dist = (hrp.Position - enemyHrp.Position).Magnitude
+                        if dist < 15 then
+                            hum.Health = 0 -- القضاء الفوري على العدو القريب
+                        end
+                    end
+
+                    if headAimEnabled and head and hrp then
+                        local dist = (hrp.Position - head.Position).Magnitude
+                        if dist < shortestDist then
+                            shortestDist = dist
+                            closestHead = head
                         end
                     end
                 end
-            end)
-            task.wait()
+            end
+
+            if headAimEnabled and closestHead then
+                Camera.CFrame = CFrame.new(Camera.CFrame.Position, closestHead.Position)
+            end
         end
     end)
 end)
 
-CreateButton("⏹ STOP FARM", LevelPage, function()
-    autoFarmActive = false
-    Status.Text = "الحالة: متوقف بأمان"
-end)
-
-CreateButton("🔙 رجوع", LevelPage, function()
-    ShowPage(HomePage)
-    Status.Text = "الحالة: الرئيسية"
-end)
-
--- زر إخفاء وإظهار الواجهة
-local Open = Instance.new("TextButton")
-Open.Size = UDim2.fromOffset(130, 40)
-Open.Position = UDim2.new(0, 15, 0.5, 0)
-Open.BackgroundColor3 = Purple
-Open.Text = "👑 ADAM HUB"
-Open.TextColor3 = White
-Open.TextSize = 13
-Open.Font = Enum.Font.GothamBold
-Open.Visible = false
-Open.Parent = Screen
-
-local OpenCorner = Instance.new("UICorner")
-OpenCorner.CornerRadius = UDim.new(0, 10)
-OpenCorner.Parent = Open
-
-CreateButton("🙈 إخفاء الواجهة", HomePage, function()
-    Main.Visible = false
-    Open.Visible = true
-end)
-
-Open.Activated:Connect(function()
-    Main.Visible = true
-    Open.Visible = false
-end)
-
-Main:GetPropertyChangedSignal("Visible"):Connect(function()
-    Open.Visible = not Main.Visible
-end)
-
-print("ADAM HUB ARAB - V9 Loaded Successfully with SaferRun & Level Tracker!")
+print("ADAM HUB - God Combat V6 Loaded Successfully with GodMode, Fly & KillAura!")
