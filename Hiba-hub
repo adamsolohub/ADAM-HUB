@@ -1,6 +1,6 @@
 --================================================================
---          ADAM HUB ARAB | ULTIMATE STABLE V9.0
---          Locked Head Aimbot, POV, Hitbox, ESP & Delta Optimized
+--          ADAM HUB ARAB | ULTIMATE FIXED BUTTONS V11.0
+--          Fixed Button ON/OFF Touch States & Delta Optimized
 --================================================================
 
 local Players = game:GetService("Players")
@@ -29,18 +29,22 @@ GUI.Name = "ADAM_HUB_COMBAT"
 GUI.ResetOnSpawn = false
 GUI.Parent = PlayerGui
 
--- دائرة الـ POV / FOV البصرية على الشاشة
-local FOVCircle = Drawing.new("Circle")
-FOVCircle.Visible = false
-FOVCircle.Radius = 120
-FOVCircle.Color = Purple
-FOVCircle.Thickness = 2
-FOVCircle.Filled = false
-FOVCircle.Transparency = 0.8
-FOVCircle.Position = Vector2.new(Camera.ViewportSize.X / 2, Camera.ViewportSize.Y / 2)
+-- دائرة الـ POV البصرية على الشاشة
+local FOVCircle = nil
+pcall(function()
+    FOVCircle = Drawing.new("Circle")
+    FOVCircle.Visible = false
+    FOVCircle.Radius = 120
+    FOVCircle.Color = Purple
+    FOVCircle.Thickness = 2
+    FOVCircle.Filled = false
+    FOVCircle.Transparency = 0.8
+    FOVCircle.Position = Vector2.new(Camera.ViewportSize.X / 2, Camera.ViewportSize.Y / 2)
+end)
 
--- النافذة الرئيسية الطويلة والمظلمة (قابلة للتحريك)
-local Main = Instance.new("Frame")
+-- النافذة الرئيسية الطويلة والمظلمة
+Main = Instance.new("Frame")
+local Main = Main
 Main.Size = UDim2.fromOffset(360, 500)
 Main.Position = UDim2.new(0.5, -180, 0.5, -250)
 Main.BackgroundColor3 = Dark
@@ -58,11 +62,11 @@ Stroke.Color = Purple
 Stroke.Thickness = 2.5
 Stroke.Parent = Main
 
--- عنوان القائمة يحمل اسمك الأسطوري مع أزرار التصغير والإغلاق
+-- عنوان القائمة يحمل اسمك الأسطوري
 local Title = Instance.new("TextLabel")
 Title.Size = UDim2.new(1, 0, 0, 45)
 Title.BackgroundColor3 = Light
-Title.Text = "👑 ADAM HUB - STABLE V9"
+Title.Text = "👑 ADAM HUB - V11 FIXED"
 Title.TextColor3 = White
 Title.TextSize = 14
 Title.Font = Enum.Font.GothamBold
@@ -129,10 +133,10 @@ local function CreateBtn(Name, YPos, DefaultText)
     return Btn
 end
 
--- الأزرار الشاملة للقتال والميزات الخرافية
+-- الأزرار الشاملة
 local POVBtn = CreateBtn("POV", 0, "🔵 دائرة POV (FOV): OFF")
 local POVSizeBtn = CreateBtn("POVSize", 48, "🎚️ تعديل حجم دائرة POV: 120")
-local HeadAimBtn = CreateBtn("HeadAim", 96, "🎯 ايمبوت رأس ثابت (Locked Aim): OFF")
+local HeadAimBtn = CreateBtn("HeadAim", 96, "🎯 ايمبوت الرأس الثابت: OFF")
 local HitboxBtn = CreateBtn("Hitbox", 144, "📦 الهيتبوكس واحتساب المربع: OFF")
 local GodModeBtn = CreateBtn("GodMode", 192, "🛡️ دم الشخصية (1000 HP): OFF")
 local FlyBtn = CreateBtn("Fly", 240, "✈️ وضع الطيران (Fly): OFF")
@@ -182,15 +186,14 @@ Status.BackgroundTransparency = 1
 Status.TextColor3 = Color3.fromRGB(100, 255, 150)
 Status.TextSize = 12
 Status.Font = Enum.Font.GothamBold
-Status.Text = "الحالة: جاهز للاستهداف الثابت ⚡"
+Status.Text = "الحالة: الأزرار تعمل بامتياز ⚡"
 Status.Parent = Main
 
 local function SaferRun(callback)
     local success, err = pcall(callback)
     if not success then
-        warn("[ADAM COMBAT ERROR]:", err)
+        warn("[ADAM ERROR]:", err)
     end
-    return success
 end
 
 -- متغيرات تفعيل الميزات
@@ -206,14 +209,16 @@ local customWalkSpeed = 16
 local customFlySpeed = 50
 local espObjects = {}
 
+-- دالة مضمونة 100% للاستجابة السريعة في دلتا (تعتمد على MouseButton1Down)
 local function ConnectButton(btn, callback)
-    btn.MouseButton1Click:Connect(callback)
-    btn.Activated:Connect(callback)
+    btn.MouseButton1Down:Connect(callback)
 end
 
 ConnectButton(POVBtn, function()
     povEnabled = not povEnabled
-    FOVCircle.Visible = povEnabled
+    if FOVCircle then
+        FOVCircle.Visible = povEnabled
+    end
     POVBtn.BackgroundColor3 = povEnabled and Color3.fromRGB(0, 200, 100) or Light
     POVBtn.Text = povEnabled and "🔵 دائرة POV (FOV): ON" or "🔵 دائرة POV (FOV): OFF"
 end)
@@ -221,14 +226,16 @@ end)
 ConnectButton(POVSizeBtn, function()
     povRadius = povRadius + 40
     if povRadius > 280 then povRadius = 80 end
-    FOVCircle.Radius = povRadius
+    if FOVCircle then
+        FOVCircle.Radius = povRadius
+    end
     POVSizeBtn.Text = "🎚️ تعديل حجم دائرة POV: " .. tostring(povRadius)
 end)
 
 ConnectButton(HeadAimBtn, function()
     headAimEnabled = not headAimEnabled
     HeadAimBtn.BackgroundColor3 = headAimEnabled and Color3.fromRGB(0, 200, 100) or Light
-    HeadAimBtn.Text = headAimEnabled and "🎯 ايمبوت رأس ثابت: ON" or "🎯 ايمبوت رأس ثابت: OFF"
+    HeadAimBtn.Text = headAimEnabled and "🎯 ايمبوت الرأس الثابت: ON" or "🎯 ايمبوت الرأس الثابت: OFF"
 end)
 
 ConnectButton(HitboxBtn, function()
@@ -314,22 +321,22 @@ end)
 -- وظيفة زر الإغلاق النهائي (X)
 ConnectButton(CloseBtn, function()
     if FOVCircle then
-        FOVCircle:Remove()
+        pcall(function() FOVCircle:Remove() end)
     end
     GUI:Destroy()
 end)
 
--- الحلقة الأسطورية للتشغيل المستمر مع ايمبوت رأس ثابت ومرتبط بنطاق دائرة الـ POV
+-- الحلقة الأسطورية للتشغيل المستمر
 RunService.RenderStepped:Connect(function()
     SaferRun(function()
         local character = Player.Character
         local humanoid = character and character:FindFirstChildOfClass("Humanoid")
         local hrp = character and character:FindFirstChild("HumanoidRootPart")
 
-        if povEnabled then
+        if povEnabled and FOVCircle then
             FOVCircle.Position = Vector2.new(Camera.ViewportSize.X / 2, Camera.ViewportSize.Y / 2)
             FOVCircle.Visible = true
-        else
+        elseif FOVCircle then
             FOVCircle.Visible = false
         end
 
@@ -359,7 +366,6 @@ RunService.RenderStepped:Connect(function()
             end
         end
 
-        -- نظام كشف الأماكن والأسماء ESP
         if espEnabled then
             local enemiesFolder = Workspace:FindFirstChild("Enemies")
             if enemiesFolder then
@@ -410,26 +416,24 @@ RunService.RenderStepped:Connect(function()
 
                 if hum and hum.Health > 0 then
                     if hitboxEnabled and enemyHrp then
-                        enemyHrp.Size = Vector3.new(11, 11, 11)
+                        enemyHrp.Size = Vector3.new(12, 12, 12)
                         enemyHrp.Transparency = 0.7
                         enemyHrp.CanCollide = false
                     end
 
                     if killAuraEnabled and hrp and enemyHrp then
                         local dist = (hrp.Position - enemyHrp.Position).Magnitude
-                        if dist < 22 then
+                        if dist < 25 then
                             hum.Health = 0
                         end
                     end
 
                     if headAimEnabled and head then
-                        -- التحقق من موقع العدو داخل شاشة الكاميرا ودائرة الـ POV الثابتة
                         local screenPoint, onScreen = Camera:WorldToViewportPoint(head.Position)
                         if onScreen then
                             local screenCenter = Vector2.new(Camera.ViewportSize.X / 2, Camera.ViewportSize.Y / 2)
                             local mouseDist = (Vector2.new(screenPoint.X, screenPoint.Y) - screenCenter).Magnitude
                             
-                            -- إذا كان داخل نطاق دائرة الـ POV المحددة
                             if mouseDist <= povRadius and mouseDist < shortestDist then
                                 shortestDist = mouseDist
                                 closestHead = head
@@ -439,14 +443,12 @@ RunService.RenderStepped:Connect(function()
                 end
             end
 
-            -- ايمبوت رأس ثابت ومقود (Locked Head Aimbot) داخل الدائرة
             if headAimEnabled and closestHead then
                 local targetCFrame = CFrame.new(Camera.CFrame.Position, closestHead.Position)
-                -- تثبيت الاتجاه بسلاسة وثبات تام نحو رأس العدو
-                Camera.CFrame = Camera.CFrame:Lerp(targetCFrame, 0.35)
+                Camera.CFrame = Camera.CFrame:Lerp(targetCFrame, 0.4)
             end
         end
     end)
 end)
 
-print("ADAM HUB - Ultimate Stable V9.0 Loaded Successfully!")
+print("ADAM HUB - V11 Fixed Buttons Loaded Successfully!")
