@@ -1,31 +1,27 @@
--- ADAM HUB BLOX - Multi-Color Theme & Highlight ESP
+-- ADAM HUB BLOX - Clean & Optimized for Delta & GitHub
 local Players = game:GetService("Players")
 local RunService = game:GetService("RunService")
 local LocalPlayer = Players.LocalPlayer
 local Camera = workspace.CurrentCamera
 
--- إعداد الواجهة الرئيسية (UI)
+-- Qulqullinaaf ScreenGui duraan jiru hunda haquu (Duplicate GUI dhowruuf)
+for _, gui in pairs(game.CoreGui:GetChildren()) do
+    if gui.Name == "AdamHubBlox" then
+        gui:Destroy()
+    end
+end
+
+-- Qopheessuu Interface (UI)
 local ScreenGui = Instance.new("ScreenGui")
 ScreenGui.Name = "AdamHubBlox"
 ScreenGui.Parent = game.CoreGui
 ScreenGui.ResetOnSpawn = false
 
--- الألوان المتاحة
-local Colors = {
-	Red = Color3.fromRGB(255, 0, 0),
-	Blue = Color3.fromRGB(0, 150, 255),
-	Green = Color3.fromRGB(0, 255, 0),
-	Yellow = Color3.fromRGB(255, 255, 0),
-	Pink = Color3.fromRGB(255, 105, 180),
-	White = Color3.fromRGB(255, 255, 255)
-}
-local currentColor = Colors.Red
-
--- الزر العائم المتحرك
+-- Tolchuu Button Adda Baasuuf (Toggle)
 local ToggleBtn = Instance.new("TextButton")
 ToggleBtn.Name = "ToggleBtn"
 ToggleBtn.Parent = ScreenGui
-ToggleBtn.BackgroundColor3 = Colors.Red
+ToggleBtn.BackgroundColor3 = Color3.fromRGB(180, 0, 0)
 ToggleBtn.Position = UDim2.new(0, 50, 0, 100)
 ToggleBtn.Size = UDim2.new(0, 50, 0, 50)
 ToggleBtn.Font = Enum.Font.SourceSansBold
@@ -39,8 +35,8 @@ local MainFrame = Instance.new("Frame")
 MainFrame.Name = "MainFrame"
 MainFrame.Parent = ScreenGui
 MainFrame.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
-MainFrame.Position = UDim2.new(0.5, -125, 0.5, -170)
-MainFrame.Size = UDim2.new(0, 250, 0, 360)
+MainFrame.Position = UDim2.new(0.5, -125, 0.5, -150)
+MainFrame.Size = UDim2.new(0, 250, 0, 320)
 MainFrame.Visible = false
 MainFrame.Draggable = true
 MainFrame.Active = true
@@ -49,17 +45,17 @@ ToggleBtn.MouseButton1Click:Connect(function()
 	MainFrame.Visible = not MainFrame.Visible
 end)
 
--- عنوان الواجهة
+-- Mata Duree
 local Title = Instance.new("TextLabel")
 Title.Parent = MainFrame
 Title.Size = UDim2.new(1, 0, 0, 30)
 Title.BackgroundColor3 = Color3.fromRGB(20, 20, 20)
 Title.Text = "ADAM HUB BLOX"
-Title.TextColor3 = Colors.Red
+Title.TextColor3 = Color3.fromRGB(255, 0, 0)
 Title.Font = Enum.Font.SourceSansBold
 Title.TextSize = 16
 
--- متغيرات الميزات
+-- Jijjiiramoota (Variables)
 local AimbotEnabled = false
 local HitboxEnabled = false
 local HitboxSize = 18
@@ -67,12 +63,6 @@ local ESPEnabled = false
 local AutoClickerEnabled = false
 
 local highlights = {}
-
-local function updateESPColors()
-	for _, hl in pairs(highlights) do
-		hl.FillColor = currentColor
-	end
-end
 
 local function updateESP()
 	for _, player in pairs(Players:GetPlayers()) do
@@ -82,7 +72,7 @@ local function updateESP()
 					local hl = Instance.new("Highlight")
 					hl.Name = "AdamESP"
 					hl.Adornee = player.Character
-					hl.FillColor = currentColor
+					hl.FillColor = Color3.fromRGB(255, 0, 0)
 					hl.OutlineColor = Color3.fromRGB(255, 255, 255)
 					hl.FillTransparency = 0.5
 					hl.OutlineTransparency = 0
@@ -102,12 +92,11 @@ local function updateESP()
 	end
 end
 
--- وظيفة إنشاء الأزرار
 local function createButton(name, posY, callback)
 	local btn = Instance.new("TextButton")
 	btn.Parent = MainFrame
 	btn.Position = UDim2.new(0, 10, 0, posY)
-	btn.Size = UDim2.new(0, 230, 0, 28)
+	btn.Size = UDim2.new(0, 230, 0, 30)
 	btn.BackgroundColor3 = Color3.fromRGB(60, 60, 60)
 	btn.TextColor3 = Color3.fromRGB(255, 255, 255)
 	btn.Font = Enum.Font.SourceSans
@@ -119,136 +108,7 @@ local function createButton(name, posY, callback)
 	end)
 end
 
--- أزرار التحكم
-createButton("Precise Head Aimbot: OFF", 35, function(btn)
+-- Buttons
+createButton("Precise Head Aimbot: OFF", 40, function(btn)
 	AimbotEnabled = not AimbotEnabled
-	btn.Text = "Precise Head Aimbot: " .. (AimbotEnabled and "ON" or "OFF")
-end)
-
-createButton("Hitbox (Size 18): OFF", 68, function(btn)
-	HitboxEnabled = not HitboxEnabled
-	btn.Text = "Hitbox (Size 18): " .. (HitboxEnabled and "ON" or "OFF")
-end)
-
-createButton("Wallhack ESP: OFF", 101, function(btn)
-	ESPEnabled = not ESPEnabled
-	btn.Text = "Wallhack ESP: " .. (ESPEnabled and "ON" or "OFF")
-	if not ESPEnabled then
-		for _, player in pairs(Players:GetPlayers()) do
-			if highlights[player] then
-				highlights[player]:Destroy()
-				highlights[player] = nil
-			end
-		end
-	end
-end)
-
-createButton("Auto Clicker: OFF", 134, function(btn)
-	AutoClickerEnabled = not AutoClickerEnabled
-	btn.Text = "Auto Clicker: " .. (AutoClickerEnabled and "ON" or "OFF")
-end)
-
--- زر تغيير الألوان (يتبدل بين الألوان عند الضغط)
-local colorList = {"Red", "Blue", "Green", "Yellow", "Pink", "White"}
-local colorIndex = 1
-createButton("Theme Color: Red", 167, function(btn)
-	colorIndex = colorIndex + 1
-	if colorIndex > #colorList then colorIndex = 1 end
-	local colorName = colorList[colorIndex]
-	currentColor = Colors[colorName]
-	
-	btn.Text = "Theme Color: " .. colorName
-	ToggleBtn.BackgroundColor3 = currentColor
-	Title.TextColor3 = currentColor
-	updateESPColors()
-end)
-
--- حقل البحث والانتقال السريع للاعبين
-local TextBox = Instance.new("TextBox")
-TextBox.Parent = MainFrame
-TextBox.Position = UDim2.new(0, 10, 0, 205)
-TextBox.Size = UDim2.new(0, 150, 0, 30)
-TextBox.PlaceholderText = "اسم اللاعب..."
-TextBox.Text = ""
-TextBox.TextColor3 = Color3.fromRGB(255, 255, 255)
-TextBox.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
-
-local TpBtn = Instance.new("TextButton")
-TpBtn.Parent = MainFrame
-TpBtn.Position = UDim2.new(0, 170, 0, 205)
-TpBtn.Size = UDim2.new(0, 70, 0, 30)
-TpBtn.BackgroundColor3 = Colors.Red
-TpBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
-TpBtn.Text = "انتقال"
-
-TpBtn.MouseButton1Click:Connect(function()
-	local query = string.lower(TextBox.Text)
-	for _, player in pairs(Players:GetPlayers()) do
-		if player ~= LocalPlayer and string.find(string.lower(player.Name), query) then
-			if player.Character and player.Character:FindFirstChild("HumanoidRootPart") then
-				if LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("HumanoidRootPart") then
-					LocalPlayer.Character.HumanoidRootPart.CFrame = player.Character.HumanoidRootPart.CFrame
-					break
-				end
-			end
-		end
-	end
-end)
-
-Players.PlayerRemoving:Connect(function(player)
-	if highlights[player] then
-		highlights[player]:Destroy()
-		highlights[player] = nil
-	end
-end)
-
--- حلقة التشغيل المستمرة
-RunService.RenderStepped:Connect(function()
-	if ESPEnabled then
-		updateESP()
-	end
-
-	if HitboxEnabled then
-		for _, player in pairs(Players:GetPlayers()) do
-			if player ~= LocalPlayer and player.Character then
-				local rootPart = player.Character:FindFirstChild("HumanoidRootPart")
-				if rootPart then
-					rootPart.Size = Vector3.new(HitboxSize, HitboxSize, HitboxSize)
-					rootPart.Transparency = 0.7
-					rootPart.CanCollide = false
-				end
-			end
-		end
-	end
-
-	if AimbotEnabled then
-		local nearestTarget = nil
-		local shortestDistance = math.huge
-		
-		for _, player in pairs(Players:GetPlayers()) do
-			if player ~= LocalPlayer and player.Character and player.Character:FindFirstChild("Head") then
-				local humanoid = player.Character:FindFirstChild("Humanoid")
-				if humanoid and humanoid.Health > 0 then
-					local head = player.Character.Head
-					local screenPoint, onScreen = Camera:WorldToScreenPoint(head.Position)
-					if onScreen then
-						local distance = (Vector2.new(screenPoint.X, screenPoint.Y) - Vector2.new(Camera.ViewportSize.X/2, Camera.ViewportSize.Y/2)).Magnitude
-						if distance < shortestDistance then
-							shortestDistance = distance
-							nearestTarget = head
-						end
-					end
-				end
-			end
-		end
-		
-		if nearestTarget then
-			Camera.CFrame = CFrame.new(Camera.CFrame.Position, nearestTarget.Position)
-		end
-	end
-
-	if AutoClickerEnabled then
-		mouse1click()
-		task.wait(0.05)
-	end
-end)
+	btn.Text = "Precise Head Aimbot: " .. (AimbotEnabled and
