@@ -1,4 +1,4 @@
--- ADAM HUB BLOX - Highlight ESP & Head Aimbot (Clean & Working)
+-- ADAM HUB BLOX - Multi-Color Theme & Highlight ESP
 local Players = game:GetService("Players")
 local RunService = game:GetService("RunService")
 local LocalPlayer = Players.LocalPlayer
@@ -10,11 +10,22 @@ ScreenGui.Name = "AdamHubBlox"
 ScreenGui.Parent = game.CoreGui
 ScreenGui.ResetOnSpawn = false
 
--- الزر العائم المتحرك (أحمر)
+-- الألوان المتاحة
+local Colors = {
+	Red = Color3.fromRGB(255, 0, 0),
+	Blue = Color3.fromRGB(0, 150, 255),
+	Green = Color3.fromRGB(0, 255, 0),
+	Yellow = Color3.fromRGB(255, 255, 0),
+	Pink = Color3.fromRGB(255, 105, 180),
+	White = Color3.fromRGB(255, 255, 255)
+}
+local currentColor = Colors.Red
+
+-- الزر العائم المتحرك
 local ToggleBtn = Instance.new("TextButton")
 ToggleBtn.Name = "ToggleBtn"
 ToggleBtn.Parent = ScreenGui
-ToggleBtn.BackgroundColor3 = Color3.fromRGB(180, 0, 0)
+ToggleBtn.BackgroundColor3 = Colors.Red
 ToggleBtn.Position = UDim2.new(0, 50, 0, 100)
 ToggleBtn.Size = UDim2.new(0, 50, 0, 50)
 ToggleBtn.Font = Enum.Font.SourceSansBold
@@ -28,8 +39,8 @@ local MainFrame = Instance.new("Frame")
 MainFrame.Name = "MainFrame"
 MainFrame.Parent = ScreenGui
 MainFrame.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
-MainFrame.Position = UDim2.new(0.5, -125, 0.5, -150)
-MainFrame.Size = UDim2.new(0, 250, 0, 320)
+MainFrame.Position = UDim2.new(0.5, -125, 0.5, -170)
+MainFrame.Size = UDim2.new(0, 250, 0, 360)
 MainFrame.Visible = false
 MainFrame.Draggable = true
 MainFrame.Active = true
@@ -38,13 +49,13 @@ ToggleBtn.MouseButton1Click:Connect(function()
 	MainFrame.Visible = not MainFrame.Visible
 end)
 
--- عنوان الواجهة (أحمر)
+-- عنوان الواجهة
 local Title = Instance.new("TextLabel")
 Title.Parent = MainFrame
 Title.Size = UDim2.new(1, 0, 0, 30)
 Title.BackgroundColor3 = Color3.fromRGB(20, 20, 20)
 Title.Text = "ADAM HUB BLOX"
-Title.TextColor3 = Color3.fromRGB(255, 0, 0)
+Title.TextColor3 = Colors.Red
 Title.Font = Enum.Font.SourceSansBold
 Title.TextSize = 16
 
@@ -55,8 +66,13 @@ local HitboxSize = 18
 local ESPEnabled = false
 local AutoClickerEnabled = false
 
--- جدول لتخزين الـ Highlights الخاصة بكشف الأماكن
 local highlights = {}
+
+local function updateESPColors()
+	for _, hl in pairs(highlights) do
+		hl.FillColor = currentColor
+	end
+end
 
 local function updateESP()
 	for _, player in pairs(Players:GetPlayers()) do
@@ -66,7 +82,7 @@ local function updateESP()
 					local hl = Instance.new("Highlight")
 					hl.Name = "AdamESP"
 					hl.Adornee = player.Character
-					hl.FillColor = Color3.fromRGB(255, 0, 0)
+					hl.FillColor = currentColor
 					hl.OutlineColor = Color3.fromRGB(255, 255, 255)
 					hl.FillTransparency = 0.5
 					hl.OutlineTransparency = 0
@@ -91,7 +107,7 @@ local function createButton(name, posY, callback)
 	local btn = Instance.new("TextButton")
 	btn.Parent = MainFrame
 	btn.Position = UDim2.new(0, 10, 0, posY)
-	btn.Size = UDim2.new(0, 230, 0, 30)
+	btn.Size = UDim2.new(0, 230, 0, 28)
 	btn.BackgroundColor3 = Color3.fromRGB(60, 60, 60)
 	btn.TextColor3 = Color3.fromRGB(255, 255, 255)
 	btn.Font = Enum.Font.SourceSans
@@ -104,19 +120,19 @@ local function createButton(name, posY, callback)
 end
 
 -- أزرار التحكم
-createButton("Precise Head Aimbot: OFF", 40, function(btn)
+createButton("Precise Head Aimbot: OFF", 35, function(btn)
 	AimbotEnabled = not AimbotEnabled
 	btn.Text = "Precise Head Aimbot: " .. (AimbotEnabled and "ON" or "OFF")
 end)
 
-createButton("Hitbox (Size 18): OFF", 80, function(btn)
+createButton("Hitbox (Size 18): OFF", 68, function(btn)
 	HitboxEnabled = not HitboxEnabled
 	btn.Text = "Hitbox (Size 18): " .. (HitboxEnabled and "ON" or "OFF")
 end)
 
-createButton("Red Body ESP (Wallhack): OFF", 120, function(btn)
+createButton("Wallhack ESP: OFF", 101, function(btn)
 	ESPEnabled = not ESPEnabled
-	btn.Text = "Red Body ESP (Wallhack): " .. (ESPEnabled and "ON" or "OFF")
+	btn.Text = "Wallhack ESP: " .. (ESPEnabled and "ON" or "OFF")
 	if not ESPEnabled then
 		for _, player in pairs(Players:GetPlayers()) do
 			if highlights[player] then
@@ -127,26 +143,41 @@ createButton("Red Body ESP (Wallhack): OFF", 120, function(btn)
 	end
 end)
 
-createButton("Auto Clicker: OFF", 160, function(btn)
+createButton("Auto Clicker: OFF", 134, function(btn)
 	AutoClickerEnabled = not AutoClickerEnabled
 	btn.Text = "Auto Clicker: " .. (AutoClickerEnabled and "ON" or "OFF")
+end)
+
+-- زر تغيير الألوان (يتبدل بين الألوان عند الضغط)
+local colorList = {"Red", "Blue", "Green", "Yellow", "Pink", "White"}
+local colorIndex = 1
+createButton("Theme Color: Red", 167, function(btn)
+	colorIndex = colorIndex + 1
+	if colorIndex > #colorList then colorIndex = 1 end
+	local colorName = colorList[colorIndex]
+	currentColor = Colors[colorName]
+	
+	btn.Text = "Theme Color: " .. colorName
+	ToggleBtn.BackgroundColor3 = currentColor
+	Title.TextColor3 = currentColor
+	updateESPColors()
 end)
 
 -- حقل البحث والانتقال السريع للاعبين
 local TextBox = Instance.new("TextBox")
 TextBox.Parent = MainFrame
-TextBox.Position = UDim2.new(0, 10, 0, 200)
+TextBox.Position = UDim2.new(0, 10, 0, 205)
 TextBox.Size = UDim2.new(0, 150, 0, 30)
-TextBox.PlaceholderText = "اكتب اسم اللاعب..."
+TextBox.PlaceholderText = "اسم اللاعب..."
 TextBox.Text = ""
 TextBox.TextColor3 = Color3.fromRGB(255, 255, 255)
 TextBox.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
 
 local TpBtn = Instance.new("TextButton")
 TpBtn.Parent = MainFrame
-TpBtn.Position = UDim2.new(0, 170, 0, 200)
+TpBtn.Position = UDim2.new(0, 170, 0, 205)
 TpBtn.Size = UDim2.new(0, 70, 0, 30)
-TpBtn.BackgroundColor3 = Color3.fromRGB(180, 0, 0)
+TpBtn.BackgroundColor3 = Colors.Red
 TpBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
 TpBtn.Text = "انتقال"
 
@@ -173,12 +204,10 @@ end)
 
 -- حلقة التشغيل المستمرة
 RunService.RenderStepped:Connect(function()
-	-- 1. تفعيل كشف الأماكن (Highlight ESP)
 	if ESPEnabled then
 		updateESP()
 	end
 
-	-- 2. الهيت بوكس
 	if HitboxEnabled then
 		for _, player in pairs(Players:GetPlayers()) do
 			if player ~= LocalPlayer and player.Character then
@@ -192,7 +221,6 @@ RunService.RenderStepped:Connect(function()
 		end
 	end
 
-	-- 3. الأيم بوت الدقيق للرأس
 	if AimbotEnabled then
 		local nearestTarget = nil
 		local shortestDistance = math.huge
@@ -219,7 +247,6 @@ RunService.RenderStepped:Connect(function()
 		end
 	end
 
-	-- 4. الأوتو كليكر
 	if AutoClickerEnabled then
 		mouse1click()
 		task.wait(0.05)
