@@ -111,4 +111,120 @@ end
 -- Buttons
 createButton("Precise Head Aimbot: OFF", 40, function(btn)
 	AimbotEnabled = not AimbotEnabled
-	btn.Text = "Precise Head Aimbot: " .. (AimbotEnabled and
+	btn.Text = "Precise Head Aimbot: " .. (AimbotEnabled and "ON" or "OFF")
+end)
+
+createButton("Hitbox (Size 18): OFF", 80, function(btn)
+	HitboxEnabled = not HitboxEnabled
+	btn.Text = "Hitbox (Size 18): " .. (HitboxEnabled and "ON" or "OFF")
+end)
+
+createButton("Red Body ESP (Wallhack): OFF", 120, function(btn)
+	ESPEnabled = not ESPEnabled
+	btn.Text = "Red Body ESP (Wallhack): " .. (ESPEnabled and "ON" or "OFF")
+	if not ESPEnabled then
+		for _, player in pairs(Players:GetPlayers()) do
+			if highlights[player] then
+				highlights[player]:Destroy()
+				highlights[player] = nil
+			end
+		end
+	end
+end)
+
+createButton("Auto Clicker: OFF", 160, function(btn)
+	AutoClickerEnabled = not AutoClickerEnabled
+	btn.Text = "Auto Clicker: " .. (AutoClickerEnabled and "ON" or "OFF")
+end)
+
+-- Baruu Maqaa barreessanii itti darbuuf (Teleport Box)
+local TextBox = Instance.new("TextBox")
+TextBox.Parent = MainFrame
+TextBox.Position = UDim2.new(0, 10, 0, 200)
+TextBox.Size = UDim2.new(0, 150, 0, 30)
+TextBox.PlaceholderText = "اكتب اسم اللاعب..."
+TextBox.Text = ""
+TextBox.TextColor3 = Color3.fromRGB(255, 255, 255)
+TextBox.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
+
+local TpBtn = Instance.new("TextButton")
+TpBtn.Parent = MainFrame
+TpBtn.Position = UDim2.new(0, 170, 0, 200)
+TpBtn.Size = UDim2.new(0, 70, 0, 30)
+TpBtn.BackgroundColor3 = Color3.fromRGB(180, 0, 0)
+TpBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
+TpBtn.Text = "انتقال"
+
+TpBtn.MouseButton1Click:Connect(function()
+	local query = string.lower(TextBox.Text)
+	for _, player in pairs(Players:GetPlayers()) do
+		if player ~= LocalPlayer and string.find(string.lower(player.Name), query) then
+			if player.Character and player.Character:FindFirstChild("HumanoidRootPart") then
+				if LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("HumanoidRootPart") then
+					LocalPlayer.Character.HumanoidRootPart.CFrame = player.Character.HumanoidRootPart.CFrame
+					break
+				end
+			end
+		end
+	end
+end)
+
+Players.PlayerRemoving:Connect(function(player)
+	if highlights[player] then
+		highlights[player]:Destroy()
+		highlights[player] = nil
+	end
+end)
+
+-- Loop guddina hojii (RenderStepped)
+RunService.RenderStepped:Connect(function()
+	if ESPEnabled then
+		updateESP()
+	end
+
+	if HitboxEnabled then
+		for _, player in pairs(Players:GetPlayers()) do
+			if player ~= LocalPlayer and player.Character then
+				local rootPart = player.Character:FindFirstChild("HumanoidRootPart")
+				if rootPart then
+					rootPart.Size = Vector3.new(HitboxSize, HitboxSize, HitboxSize)
+					rootPart.Transparency = 0.7
+					rootPart.CanCollide = false
+				end
+			end
+		end
+	end
+
+	if AimbotEnabled then
+		local nearestTarget = nil
+		local shortestDistance = math.huge
+		
+		for _, player in pairs(Players:GetPlayers()) do
+			if player ~= LocalPlayer and player.Character and player.Character:FindFirstChild("Head") then
+				local humanoid = player.Character:FindFirstChild("Humanoid")
+				if humanoid and humanoid.Health > 0 then
+					local head = player.Character.Head
+					local screenPoint, onScreen = Camera:WorldToScreenPoint(head.Position)
+					if onScreen then
+						local distance = (Vector2.new(screenPoint.X, screenPoint.Y) - Vector2.new(Camera.ViewportSize.X/2, Camera.ViewportSize.Y/2)).Magnitude
+						if distance < shortestDistance then
+							shortestDistance = distance
+							nearestTarget = head
+						end
+					end
+				end
+			end
+		end
+		
+		if nearestTarget then
+			Camera.CFrame = CFrame.new(Camera.CFrame.Position, nearestTarget.Position)
+		end
+	end
+
+	if AutoClickerEnabled then
+		pcall(function()
+			mouse1click()
+		end)
+		task.wait(0.05)
+	end
+end)
