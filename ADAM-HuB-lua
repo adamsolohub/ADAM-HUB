@@ -1,4 +1,4 @@
--- ADAM HUB BLOX - Smooth Aimbot & FOV Circle
+-- ADAM HUB BLOX - Perfect Head Aimbot & Fixed ESP
 local Players = game:GetService("Players")
 local RunService = game:GetService("RunService")
 local UserInputService = game:GetService("UserInputService")
@@ -11,11 +11,11 @@ ScreenGui.Name = "AdamHubBlox"
 ScreenGui.Parent = game.CoreGui
 ScreenGui.ResetOnSpawn = false
 
--- الزر العائم المتحرك
+-- الزر العائم المتحرك (أحمر)
 local ToggleBtn = Instance.new("TextButton")
 ToggleBtn.Name = "ToggleBtn"
 ToggleBtn.Parent = ScreenGui
-ToggleBtn.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
+ToggleBtn.BackgroundColor3 = Color3.fromRGB(180, 0, 0)
 ToggleBtn.Position = UDim2.new(0, 50, 0, 100)
 ToggleBtn.Size = UDim2.new(0, 50, 0, 50)
 ToggleBtn.Font = Enum.Font.SourceSansBold
@@ -39,7 +39,7 @@ ToggleBtn.MouseButton1Click:Connect(function()
 	MainFrame.Visible = not MainFrame.Visible
 end)
 
--- عنوان الواجهة
+-- عنوان الواجهة (أحمر)
 local Title = Instance.new("TextLabel")
 Title.Parent = MainFrame
 Title.Size = UDim2.new(1, 0, 0, 30)
@@ -55,16 +55,27 @@ local HitboxEnabled = false
 local HitboxSize = 18
 local ESPEnabled = false
 local AutoClickerEnabled = false
-local FOVRadius = 120 -- حجم دائرة الـ FOV
+local FOVRadius = 140
 
--- رسم دائرة الـ FOV على الشاشة
+-- رسم دائرة الـ FOV (أحمر)
 local FOVCircle = Drawing.new("Circle")
 FOVCircle.Visible = false
 FOVCircle.Radius = FOVRadius
-FOVCircle.Color = Color3.fromRGB(255, 255, 255)
-FOVCircle.Thickness = 1
+FOVCircle.Color = Color3.fromRGB(255, 0, 0)
+FOVCircle.Thickness = 1.5
 FOVCircle.Filled = false
-FOVCircle.Transparency = 0.7
+FOVCircle.Transparency = 0.8
+
+-- جدول تخزين رسومات الـ ESP
+local espCache = {}
+
+local function removeESP(player)
+	if espCache[player] then
+		if espCache[player].Box then espCache[player].Box:Remove() end
+		if espCache[player].Line then espCache[player].Line:Remove() end
+		espCache[player] = nil
+	end
+end
 
 -- وظيفة إنشاء الأزرار
 local function createButton(name, posY, callback)
@@ -84,10 +95,10 @@ local function createButton(name, posY, callback)
 end
 
 -- أزرار التحكم
-createButton("Smooth Aimbot (Head): OFF", 40, function(btn)
+createButton("Precise Head Aimbot: OFF", 40, function(btn)
 	AimbotEnabled = not AimbotEnabled
 	FOVCircle.Visible = AimbotEnabled
-	btn.Text = "Smooth Aimbot (Head): " .. (AimbotEnabled and "ON" or "OFF")
+	btn.Text = "Precise Head Aimbot: " .. (AimbotEnabled and "ON" or "OFF")
 end)
 
 createButton("Hitbox (Size 18): OFF", 80, function(btn)
@@ -95,9 +106,14 @@ createButton("Hitbox (Size 18): OFF", 80, function(btn)
 	btn.Text = "Hitbox (Size 18): " .. (HitboxEnabled and "ON" or "OFF")
 end)
 
-createButton("ESP Boxes: OFF", 120, function(btn)
+createButton("ESP Boxes & Lines: OFF", 120, function(btn)
 	ESPEnabled = not ESPEnabled
-	btn.Text = "ESP Boxes: " .. (ESPEnabled and "ON" or "OFF")
+	btn.Text = "ESP Boxes & Lines: " .. (ESPEnabled and "ON" or "OFF")
+	if not ESPEnabled then
+		for _, player in pairs(Players:GetPlayers()) do
+			removeESP(player)
+		end
+	end
 end)
 
 createButton("Auto Clicker: OFF", 160, function(btn)
@@ -119,7 +135,7 @@ local TpBtn = Instance.new("TextButton")
 TpBtn.Parent = MainFrame
 TpBtn.Position = UDim2.new(0, 170, 0, 200)
 TpBtn.Size = UDim2.new(0, 70, 0, 30)
-TpBtn.BackgroundColor3 = Color3.fromRGB(0, 150, 0)
+TpBtn.BackgroundColor3 = Color3.fromRGB(180, 0, 0)
 TpBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
 TpBtn.Text = "انتقال"
 
@@ -137,12 +153,74 @@ TpBtn.MouseButton1Click:Connect(function()
 	end
 end)
 
+Players.PlayerRemoving:Connect(function(player)
+	removeESP(player)
+end)
+
 -- حلقة التشغيل المستمرة
 RunService.RenderStepped:Connect(function()
-	-- تحديث مكان دائرة الـ FOV لتتبع منتصف الشاشة (مكان المؤشر)
 	FOVCircle.Position = Vector2.new(Camera.ViewportSize.X / 2, Camera.ViewportSize.Y / 2)
 
-	-- 1. الهيت بوكس
+	-- 1. نظام كشف الأماكن (ESP Boxes & Tracers باللون الأحمر وتصحيح الإحداثيات)
+	if ESPEnabled then
+		for _, player in pairs(Players:GetPlayers()) do
+			if player ~= LocalPlayer and player.Character then
+				local character = player.Character
+				local humanoid = character:FindFirstChild("Humanoid")
+				local rootPart = character:FindFirstChild("HumanoidRootPart")
+				local head = character:FindFirstChild("Head")
+				
+				if humanoid and humanoid.Health > 0 and rootPart and head then
+					if not espCache[player] then
+						espCache[player] = {
+							Box = Drawing.new("Square"),
+							Line = Drawing.new("Line")
+						}
+						espCache[player].Box.Visible = false
+						espCache[player].Box.Thickness = 1.5
+						espCache[player].Box.Color = Color3.fromRGB(255, 0, 0)
+						espCache[player].Box.Filled = false
+						
+						espCache[player].Line.Visible = false
+						espCache[player].Line.Thickness = 1.5
+						espCache[player].Line.Color = Color3.fromRGB(255, 0, 0)
+					end
+					
+					local box = espCache[player].Box
+					local line = espCache[player].Line
+					
+					local headPos, headOnScreen = Camera:WorldToScreenPoint(head.Position + Vector3.new(0, 0.5, 0))
+					local legPos, legOnScreen = Camera:WorldToScreenPoint(rootPart.Position - Vector3.new(0, 3, 0))
+					
+					if headOnScreen or legOnScreen then
+						local height = math.abs(headPos.Y - legPos.Y)
+						local width = height / 2
+						
+						box.Size = Vector2.new(width, height)
+						box.Position = Vector2.new(headPos.X - width / 2, headPos.Y)
+						box.Visible = true
+						
+						line.From = Vector2.new(Camera.ViewportSize.X / 2, Camera.ViewportSize.Y)
+						line.To = Vector2.new(headPos.X, headPos.Y + height)
+						line.Visible = true
+					else
+						box.Visible = false
+						line.Visible = false
+					end
+				else
+					removeESP(player)
+				end
+			else
+				removeESP(player)
+			end
+		end
+	else
+		for _, player in pairs(Players:GetPlayers()) do
+			removeESP(player)
+		end
+	end
+
+	-- 2. الهيت بوكس
 	if HitboxEnabled then
 		for _, player in pairs(Players:GetPlayers()) do
 			if player ~= LocalPlayer and player.Character then
@@ -156,7 +234,7 @@ RunService.RenderStepped:Connect(function()
 		end
 	end
 
-	-- 2. الأيم بوت السلس (Smooth Aimbot) واستهداف الرأس داخل دائرة الـ FOV
+	-- 3. الأيم بوت الدقيق الموجه للرأس (Head Aimbot دقيق وثابت)
 	if AimbotEnabled then
 		local nearestTarget = nil
 		local shortestDistance = FOVRadius
@@ -180,13 +258,12 @@ RunService.RenderStepped:Connect(function()
 		end
 		
 		if nearestTarget then
-			-- حركة سلسة باستخدام Lerp لكي لا يكون التصويب مزعجاً أو سريعاً بشكل مفاجئ
-			local targetCFrame = CFrame.new(Camera.CFrame.Position, nearestTarget.Position)
-			Camera.CFrame = Camera.CFrame:Lerp(targetCFrame, 0.15)
+			-- تركيز دقيق ومباشر وسريع وثابت على الرأس
+			Camera.CFrame = CFrame.new(Camera.CFrame.Position, nearestTarget.Position)
 		end
 	end
 
-	-- 3. الأوتو كليكر
+	-- 4. الأوتو كليكر
 	if AutoClickerEnabled then
 		mouse1click()
 		task.wait(0.05)
