@@ -1,69 +1,194 @@
--- ==========================================
--- ADAM HUB - BLOX (RED THEME EDITION)
--- ==========================================
+-- ADAM HUB BLOX - Smooth Aimbot & FOV Circle
+local Players = game:GetService("Players")
+local RunService = game:GetService("RunService")
+local UserInputService = game:GetService("UserInputService")
+local LocalPlayer = Players.LocalPlayer
+local Camera = workspace.CurrentCamera
 
-local OrionLib = loadstring(game:HttpGet(('https://raw.githubusercontent.com/shlexware/Orion/main/source')))()
-local Window = OrionLib:MakeWindow({Name = "ADAM HUB : Blox Fruits", HidePremium = false, SaveConfig = true, ConfigFolder = "AdamHubConfig", IntroText = "ADAM HUB - HEYBA"})
+-- إعداد الواجهة الرئيسية (UI)
+local ScreenGui = Instance.new("ScreenGui")
+ScreenGui.Name = "AdamHubBlox"
+ScreenGui.Parent = game.CoreGui
+ScreenGui.ResetOnSpawn = false
 
--- تخصيص الثيم باللون الأحمر الفخم
--- (ملاحظة: يمكنك ضبط ألوان الواجهة عبر إعدادات المكتبة لتعمل باللون الأحمر الكامل)
+-- الزر العائم المتحرك
+local ToggleBtn = Instance.new("TextButton")
+ToggleBtn.Name = "ToggleBtn"
+ToggleBtn.Parent = ScreenGui
+ToggleBtn.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
+ToggleBtn.Position = UDim2.new(0, 50, 0, 100)
+ToggleBtn.Size = UDim2.new(0, 50, 0, 50)
+ToggleBtn.Font = Enum.Font.SourceSansBold
+ToggleBtn.Text = "ADAM"
+ToggleBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
+ToggleBtn.TextSize = 14
+ToggleBtn.Draggable = true
+ToggleBtn.Active = true
 
--- [1] تبويب الفارم والتلفيل (Farming Tab)
-local FarmTab = Window:MakeTab({
-	Name = "Farming Level",
-	Icon = "rbxassetid://4483345998",
-	PremiumOnly = false
-})
+local MainFrame = Instance.new("Frame")
+MainFrame.Name = "MainFrame"
+MainFrame.Parent = ScreenGui
+MainFrame.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
+MainFrame.Position = UDim2.new(0.5, -125, 0.5, -150)
+MainFrame.Size = UDim2.new(0, 250, 0, 320)
+MainFrame.Visible = false
+MainFrame.Draggable = true
+MainFrame.Active = true
 
-local Section = FarmTab:AddSection({
-	Name = "Auto Farm Level Systems"
-})
+ToggleBtn.MouseButton1Click:Connect(function()
+	MainFrame.Visible = not MainFrame.Visible
+end)
 
--- متغيرات التحكم
-_G.AutoFarmLevel = false
-_G.WeaponChoice = "Sword" -- الخيارات: Melee, Sword, Fruit
+-- عنوان الواجهة
+local Title = Instance.new("TextLabel")
+Title.Parent = MainFrame
+Title.Size = UDim2.new(1, 0, 0, 30)
+Title.BackgroundColor3 = Color3.fromRGB(20, 20, 20)
+Title.Text = "ADAM HUB BLOX"
+Title.TextColor3 = Color3.fromRGB(255, 0, 0)
+Title.Font = Enum.Font.SourceSansBold
+Title.TextSize = 16
 
--- خيار اختيار سلاح القتال
-FarmTab:AddDropdown({
-	Name = "Select Weapon Style",
-	Options = {"Melee", "Sword", "Fruit"},
-	Default = "Sword",
-	Callback = function(Value)
-		_G.WeaponChoice = Value
-	end    
-})
+-- متغيرات الميزات
+local AimbotEnabled = false
+local HitboxEnabled = false
+local HitboxSize = 18
+local ESPEnabled = false
+local AutoClickerEnabled = false
+local FOVRadius = 120 -- حجم دائرة الـ FOV
 
--- زر تشغيل الفارم التلقائي (ياخد المهمة + يقتل الوحوش)
-FarmTab:AddToggle({
-	Name = "Auto Farm Level (Quest + Kill)",
-	Default = false,
-	Callback = function(Value)
-		_G.AutoFarmLevel = Value
-		
-		task.spawn(function()
-			while _G.AutoFarmLevel do
-				task.wait(0.1)
-				pcall(function()
-					-- هنا الكود الأساسي لجلب المهمة المناسبة وحсاب لفل اللاعب
-					local player = game.Players.LocalPlayer
-					local myLevel = player.Data.Level.Value
-					
-					-- 1. الذهاب لأخذ المهمة (Quest Logic)
-					-- 2. الانتقال للوحوش وقتلهم باستخدام الأسلوب المختار (_G.WeaponChoice)
-					print("Adam Hub: Farming Active - Weapon: " .. _G.WeaponChoice)
-				end)
+-- رسم دائرة الـ FOV على الشاشة
+local FOVCircle = Drawing.new("Circle")
+FOVCircle.Visible = false
+FOVCircle.Radius = FOVRadius
+FOVCircle.Color = Color3.fromRGB(255, 255, 255)
+FOVCircle.Thickness = 1
+FOVCircle.Filled = false
+FOVCircle.Transparency = 0.7
+
+-- وظيفة إنشاء الأزرار
+local function createButton(name, posY, callback)
+	local btn = Instance.new("TextButton")
+	btn.Parent = MainFrame
+	btn.Position = UDim2.new(0, 10, 0, posY)
+	btn.Size = UDim2.new(0, 230, 0, 30)
+	btn.BackgroundColor3 = Color3.fromRGB(60, 60, 60)
+	btn.TextColor3 = Color3.fromRGB(255, 255, 255)
+	btn.Font = Enum.Font.SourceSans
+	btn.TextSize = 14
+	btn.Text = name
+	
+	btn.MouseButton1Click:Connect(function()
+		callback(btn)
+	end)
+end
+
+-- أزرار التحكم
+createButton("Smooth Aimbot (Head): OFF", 40, function(btn)
+	AimbotEnabled = not AimbotEnabled
+	FOVCircle.Visible = AimbotEnabled
+	btn.Text = "Smooth Aimbot (Head): " .. (AimbotEnabled and "ON" or "OFF")
+end)
+
+createButton("Hitbox (Size 18): OFF", 80, function(btn)
+	HitboxEnabled = not HitboxEnabled
+	btn.Text = "Hitbox (Size 18): " .. (HitboxEnabled and "ON" or "OFF")
+end)
+
+createButton("ESP Boxes: OFF", 120, function(btn)
+	ESPEnabled = not ESPEnabled
+	btn.Text = "ESP Boxes: " .. (ESPEnabled and "ON" or "OFF")
+end)
+
+createButton("Auto Clicker: OFF", 160, function(btn)
+	AutoClickerEnabled = not AutoClickerEnabled
+	btn.Text = "Auto Clicker: " .. (AutoClickerEnabled and "ON" or "OFF")
+end)
+
+-- حقل البحث والانتقال السريع للاعبين
+local TextBox = Instance.new("TextBox")
+TextBox.Parent = MainFrame
+TextBox.Position = UDim2.new(0, 10, 0, 200)
+TextBox.Size = UDim2.new(0, 150, 0, 30)
+TextBox.PlaceholderText = "اكتب اسم اللاعب..."
+TextBox.Text = ""
+TextBox.TextColor3 = Color3.fromRGB(255, 255, 255)
+TextBox.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
+
+local TpBtn = Instance.new("TextButton")
+TpBtn.Parent = MainFrame
+TpBtn.Position = UDim2.new(0, 170, 0, 200)
+TpBtn.Size = UDim2.new(0, 70, 0, 30)
+TpBtn.BackgroundColor3 = Color3.fromRGB(0, 150, 0)
+TpBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
+TpBtn.Text = "انتقال"
+
+TpBtn.MouseButton1Click:Connect(function()
+	local query = string.lower(TextBox.Text)
+	for _, player in pairs(Players:GetPlayers()) do
+		if player ~= LocalPlayer and string.find(string.lower(player.Name), query) then
+			if player.Character and player.Character:FindFirstChild("HumanoidRootPart") then
+				if LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("HumanoidRootPart") then
+					LocalPlayer.Character.HumanoidRootPart.CFrame = player.Character.HumanoidRootPart.CFrame
+					break
+				end
 			end
-		end)
+		end
 	end
-})
+end)
 
--- [2] تبويب المتجر والمميزات الأخرى (Shop & Extras)
-local ShopTab = Window:MakeTab({
-	Name = "Shop & Misc",
-	Icon = "rbxassetid://6023426915",
-	PremiumOnly = false
-})
+-- حلقة التشغيل المستمرة
+RunService.RenderStepped:Connect(function()
+	-- تحديث مكان دائرة الـ FOV لتتبع منتصف الشاشة (مكان المؤشر)
+	FOVCircle.Position = Vector2.new(Camera.ViewportSize.X / 2, Camera.ViewportSize.Y / 2)
 
-ShopTab:AddParagraph("ADAM HUB - BLOX", "Made with HEYBA power. Enjoy the ultimate script!")
+	-- 1. الهيت بوكس
+	if HitboxEnabled then
+		for _, player in pairs(Players:GetPlayers()) do
+			if player ~= LocalPlayer and player.Character then
+				local rootPart = player.Character:FindFirstChild("HumanoidRootPart")
+				if rootPart then
+					rootPart.Size = Vector3.new(HitboxSize, HitboxSize, HitboxSize)
+					rootPart.Transparency = 0.7
+					rootPart.CanCollide = false
+				end
+			end
+		end
+	end
 
-OrionLib:Init()
+	-- 2. الأيم بوت السلس (Smooth Aimbot) واستهداف الرأس داخل دائرة الـ FOV
+	if AimbotEnabled then
+		local nearestTarget = nil
+		local shortestDistance = FOVRadius
+		
+		for _, player in pairs(Players:GetPlayers()) do
+			if player ~= LocalPlayer and player.Character and player.Character:FindFirstChild("Head") then
+				local humanoid = player.Character:FindFirstChild("Humanoid")
+				if humanoid and humanoid.Health > 0 then
+					local head = player.Character.Head
+					local screenPoint, onScreen = Camera:WorldToScreenPoint(head.Position)
+					if onScreen then
+						local screenCenter = Vector2.new(Camera.ViewportSize.X / 2, Camera.ViewportSize.Y / 2)
+						local distance = (Vector2.new(screenPoint.X, screenPoint.Y) - screenCenter).Magnitude
+						if distance < shortestDistance then
+							shortestDistance = distance
+							nearestTarget = head
+						end
+					end
+				end
+			end
+		end
+		
+		if nearestTarget then
+			-- حركة سلسة باستخدام Lerp لكي لا يكون التصويب مزعجاً أو سريعاً بشكل مفاجئ
+			local targetCFrame = CFrame.new(Camera.CFrame.Position, nearestTarget.Position)
+			Camera.CFrame = Camera.CFrame:Lerp(targetCFrame, 0.15)
+		end
+	end
+
+	-- 3. الأوتو كليكر
+	if AutoClickerEnabled then
+		mouse1click()
+		task.wait(0.05)
+	end
+end)
