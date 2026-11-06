@@ -268,4 +268,4 @@ RunService.RenderStepped:Connect(function()
 		mouse1click()
 		task.wait(0.05)
 	end
-end)
+end) 
