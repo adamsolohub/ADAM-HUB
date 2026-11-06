@@ -1,319 +1,271 @@
--- ===================================================
--- ADAM HUB V1 - ULTIMATE MOBILE SCRIPT (ROBLOX)
--- Developer: ADAM (adamsolohub)
--- Fully Optimized & Fixed for All Maps & Executors
--- ===================================================
-
-local CoreGui = game:GetService("CoreGui")
+-- ADAM HUB BLOX - Perfect Head Aimbot & Fixed ESP
 local Players = game:GetService("Players")
 local RunService = game:GetService("RunService")
+local UserInputService = game:GetService("UserInputService")
 local LocalPlayer = Players.LocalPlayer
+local Camera = workspace.CurrentCamera
 
--- إزالة أي واجهة قديمة لتفادي التكرار
-if CoreGui:FindFirstChild("AdamHubUltimate") then
-    CoreGui.AdamHubUltimate:Destroy()
-end
-
--- إنشاء الشاشة الرئيسية
+-- إعداد الواجهة الرئيسية (UI)
 local ScreenGui = Instance.new("ScreenGui")
-ScreenGui.Name = "AdamHubUltimate"
-ScreenGui.Parent = CoreGui
+ScreenGui.Name = "AdamHubBlox"
+ScreenGui.Parent = game.CoreGui
+ScreenGui.ResetOnSpawn = false
 
--- الإطار الرئيسي (Main Window - Square & Clean)
+-- الزر العائم المتحرك (أحمر)
+local ToggleBtn = Instance.new("TextButton")
+ToggleBtn.Name = "ToggleBtn"
+ToggleBtn.Parent = ScreenGui
+ToggleBtn.BackgroundColor3 = Color3.fromRGB(180, 0, 0)
+ToggleBtn.Position = UDim2.new(0, 50, 0, 100)
+ToggleBtn.Size = UDim2.new(0, 50, 0, 50)
+ToggleBtn.Font = Enum.Font.SourceSansBold
+ToggleBtn.Text = "ADAM"
+ToggleBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
+ToggleBtn.TextSize = 14
+ToggleBtn.Draggable = true
+ToggleBtn.Active = true
+
 local MainFrame = Instance.new("Frame")
-MainFrame.Size = UDim2.new(0, 500, 0, 380)
-MainFrame.Position = UDim2.new(0.5, -250, 0.5, -190)
-MainFrame.BackgroundColor3 = Color3.fromRGB(12, 8, 20)
-MainFrame.BorderColor3 = Color3.fromRGB(140, 0, 255)
-MainFrame.BorderSizePixel = 2
-MainFrame.Active = true
-MainFrame.Draggable = true
+MainFrame.Name = "MainFrame"
 MainFrame.Parent = ScreenGui
+MainFrame.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
+MainFrame.Position = UDim2.new(0.5, -125, 0.5, -150)
+MainFrame.Size = UDim2.new(0, 250, 0, 320)
+MainFrame.Visible = false
+MainFrame.Draggable = true
+MainFrame.Active = true
 
--- شريط العنوان العلوي
-local TitleBar = Instance.new("TextLabel")
-TitleBar.Size = UDim2.new(1, 0, 0, 40)
-TitleBar.BackgroundColor3 = Color3.fromRGB(22, 12, 35)
-TitleBar.TextColor3 = Color3.fromRGB(255, 255, 255)
-TitleBar.Text = "  ADAM HUB V1 - GOD TIER [MOBILE]"
-TitleBar.TextSize = 15
-TitleBar.Font = Enum.Font.GothamBold
-TitleBar.TextXAlignment = Enum.TextXAlignment.Left
-TitleBar.Parent = MainFrame
-
--- زر الإغلاق
-local CloseButton = Instance.new("TextButton")
-CloseButton.Size = UDim2.new(0, 40, 0, 40)
-CloseButton.Position = UDim2.new(1, -40, 0, 0)
-CloseButton.BackgroundTransparency = 1
-CloseButton.Text = "X"
-CloseButton.TextColor3 = Color3.fromRGB(255, 50, 50)
-CloseButton.TextSize = 16
-CloseButton.Font = Enum.Font.GothamBold
-CloseButton.Parent = TitleBar
-
-CloseButton.MouseButton1Click:Connect(function()
-    ScreenGui:Destroy()
+ToggleBtn.MouseButton1Click:Connect(function()
+	MainFrame.Visible = not MainFrame.Visible
 end)
 
--- شريط التنقل الجانبي (Tabs)
-local TabContainer = Instance.new("ScrollingFrame")
-TabContainer.Size = UDim2.new(0, 130, 1, -45)
-TabContainer.Position = UDim2.new(0, 0, 0, 40)
-TabContainer.BackgroundColor3 = Color3.fromRGB(18, 12, 28)
-TabContainer.BorderSizePixel = 0
-TabContainer.ScrollBarThickness = 3
-TabContainer.Parent = MainFrame
+-- عنوان الواجهة (أحمر)
+local Title = Instance.new("TextLabel")
+Title.Parent = MainFrame
+Title.Size = UDim2.new(1, 0, 0, 30)
+Title.BackgroundColor3 = Color3.fromRGB(20, 20, 20)
+Title.Text = "ADAM HUB BLOX"
+Title.TextColor3 = Color3.fromRGB(255, 0, 0)
+Title.Font = Enum.Font.SourceSansBold
+Title.TextSize = 16
 
--- إطار عرض محتوى الأقسام
-local ContentFrame = Instance.new("Frame")
-ContentFrame.Size = UDim2.new(1, -135, 1, -45)
-ContentFrame.Position = UDim2.new(0, 135, 0, 40)
-ContentFrame.BackgroundTransparency = 1
-ContentFrame.Parent = MainFrame
+-- متغيرات الميزات
+local AimbotEnabled = false
+local HitboxEnabled = false
+local HitboxSize = 18
+local ESPEnabled = false
+local AutoClickerEnabled = false
+local FOVRadius = 140
 
--- دالة لإنشاء الأقسام الداخلية
-local function CreateSectionView()
-    local sec = Instance.new("ScrollingFrame")
-    sec.Size = UDim2.new(1, 0, 1, 0)
-    sec.BackgroundTransparency = 1
-    sec.ScrollBarThickness = 4
-    sec.CanvasSize = UDim2.new(0, 0, 1.5, 0)
-    sec.Visible = false
-    sec.Parent = ContentFrame
-    return sec
+-- رسم دائرة الـ FOV (أحمر)
+local FOVCircle = Drawing.new("Circle")
+FOVCircle.Visible = false
+FOVCircle.Radius = FOVRadius
+FOVCircle.Color = Color3.fromRGB(255, 0, 0)
+FOVCircle.Thickness = 1.5
+FOVCircle.Filled = false
+FOVCircle.Transparency = 0.8
+
+-- جدول تخزين رسومات الـ ESP
+local espCache = {}
+
+local function removeESP(player)
+	if espCache[player] then
+		if espCache[player].Box then espCache[player].Box:Remove() end
+		if espCache[player].Line then espCache[player].Line:Remove() end
+		espCache[player] = nil
+	end
 end
 
-local HomeView = CreateSectionView()
-local AimbotView = CreateSectionView()
-local PlayersView = CreateSectionView()
-local TeleportView = CreateSectionView()
-HomeView.Visible = true -- الافتراضي
-
--- دالة لتبديل الأقسام
-local function CreateTabButton(name, yPos, targetView)
-    local btn = Instance.new("TextButton")
-    btn.Size = UDim2.new(1, 0, 0, 40)
-    btn.Position = UDim2.new(0, 0, 0, yPos)
-    btn.BackgroundColor3 = Color3.fromRGB(25, 15, 40)
-    btn.BorderSizePixel = 0
-    btn.TextColor3 = Color3.fromRGB(220, 220, 220)
-    btn.Text = name
-    btn.TextSize = 13
-    btn.Font = Enum.Font.GothamSemibold
-    btn.Parent = TabContainer
-
-    btn.MouseButton1Click:Connect(function()
-        HomeView.Visible = false
-        AimbotView.Visible = false
-        PlayersView.Visible = false
-        TeleportView.Visible = false
-        targetView.Visible = true
-    end)
+-- وظيفة إنشاء الأزرار
+local function createButton(name, posY, callback)
+	local btn = Instance.new("TextButton")
+	btn.Parent = MainFrame
+	btn.Position = UDim2.new(0, 10, 0, posY)
+	btn.Size = UDim2.new(0, 230, 0, 30)
+	btn.BackgroundColor3 = Color3.fromRGB(60, 60, 60)
+	btn.TextColor3 = Color3.fromRGB(255, 255, 255)
+	btn.Font = Enum.Font.SourceSans
+	btn.TextSize = 14
+	btn.Text = name
+	
+	btn.MouseButton1Click:Connect(function()
+		callback(btn)
+	end)
 end
 
-CreateTabButton("🏠 Home / Farm", 0, HomeView)
-CreateTabButton("🎯 Aimbot Systems", 45, AimbotView)
-CreateTabButton("⚔️ Players & Kill All", 90, PlayersView)
-CreateTabButton("🌍 Teleport Menu", 135, TeleportView)
-
--- ==========================================
--- 1. HOME / FARM VIEW CONFIGURATION
--- ==========================================
-local function AddToggleToView(parentView, title, yPos, callback)
-    local btn = Instance.new("TextButton")
-    btn.Size = UDim2.new(0, 335, 0, 35)
-    btn.Position = UDim2.new(0, 10, 0, yPos)
-    btn.BackgroundColor3 = Color3.fromRGB(30, 20, 50)
-    btn.BorderColor3 = Color3.fromRGB(100, 0, 180)
-    btn.TextColor3 = Color3.fromRGB(255, 255, 255)
-    btn.Text = title .. " [OFF]"
-    btn.TextSize = 13
-    btn.Font = Enum.Font.GothamSemibold
-    btn.Parent = parentView
-
-    local toggled = false
-    btn.MouseButton1Click:Connect(function()
-        toggled = not toggled
-        if toggled then
-            btn.BackgroundColor3 = Color3.fromRGB(100, 0, 200)
-            btn.Text = title .. " [ON]"
-        else
-            btn.BackgroundColor3 = Color3.fromRGB(30, 20, 50)
-            btn.Text = title .. " [OFF]"
-        end
-        if callback then callback(toggled) end
-    end)
-end
-
-AddToggleToView(HomeView, "Smart Auto Farm / Quest", 10, function(state)
-    if state then
-        print("Adam Hub: Smart Auto Farm Activated safely.")
-    end
+-- أزرار التحكم
+createButton("Precise Head Aimbot: OFF", 40, function(btn)
+	AimbotEnabled = not AimbotEnabled
+	FOVCircle.Visible = AimbotEnabled
+	btn.Text = "Precise Head Aimbot: " .. (AimbotEnabled and "ON" or "OFF")
 end)
 
-AddToggleToView(HomeView, "Noclip & Wallhack", 55, function(state)
-    RunService.Stepped:Connect(function()
-        if state and LocalPlayer.Character then
-            for _, v in pairs(LocalPlayer.Character:GetDescendants()) do
-                if v:IsA("BasePart") then v.CanCollide = false end
-            end
-        end
-    end)
+createButton("Hitbox (Size 18): OFF", 80, function(btn)
+	HitboxEnabled = not HitboxEnabled
+	btn.Text = "Hitbox (Size 18): " .. (HitboxEnabled and "ON" or "OFF")
 end)
 
-AddToggleToView(HomeView, "God Mode / Damage Boost", 100, function(state)
-    if state then
-        print("Adam Hub: High Damage & God Mode Enabled.")
-    end
+createButton("ESP Boxes & Lines: OFF", 120, function(btn)
+	ESPEnabled = not ESPEnabled
+	btn.Text = "ESP Boxes & Lines: " .. (ESPEnabled and "ON" or "OFF")
+	if not ESPEnabled then
+		for _, player in pairs(Players:GetPlayers()) do
+			removeESP(player)
+		end
+	end
 end)
 
--- ==========================================
--- 2. AIMBOT SYSTEMS VIEW
--- ==========================================
-AddToggleToView(AimbotView, "Aimbot Head (Target Lock)", 10, function(state)
-    local camera = workspace.CurrentCamera
-    RunService.RenderStepped:Connect(function()
-        if state then
-            local closestPlayer = nil
-            local shortestDistance = math.huge
-            for _, player in pairs(Players:GetPlayers()) do
-                if player ~= LocalPlayer and player.Character and player.Character:FindFirstChild("Head") then
-                    local humanoid = player.Character:FindFirstChildOfClass("Humanoid")
-                    if humanoid and humanoid.Health > 0 then
-                        local pos, onScreen = camera:WorldToViewportPoint(player.Character.Head.Position)
-                        if onScreen then
-                            local magnitude = (Vector2.new(pos.X, pos.Y) - Vector2.new(camera.ViewportSize.X/2, camera.ViewportSize.Y/2)).Magnitude
-                            if magnitude < shortestDistance then
-                                shortestDistance = magnitude
-                                closestPlayer = player
-                            end
-                        end
-                    end
-                end
-            end
-            if closestPlayer and closestPlayer.Character and closestPlayer.Character:FindFirstChild("Head") then
-                camera.CFrame = CFrame.new(camera.CFrame.Position, closestPlayer.Character.Head.Position)
-            end
-        end
-    end)
+createButton("Auto Clicker: OFF", 160, function(btn)
+	AutoClickerEnabled = not AutoClickerEnabled
+	btn.Text = "Auto Clicker: " .. (AutoClickerEnabled and "ON" or "OFF")
 end)
 
-AddToggleToView(AimbotView, "Aimbot Touch & Smooth Aim", 55, function(state)
-    if state then print("Adam Hub: Touch Aimbot Active.") end
+-- حقل البحث والانتقال السريع للاعبين
+local TextBox = Instance.new("TextBox")
+TextBox.Parent = MainFrame
+TextBox.Position = UDim2.new(0, 10, 0, 200)
+TextBox.Size = UDim2.new(0, 150, 0, 30)
+TextBox.PlaceholderText = "اكتب اسم اللاعب..."
+TextBox.Text = ""
+TextBox.TextColor3 = Color3.fromRGB(255, 255, 255)
+TextBox.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
+
+local TpBtn = Instance.new("TextButton")
+TpBtn.Parent = MainFrame
+TpBtn.Position = UDim2.new(0, 170, 0, 200)
+TpBtn.Size = UDim2.new(0, 70, 0, 30)
+TpBtn.BackgroundColor3 = Color3.fromRGB(180, 0, 0)
+TpBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
+TpBtn.Text = "انتقال"
+
+TpBtn.MouseButton1Click:Connect(function()
+	local query = string.lower(TextBox.Text)
+	for _, player in pairs(Players:GetPlayers()) do
+		if player ~= LocalPlayer and string.find(string.lower(player.Name), query) then
+			if player.Character and player.Character:FindFirstChild("HumanoidRootPart") then
+				if LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("HumanoidRootPart") then
+					LocalPlayer.Character.HumanoidRootPart.CFrame = player.Character.HumanoidRootPart.CFrame
+					break
+				end
+			end
+		end
+	end
 end)
 
-AddToggleToView(AimbotView, "ESP Players Names & Health", 100, function(state)
-    RunService.RenderStepped:Connect(function()
-        for _, player in pairs(Players:GetPlayers()) do
-            if player ~= LocalPlayer and player.Character and player.Character:FindFirstChild("Head") then
-                local head = player.Character.Head
-                if state then
-                    if not head:FindFirstChild("AdamESP_Tag") then
-                        local bill = Instance.new("BillboardGui")
-                        bill.Name = "AdamESP_Tag"
-                        bill.Size = UDim2.new(0, 120, 0, 40)
-                        bill.AlwaysOnTop = true
-                        bill.Parent = head
-                        
-                        local txt = Instance.new("TextLabel")
-                        txt.Size = UDim2.new(1, 0, 1, 0)
-                        txt.BackgroundTransparency = 1
-                        txt.TextColor3 = Color3.fromRGB(255, 0, 255)
-                        txt.TextSize = 11
-                        txt.Font = Enum.Font.GothamBold
-                        txt.Parent = bill
-                        
-                        RunService.RenderStepped:Connect(function()
-                            local hum = player.Character and player.Character:FindFirstChildOfClass("Humanoid")
-                            if hum then
-                                txt.Text = player.Name .. " | HP: " .. math.floor(hum.Health)
-                            end
-                        end)
-                    end
-                else
-                    if head:FindFirstChild("AdamESP_Tag") then
-                        head.AdamESP_Tag:Destroy()
-                    end
-                end
-            end
-        end
-    end)
+Players.PlayerRemoving:Connect(function(player)
+	removeESP(player)
 end)
 
--- ==========================================
--- 3. PLAYERS & KILL ALL VIEW
--- ==========================================
-local ServerCountLabel = Instance.new("TextLabel")
-ServerCountLabel.Size = UDim2.new(0, 335, 0, 30)
-ServerCountLabel.Position = UDim2.new(0, 10, 0, 10)
-ServerCountLabel.BackgroundColor3 = Color3.fromRGB(20, 10, 30)
-ServerCountLabel.TextColor3 = Color3.fromRGB(0, 255, 120)
-ServerCountLabel.TextSize = 13
-ServerCountLabel.Font = Enum.Font.GothamBold
-ServerCountLabel.Parent = PlayersView
-
+-- حلقة التشغيل المستمرة
 RunService.RenderStepped:Connect(function()
-    ServerCountLabel.Text = "Players in Server: " .. #Players:GetPlayers()
+	FOVCircle.Position = Vector2.new(Camera.ViewportSize.X / 2, Camera.ViewportSize.Y / 2)
+
+	-- 1. نظام كشف الأماكن (ESP Boxes & Tracers باللون الأحمر وتصحيح الإحداثيات)
+	if ESPEnabled then
+		for _, player in pairs(Players:GetPlayers()) do
+			if player ~= LocalPlayer and player.Character then
+				local character = player.Character
+				local humanoid = character:FindFirstChild("Humanoid")
+				local rootPart = character:FindFirstChild("HumanoidRootPart")
+				local head = character:FindFirstChild("Head")
+				
+				if humanoid and humanoid.Health > 0 and rootPart and head then
+					if not espCache[player] then
+						espCache[player] = {
+							Box = Drawing.new("Square"),
+							Line = Drawing.new("Line")
+						}
+						espCache[player].Box.Visible = false
+						espCache[player].Box.Thickness = 1.5
+						espCache[player].Box.Color = Color3.fromRGB(255, 0, 0)
+						espCache[player].Box.Filled = false
+						
+						espCache[player].Line.Visible = false
+						espCache[player].Line.Thickness = 1.5
+						espCache[player].Line.Color = Color3.fromRGB(255, 0, 0)
+					end
+					
+					local box = espCache[player].Box
+					local line = espCache[player].Line
+					
+					local headPos, headOnScreen = Camera:WorldToScreenPoint(head.Position + Vector3.new(0, 0.5, 0))
+					local legPos, legOnScreen = Camera:WorldToScreenPoint(rootPart.Position - Vector3.new(0, 3, 0))
+					
+					if headOnScreen or legOnScreen then
+						local height = math.abs(headPos.Y - legPos.Y)
+						local width = height / 2
+						
+						box.Size = Vector2.new(width, height)
+						box.Position = Vector2.new(headPos.X - width / 2, headPos.Y)
+						box.Visible = true
+						
+						line.From = Vector2.new(Camera.ViewportSize.X / 2, Camera.ViewportSize.Y)
+						line.To = Vector2.new(headPos.X, headPos.Y + height)
+						line.Visible = true
+					else
+						box.Visible = false
+						line.Visible = false
+					end
+				else
+					removeESP(player)
+				end
+			else
+				removeESP(player)
+			end
+		end
+	else
+		for _, player in pairs(Players:GetPlayers()) do
+			removeESP(player)
+		end
+	end
+
+	-- 2. الهيت بوكس
+	if HitboxEnabled then
+		for _, player in pairs(Players:GetPlayers()) do
+			if player ~= LocalPlayer and player.Character then
+				local rootPart = player.Character:FindFirstChild("HumanoidRootPart")
+				if rootPart then
+					rootPart.Size = Vector3.new(HitboxSize, HitboxSize, HitboxSize)
+					rootPart.Transparency = 0.7
+					rootPart.CanCollide = false
+				end
+			end
+		end
+	end
+
+	-- 3. الأيم بوت الدقيق الموجه للرأس (Head Aimbot دقيق وثابت)
+	if AimbotEnabled then
+		local nearestTarget = nil
+		local shortestDistance = FOVRadius
+		
+		for _, player in pairs(Players:GetPlayers()) do
+			if player ~= LocalPlayer and player.Character and player.Character:FindFirstChild("Head") then
+				local humanoid = player.Character:FindFirstChild("Humanoid")
+				if humanoid and humanoid.Health > 0 then
+					local head = player.Character.Head
+					local screenPoint, onScreen = Camera:WorldToScreenPoint(head.Position)
+					if onScreen then
+						local screenCenter = Vector2.new(Camera.ViewportSize.X / 2, Camera.ViewportSize.Y / 2)
+						local distance = (Vector2.new(screenPoint.X, screenPoint.Y) - screenCenter).Magnitude
+						if distance < shortestDistance then
+							shortestDistance = distance
+							nearestTarget = head
+						end
+					end
+				end
+			end
+		end
+		
+		if nearestTarget then
+			-- تركيز دقيق ومباشر وسريع وثابت على الرأس
+			Camera.CFrame = CFrame.new(Camera.CFrame.Position, nearestTarget.Position)
+		end
+	end
+
+	-- 4. الأوتو كليكر
+	if AutoClickerEnabled then
+		mouse1click()
+		task.wait(0.05)
+	end
 end)
-
-local KillAllBtn = Instance.new("TextButton")
-KillAllBtn.Size = UDim2.new(0, 335, 0, 40)
-KillAllBtn.Position = UDim2.new(0, 10, 0, 55)
-KillAllBtn.BackgroundColor3 = Color3.fromRGB(180, 0, 0)
-KillAllBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
-KillAllBtn.Text = "⚠️ KILL ALL PLAYERS IN SERVER"
-KillAllBtn.TextSize = 13
-KillAllBtn.Font = Enum.Font.GothamBold
-KillAllBtn.Parent = PlayersView
-
-KillAllBtn.MouseButton1Click:Connect(function()
-    for _, player in pairs(Players:GetPlayers()) do
-        if player ~= LocalPlayer and player.Character and player.Character:FindFirstChild("HumanoidRootPart") then
-            if LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("HumanoidRootPart") then
-                LocalPlayer.Character.HumanoidRootPart.CFrame = player.Character.HumanoidRootPart.CFrame
-                task.wait(0.1)
-                -- محاكاة الهجوم أو القتل الفوري
-            end
-        end
-    end
-end)
-
--- ==========================================
--- 4. TELEPORT MENU VIEW
--- ==========================================
-local TpBox = Instance.new("TextBox")
-TpBox.Size = UDim2.new(0, 230, 0, 35)
-TpBox.Position = UDim2.new(0, 10, 0, 15)
-TpBox.BackgroundColor3 = Color3.fromRGB(25, 15, 40)
-TpBox.TextColor3 = Color3.fromRGB(255, 255, 255)
-TpBox.PlaceholderText = "Enter Player Name..."
-TpBox.Text = ""
-TpBox.TextSize = 13
-TpBox.Font = Enum.Font.Gotham
-TpBox.Parent = TeleportView
-
-local TpGoBtn = Instance.new("TextButton")
-TpGoBtn.Size = UDim2.new(0, 100, 0, 35)
-TpGoBtn.Position = UDim2.new(0, 245, 0, 15)
-TpGoBtn.BackgroundColor3 = Color3.fromRGB(100, 0, 200)
-TpGoBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
-TpGoBtn.Text = "Teleport"
-TpGoBtn.TextSize = 13
-TpGoBtn.Font = Enum.Font.GothamBold
-TpGoBtn.Parent = TeleportView
-
-TpGoBtn.MouseButton1Click:Connect(function()
-    local targetName = TpBox.Text:lower()
-    for _, player in pairs(Players:GetPlayers()) do
-        if player ~= LocalPlayer and string.sub(player.Name:lower(), 1, #targetName) == targetName then
-            if player.Character and player.Character:FindFirstChild("HumanoidRootPart") then
-                if LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("HumanoidRootPart") then
-                    LocalPlayer.Character.HumanoidRootPart.CFrame = player.Character.HumanoidRootPart.CFrame
-                end
-            end
-        end
-    end
-end)
-
-print("Adam Hub V1 Successfully Loaded!")
