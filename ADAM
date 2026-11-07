@@ -8,7 +8,7 @@ local Stats = game:GetService("Stats")
 local LocalPlayer = Players.LocalPlayer
 local Camera = workspace.CurrentCamera
 
--- جدول المفاتيح (10 مفاتيح لمدة 24 ساعة + مفاتيح 10 دقائق + مفاتيح دائمة "0")
+-- جدول المفاتيح (10 مفاتيح لمدة 24 ساعة + مفاتيح 10 دقائق + مفتاحين دائمين "0")
 local KEY_DURATIONS = {
 	-- المفاتيح المؤقتة (24 ساعة = 86400 ثانية)
 	["ADAM-24H-K9P2X4"] = 86400,
@@ -230,6 +230,9 @@ local function loadAdamHub()
 	InfoBox.TextYAlignment = Enum.TextYAlignment.Top
 	InfoBox.Text = " جاري جلب المعلومات..."
 
+	-- جدول لتثبيت مواقع اللاعبين عند التدوير
+	local lockedPositions = {}
+
 	-- متغيرات الميزات
 	local SpinPlayersEnabled = false
 	local AttackerDiesOnHit = false
@@ -335,10 +338,13 @@ local function loadAdamHub()
 		end)
 	end
 
-	-- أزرار القائمة (الخيار الأول أصبح تدوير اللاعبين القريبين)
+	-- أزرار القائمة
 	createButton("Spin Players Nearby: OFF", 35, function(btn)
 		SpinPlayersEnabled = not SpinPlayersEnabled
 		btn.Text = "Spin Players Nearby: " .. (SpinPlayersEnabled and "ON" or "OFF")
+		if not SpinPlayersEnabled then
+			lockedPositions = {}
+		end
 	end)
 
 	createButton("Attacker Dies On Hit: OFF", 68, function(btn)
@@ -428,6 +434,7 @@ local function loadAdamHub()
 			distanceBillboards[player]:Destroy()
 			distanceBillboards[player] = nil
 		end
+		lockedPositions[player] = nil
 	end)
 
 	LocalPlayer.CharacterAdded:Connect(function(newChar)
@@ -528,7 +535,7 @@ local function loadAdamHub()
 	RunService.RenderStepped:Connect(function()
 		if ESPEnabled then updateESP() end
 
-		-- ميزة جعل اللاعبين القريبين (100 متر) يدورون في مكانهم باستمرار
+		-- تدوير اللاعبين القريبين في مكانهم بدون أن يتحركوا من موقعهم
 		if SpinPlayersEnabled then
 			pcall(function()
 				local myRoot = LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("HumanoidRootPart")
@@ -538,9 +545,15 @@ local function loadAdamHub()
 							local pRoot = player.Character.HumanoidRootPart
 							local dist = (myRoot.Position - pRoot.Position).Magnitude
 							if dist <= 100 then
-								pRoot.CFrame = pRoot.CFrame * CFrame.Angles(0, math.rad(25), 0)
+								if not lockedPositions[player] then
+									lockedPositions[player] = pRoot.Position
+								end
+								-- الحفاظ على نفس الموقع تماماً وتدوير الاتجاه فقط
+								pRoot.CFrame = CFrame.new(lockedPositions[player]) * (pRoot.CFrame - pRoot.Position) * CFrame.Angles(0, math.rad(25), 0)
 								pRoot.Velocity = Vector3.new(0, 0, 0)
 								pRoot.AssemblyLinearVelocity = Vector3.new(0, 0, 0)
+							else
+								lockedPositions[player] = nil
 							end
 						end
 					end
@@ -569,7 +582,7 @@ local function loadAdamHub()
 		end
 	end)
 
-	print("Adam Hub Pro Loaded Successfully with Spin Players & Counter-Kill!")
+	print("Adam Hub Pro Loaded Successfully!")
 end
 
 button.MouseButton1Click:Connect(function()
