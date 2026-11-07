@@ -1,263 +1,615 @@
--- ADAM HUB BLOX - Fixed UI for Delta
+-- ===================================================
+-- ADAM HUB PRO • SECURE KEY SYSTEM & ULTIMATE EDITION
+-- ===================================================
 local Players = game:GetService("Players")
 local RunService = game:GetService("RunService")
+local CoreGui = game:GetService("CoreGui")
+local Stats = game:GetService("Stats")
 local LocalPlayer = Players.LocalPlayer
 local Camera = workspace.CurrentCamera
 
--- إزالة أي واجهة سابقة لتجنب التعارض
-local playerGui = LocalPlayer:WaitForChild("PlayerGui")
-if playerGui:FindFirstChild("AdamHubBlox") then
-	playerGui.AdamHubBlox:Destroy()
-end
-
--- الألوان المتاحة
-local Colors = {
-	Red = Color3.fromRGB(255, 0, 0),
-	Blue = Color3.fromRGB(0, 150, 255),
-	Green = Color3.fromRGB(0, 255, 0),
-	Yellow = Color3.fromRGB(255, 255, 0),
-	Pink = Color3.fromRGB(255, 105, 180),
-	White = Color3.fromRGB(255, 255, 255)
+-- جدول المفاتيح (10 مفاتيح لمدة 24 ساعة + مفاتيح 10 دقائق + مفاتيح دائمة "0")
+local KEY_DURATIONS = {
+	-- المفاتيح المؤقتة (24 ساعة = 86400 ثانية)
+	["ADAM-24H-K9P2X4"] = 86400,
+	["ADAM-24H-M7R3V1"] = 86400,
+	["ADAM-24H-L5T8N6"] = 86400,
+	["ADAM-24H-Q4W9J2"] = 86400,
+	["ADAM-24H-X3Y6H5"] = 86400,
+	["ADAM-24H-B1C8F7"] = 86400,
+	["ADAM-24H-Z6D4K9"] = 86400,
+	["ADAM-24H-F2G5L3"] = 86400,
+	["ADAM-24H-W8S1P7"] = 86400,
+	["ADAM-24H-J9V3M2"] = 86400,
+	
+	-- مفاتيح تجريبية لمدة 10 دقائق (600 ثانية)
+	["ADAM-10M-TEST-1"] = 600,
+	["ADAM-10M-TEST-2"] = 600,
+	
+	-- المفاتيح الدائمة (0 تعني صالحة للأبد)
+	["ADAM-VIP-PERMANENT-1"] = 0,
+	["ADAM-VIP-PERMANENT-2"] = 0,
 }
-local currentColor = Colors.Red
 
--- إنشاء الواجهة داخل PlayerGui لضمان ظهورها على الهاتف
-local ScreenGui = Instance.new("ScreenGui")
-ScreenGui.Name = "AdamHubBlox"
-ScreenGui.Parent = playerGui
-ScreenGui.ResetOnSpawn = false
-ScreenGui.DisplayOrder = 99999 -- لكي تظهر فوق كل شيء في اللعبة
-
--- الزر العائم المتحرك
-local ToggleBtn = Instance.new("TextButton")
-ToggleBtn.Name = "ToggleBtn"
-ToggleBtn.Parent = ScreenGui
-ToggleBtn.BackgroundColor3 = currentColor
-ToggleBtn.Position = UDim2.new(0, 50, 0, 100)
-ToggleBtn.Size = UDim2.new(0, 55, 0, 55)
-ToggleBtn.Font = Enum.Font.SourceSansBold
-ToggleBtn.Text = "ADAM"
-ToggleBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
-ToggleBtn.TextSize = 15
-ToggleBtn.Draggable = true
-ToggleBtn.Active = true
-
-local MainFrame = Instance.new("Frame")
-MainFrame.Name = "MainFrame"
-MainFrame.Parent = ScreenGui
-MainFrame.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
-MainFrame.Position = UDim2.new(0.5, -125, 0.5, -170)
-MainFrame.Size = UDim2.new(0, 250, 0, 360)
-MainFrame.Visible = true -- جعلتها تظهر مباشرة عند التنفيذ لتراها فوراً!
-MainFrame.Draggable = true
-MainFrame.Active = true
-
-ToggleBtn.MouseButton1Click:Connect(function()
-	MainFrame.Visible = not MainFrame.Visible
+-- تنظيف أي واجهة سابقة لمنع التكرار
+pcall(function()
+	if CoreGui:FindFirstChild("LINBO_ADAM_KEY_UI") then CoreGui.LINBO_ADAM_KEY_UI:Destroy() end
+	if CoreGui:FindFirstChild("AdamHubBlox") then CoreGui.AdamHubBlox:Destroy() end
+	if LocalPlayer.PlayerGui:FindFirstChild("LINBO_ADAM_KEY_UI") then LocalPlayer.PlayerGui.LINBO_ADAM_KEY_UI:Destroy() end
+	if LocalPlayer.PlayerGui:FindFirstChild("AdamHubBlox") then LocalPlayer.PlayerGui.AdamHubBlox:Destroy() end
 end)
 
--- عنوان الواجهة
-local Title = Instance.new("TextLabel")
-Title.Parent = MainFrame
-Title.Size = UDim2.new(1, 0, 0, 30)
-Title.BackgroundColor3 = Color3.fromRGB(20, 20, 20)
-Title.Text = "ADAM HUB BLOX"
-Title.TextColor3 = currentColor
-Title.Font = Enum.Font.SourceSansBold
-Title.TextSize = 16
+-- إنشاء واجهة نظام المفتاح أولاً
+local keyGui = Instance.new("ScreenGui")
+keyGui.Name = "LINBO_ADAM_KEY_UI"
+pcall(function() keyGui.Parent = CoreGui end)
+if not keyGui.Parent then keyGui.Parent = LocalPlayer:WaitForChild("PlayerGui") end
+keyGui.ResetOnSpawn = false
+keyGui.DisplayOrder = 999999
 
--- متغيرات الميزات
-local AimbotEnabled = false
-local HitboxEnabled = false
-local HitboxSize = 18
-local ESPEnabled = false
-local AutoClickerEnabled = false
+local frame = Instance.new("Frame")
+frame.Size = UDim2.fromOffset(350, 250)
+frame.Position = UDim2.new(0.5, -175, 0.5, -125)
+frame.BackgroundColor3 = Color3.fromRGB(15, 17, 31)
+frame.BorderSizePixel = 0
+frame.Parent = keyGui
+Instance.new("UICorner", frame).CornerRadius = UDim.new(0, 16)
 
-local highlights = {}
+local stroke = Instance.new("UIStroke")
+stroke.Color = Color3.fromRGB(133, 86, 255)
+stroke.Thickness = 1.5
+stroke.Parent = frame
 
-local function updateColors()
-	ToggleBtn.BackgroundColor3 = currentColor
-	Title.TextColor3 = currentColor
-	for _, hl in pairs(highlights) do
-		hl.FillColor = currentColor
-	end
+local title = Instance.new("TextLabel")
+title.Size = UDim2.new(1, -20, 0, 42)
+title.Position = UDim2.fromOffset(10, 12)
+title.BackgroundTransparency = 1
+title.Text = "ADAM HUB PRO"
+title.TextColor3 = Color3.fromRGB(255, 255, 255)
+title.Font = Enum.Font.GothamBold
+title.TextSize = 25
+title.Parent = frame
+
+local subtitle = Instance.new("TextLabel")
+subtitle.Size = UDim2.new(1, -20, 0, 22)
+subtitle.Position = UDim2.fromOffset(10, 53)
+subtitle.BackgroundTransparency = 1
+subtitle.Text = "KEY SYSTEM  •  DELTA"
+subtitle.TextColor3 = Color3.fromRGB(165, 156, 205)
+subtitle.Font = Enum.Font.Gotham
+subtitle.TextSize = 11
+subtitle.Parent = frame
+
+local input = Instance.new("TextBox")
+input.Size = UDim2.new(1, -40, 0, 44)
+input.Position = UDim2.fromOffset(20, 91)
+input.BackgroundColor3 = Color3.fromRGB(29, 32, 52)
+input.BorderSizePixel = 0
+input.PlaceholderText = "أدخل المفتاح هنا..."
+input.PlaceholderColor3 = Color3.fromRGB(130, 132, 158)
+input.Text = ""
+input.TextColor3 = Color3.fromRGB(255, 255, 255)
+input.Font = Enum.Font.Gotham
+input.TextSize = 14
+input.Parent = frame
+Instance.new("UICorner", input).CornerRadius = UDim.new(0, 10)
+
+local button = Instance.new("TextButton")
+button.Size = UDim2.new(1, -40, 0, 42)
+button.Position = UDim2.fromOffset(20, 147)
+button.BackgroundColor3 = Color3.fromRGB(112, 72, 220)
+button.BorderSizePixel = 0
+button.Text = "تحقق من المفتاح"
+button.TextColor3 = Color3.new(1, 1, 1)
+button.Font = Enum.Font.GothamBold
+button.TextSize = 14
+button.Parent = frame
+Instance.new("UICorner", button).CornerRadius = UDim.new(0, 10)
+
+local status = Instance.new("TextLabel")
+status.Size = UDim2.new(1, -30, 0, 42)
+status.Position = UDim2.fromOffset(15, 194)
+status.BackgroundTransparency = 1
+status.Text = "أدخل المفتاح للوصول إلى السكربت"
+status.TextColor3 = Color3.fromRGB(255, 190, 85)
+status.Font = Enum.Font.Gotham
+status.TextSize = 11
+status.TextWrapped = true
+status.Parent = frame
+
+local function showError(message)
+	status.Text = message
+	status.TextColor3 = Color3.fromRGB(255, 95, 110)
 end
 
-local function updateESP()
-	for _, player in pairs(Players:GetPlayers()) do
-		if player ~= LocalPlayer then
-			if ESPEnabled and player.Character then
-				if not highlights[player] then
-					local hl = Instance.new("Highlight")
-					hl.Name = "AdamESP"
-					hl.Adornee = player.Character
-					hl.FillColor = currentColor
-					hl.OutlineColor = Color3.fromRGB(255, 255, 255)
-					hl.FillTransparency = 0.5
-					hl.OutlineTransparency = 0
-					hl.Parent = player.Character
-					highlights[player] = hl
-				else
-					highlights[player].Adornee = player.Character
-					highlights[player].FillColor = currentColor
-					highlights[player].Enabled = true
-				end
-			else
-				if highlights[player] then
-					highlights[player]:Destroy()
-					highlights[player] = nil
-				end
-			end
+-- دالة تشغيل واجهة السكربت الأساسية بعد تجاوز المفتاح بنجاح
+local function loadAdamHub()
+	keyGui:Destroy()
+
+	local Colors = {
+		Green = Color3.fromRGB(0, 255, 0),
+		Red = Color3.fromRGB(255, 0, 0),
+		Blue = Color3.fromRGB(0, 150, 255),
+		Yellow = Color3.fromRGB(255, 255, 0),
+		Pink = Color3.fromRGB(255, 105, 180),
+		White = Color3.fromRGB(255, 255, 255)
+	}
+	local currentColor = Colors.Green
+
+	local ScreenGui = Instance.new("ScreenGui")
+	ScreenGui.Name = "AdamHubBlox"
+	pcall(function() ScreenGui.Parent = CoreGui end)
+	if not ScreenGui.Parent then ScreenGui.Parent = LocalPlayer:WaitForChild("PlayerGui") end
+	ScreenGui.ResetOnSpawn = false
+	ScreenGui.DisplayOrder = 999999
+
+	-- 1. مستطيل حماية الخصوصية
+	local BoxFrame = Instance.new("Frame")
+	BoxFrame.Parent = ScreenGui
+	BoxFrame.BackgroundColor3 = currentColor
+	BoxFrame.Position = UDim2.new(0.5, -30, 0.2, 0)
+	BoxFrame.Size = UDim2.new(0, 60, 0, 20)
+	BoxFrame.BorderSizePixel = 0
+	BoxFrame.Draggable = true
+	BoxFrame.Active = true
+
+	local BoxCorner = Instance.new("UICorner")
+	BoxCorner.CornerRadius = UDim.new(0, 4)
+	BoxCorner.Parent = BoxFrame
+
+	local LockBtn = Instance.new("TextButton")
+	LockBtn.Parent = ScreenGui
+	LockBtn.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
+	LockBtn.Position = UDim2.new(0, 20, 0, 20)
+	LockBtn.Size = UDim2.new(0, 70, 0, 35)
+	LockBtn.Font = Enum.Font.SourceSansBold
+	LockBtn.Text = "قفل: OFF"
+	LockBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
+	LockBtn.TextSize = 13
+
+	local isBoxHidden = false
+	LockBtn.MouseButton1Click:Connect(function()
+		isBoxHidden = not isBoxHidden
+		BoxFrame.Visible = not isBoxHidden
+		if isBoxHidden then
+			LockBtn.Text = "قفل: ON"
+			LockBtn.BackgroundColor3 = Color3.fromRGB(180, 0, 0)
+		else
+			LockBtn.Text = "قفل: OFF"
+			LockBtn.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
 		end
-	end
-end
-
-local function createButton(name, posY, callback)
-	local btn = Instance.new("TextButton")
-	btn.Parent = MainFrame
-	btn.Position = UDim2.new(0, 10, 0, posY)
-	btn.Size = UDim2.new(0, 230, 0, 28)
-	btn.BackgroundColor3 = Color3.fromRGB(60, 60, 60)
-	btn.TextColor3 = Color3.fromRGB(255, 255, 255)
-	btn.Font = Enum.Font.SourceSans
-	btn.TextSize = 14
-	btn.Text = name
-	
-	btn.MouseButton1Click:Connect(function()
-		callback(btn)
 	end)
-end
 
--- أزرار التحكم
-createButton("Precise Head Aimbot: OFF", 35, function(btn)
-	AimbotEnabled = not AimbotEnabled
-	btn.Text = "Precise Head Aimbot: " .. (AimbotEnabled and "ON" or "OFF")
-end)
+	-- 2. الزر العائم (ADAM)
+	local ToggleBtn = Instance.new("TextButton")
+	ToggleBtn.Parent = ScreenGui
+	ToggleBtn.BackgroundColor3 = currentColor
+	ToggleBtn.Position = UDim2.new(0, 50, 0, 100)
+	ToggleBtn.Size = UDim2.new(0, 55, 0, 55)
+	ToggleBtn.Font = Enum.Font.SourceSansBold
+	ToggleBtn.Text = "ADAM"
+	ToggleBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
+	ToggleBtn.TextSize = 15
+	ToggleBtn.Draggable = true
+	ToggleBtn.Active = true
 
-createButton("Colored Hitbox (Size 18): OFF", 68, function(btn)
-	HitboxEnabled = not HitboxEnabled
-	btn.Text = "Colored Hitbox (Size 18): " .. (HitboxEnabled and "ON" or "OFF")
-end)
+	-- القائمة الرئيسية
+	local MainFrame = Instance.new("Frame")
+	MainFrame.Parent = ScreenGui
+	MainFrame.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
+	MainFrame.Position = UDim2.new(0.5, -125, 0.5, -210)
+	MainFrame.Size = UDim2.new(0, 250, 0, 470)
+	MainFrame.Visible = true
+	MainFrame.Draggable = true
+	MainFrame.Active = true
 
-createButton("Wallhack ESP: OFF", 101, function(btn)
-	ESPEnabled = not ESPEnabled
-	btn.Text = "Wallhack ESP: " .. (ESPEnabled and "ON" or "OFF")
-	if not ESPEnabled then
-		for _, player in pairs(Players:GetPlayers()) do
-			if highlights[player] then
-				highlights[player]:Destroy()
-				highlights[player] = nil
-			end
-		end
-	end
-end)
+	ToggleBtn.MouseButton1Click:Connect(function()
+		MainFrame.Visible = not MainFrame.Visible
+	end)
 
-createButton("Auto Clicker: OFF", 134, function(btn)
-	AutoClickerEnabled = not AutoClickerEnabled
-	btn.Text = "Auto Clicker: " .. (AutoClickerEnabled and "ON" or "OFF")
-end)
+	-- عنوان الواجهة
+	local Title = Instance.new("TextLabel")
+	Title.Parent = MainFrame
+	Title.Size = UDim2.new(1, 0, 0, 30)
+	Title.BackgroundColor3 = Color3.fromRGB(20, 20, 20)
+	Title.Text = "ADAM HUB PRO"
+	Title.TextColor3 = currentColor
+	Title.Font = Enum.Font.SourceSansBold
+	Title.TextSize = 16
 
-local colorList = {"Red", "Blue", "Green", "Yellow", "Pink", "White"}
-local colorIndex = 1
-createButton("Theme Color: Red", 167, function(btn)
-	colorIndex = colorIndex + 1
-	if colorIndex > #colorList then colorIndex = 1 end
-	local colorName = colorList[colorIndex]
-	currentColor = Colors[colorName]
-	
-	btn.Text = "Theme Color: " .. colorName
-	updateColors()
-end)
+	-- شاشة معلومات الحساب والاتصال
+	local InfoBox = Instance.new("TextLabel")
+	InfoBox.Parent = MainFrame
+	InfoBox.Position = UDim2.new(0, 10, 0, 280)
+	InfoBox.Size = UDim2.new(0, 230, 0, 85)
+	InfoBox.BackgroundColor3 = Color3.fromRGB(25, 25, 25)
+	InfoBox.TextColor3 = Color3.fromRGB(0, 255, 128)
+	InfoBox.Font = Enum.Font.SourceSansBold
+	InfoBox.TextSize = 12
+	InfoBox.TextXAlignment = Enum.TextXAlignment.Left
+	InfoBox.TextYAlignment = Enum.TextYAlignment.Top
+	InfoBox.Text = " جاري جلب المعلومات..."
 
--- حقل البحث والانتقال
-local TextBox = Instance.new("TextBox")
-TextBox.Parent = MainFrame
-TextBox.Position = UDim2.new(0, 10, 0, 205)
-TextBox.Size = UDim2.new(0, 150, 0, 30)
-TextBox.PlaceholderText = "اسم اللاعب..."
-TextBox.Text = ""
-TextBox.TextColor3 = Color3.fromRGB(255, 255, 255)
-TextBox.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
+	-- متغيرات الميزات
+	local SpinPlayersEnabled = false
+	local AttackerDiesOnHit = false
+	local HitboxEnabled = false
+	local HitboxSize = 18
+	local ESPEnabled = false
+	local AutoClickerEnabled = false
+	local FakePCEnabled = false
+	local pcBillboard = nil
+	local highlights = {}
+	local distanceBillboards = {}
 
-local TpBtn = Instance.new("TextButton")
-TpBtn.Parent = MainFrame
-TpBtn.Position = UDim2.new(0, 170, 0, 205)
-TpBtn.Size = UDim2.new(0, 70, 0, 30)
-TpBtn.BackgroundColor3 = Colors.Red
-TpBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
-TpBtn.Text = "انتقال"
-
-TpBtn.MouseButton1Click:Connect(function()
-	local query = string.lower(TextBox.Text)
-	for _, player in pairs(Players:GetPlayers()) do
-		if player ~= LocalPlayer and string.find(string.lower(player.Name), query) then
-			if player.Character and player.Character:FindFirstChild("HumanoidRootPart") then
-				if LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("HumanoidRootPart") then
-					LocalPlayer.Character.HumanoidRootPart.CFrame = player.Character.HumanoidRootPart.CFrame
-					break
-				end
-			end
-		end
-	end
-end)
-
-Players.PlayerRemoving:Connect(function(player)
-	if highlights[player] then
-		highlights[player]:Destroy()
-		highlights[player] = nil
-	end
-end)
-
-RunService.RenderStepped:Connect(function()
-	if ESPEnabled then
-		updateESP()
-	end
-
-	if HitboxEnabled then
-		for _, player in pairs(Players:GetPlayers()) do
-			if player ~= LocalPlayer and player.Character then
-				local rootPart = player.Character:FindFirstChild("HumanoidRootPart")
-				if rootPart then
-					rootPart.Size = Vector3.new(HitboxSize, HitboxSize, HitboxSize)
-					rootPart.Color = currentColor
-					rootPart.Material = Enum.Material.Neon
-					rootPart.Transparency = 0.5
-					rootPart.CanCollide = false
-				end
-			end
+	local function updateColors()
+		ToggleBtn.BackgroundColor3 = currentColor
+		Title.TextColor3 = currentColor
+		BoxFrame.BackgroundColor3 = currentColor
+		for _, hl in pairs(highlights) do
+			hl.FillColor = currentColor
 		end
 	end
 
-	if AimbotEnabled then
-		local nearestTarget = nil
-		local shortestDistance = math.huge
-		
+	local function updateESP()
 		for _, player in pairs(Players:GetPlayers()) do
-			if player ~= LocalPlayer and player.Character and player.Character:FindFirstChild("Head") then
-				local humanoid = player.Character:FindFirstChild("Humanoid")
-				if humanoid and humanoid.Health > 0 then
-					local head = player.Character.Head
-					local screenPoint, onScreen = Camera:WorldToScreenPoint(head.Position)
-					if onScreen then
-						local distance = (Vector2.new(screenPoint.X, screenPoint.Y) - Vector2.new(Camera.ViewportSize.X/2, Camera.ViewportSize.Y/2)).Magnitude
-						if distance < shortestDistance then
-							shortestDistance = distance
-							nearestTarget = head
+			if player ~= LocalPlayer then
+				if ESPEnabled and player.Character and player.Character:FindFirstChild("HumanoidRootPart") then
+					if not highlights[player] then
+						local hl = Instance.new("Highlight")
+						hl.Name = "AdamESP"
+						hl.Adornee = player.Character
+						hl.FillColor = currentColor
+						hl.OutlineColor = Color3.fromRGB(255, 255, 255)
+						hl.FillTransparency = 0.5
+						hl.OutlineTransparency = 0
+						hl.Parent = player.Character
+						highlights[player] = hl
+					else
+						highlights[player].Adornee = player.Character
+						highlights[player].FillColor = currentColor
+						highlights[player].Enabled = true
+					end
+
+					local head = player.Character:FindFirstChild("Head")
+					if head then
+						local billboard = distanceBillboards[player]
+						if not billboard then
+							billboard = Instance.new("BillboardGui")
+							billboard.Name = "AdamDistance"
+							billboard.Size = UDim2.new(0, 100, 0, 40)
+							billboard.StudsOffset = Vector3.new(0, 2.5, 0)
+							billboard.AlwaysOnTop = true
+							
+							local textLabel = Instance.new("TextLabel")
+							textLabel.Name = "DistText"
+							textLabel.Parent = billboard
+							textLabel.Size = UDim2.new(1, 0, 1, 0)
+							textLabel.BackgroundTransparency = 1
+							textLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
+							textLabel.TextStrokeTransparency = 0
+							textLabel.Font = Enum.Font.SourceSansBold
+							textLabel.TextSize = 14
+							
+							billboard.Adornee = head
+							billboard.Parent = player.Character
+							distanceBillboards[player] = billboard
+						else
+							local myRoot = LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("HumanoidRootPart")
+							if myRoot then
+								local dist = math.floor((myRoot.Position - player.Character.HumanoidRootPart.Position).Magnitude)
+								local txt = billboard:FindFirstChild("DistText")
+								if txt then
+									txt.Text = player.Name .. "\n[" .. dist .. "m]"
+								end
+							end
 						end
+					end
+				else
+					if highlights[player] then
+						highlights[player]:Destroy()
+						highlights[player] = nil
+					end
+					if distanceBillboards[player] then
+						distanceBillboards[player]:Destroy()
+						distanceBillboards[player] = nil
 					end
 				end
 			end
 		end
+	end
+
+	local function createButton(name, posY, callback)
+		local btn = Instance.new("TextButton")
+		btn.Parent = MainFrame
+		btn.Position = UDim2.new(0, 10, 0, posY)
+		btn.Size = UDim2.new(0, 230, 0, 28)
+		btn.BackgroundColor3 = Color3.fromRGB(60, 60, 60)
+		btn.TextColor3 = Color3.fromRGB(255, 255, 255)
+		btn.Font = Enum.Font.SourceSans
+		btn.TextSize = 14
+		btn.Text = name
 		
-		if nearestTarget then
-			Camera.CFrame = CFrame.new(Camera.CFrame.Position, nearestTarget.Position)
+		btn.MouseButton1Click:Connect(function()
+			callback(btn)
+		end)
+	end
+
+	-- أزرار القائمة (الخيار الأول أصبح تدوير اللاعبين القريبين)
+	createButton("Spin Players Nearby: OFF", 35, function(btn)
+		SpinPlayersEnabled = not SpinPlayersEnabled
+		btn.Text = "Spin Players Nearby: " .. (SpinPlayersEnabled and "ON" or "OFF")
+	end)
+
+	createButton("Attacker Dies On Hit: OFF", 68, function(btn)
+		AttackerDiesOnHit = not AttackerDiesOnHit
+		btn.Text = "Attacker Dies On Hit: " .. (AttackerDiesOnHit and "ON" or "OFF")
+	end)
+
+	createButton("Colored Hitbox (Size 18): OFF", 101, function(btn)
+		HitboxEnabled = not HitboxEnabled
+		btn.Text = "Colored Hitbox (Size 18): " .. (HitboxEnabled and "ON" or "OFF")
+	end)
+
+	createButton("Wallhack & Distance ESP: OFF", 134, function(btn)
+		ESPEnabled = not ESPEnabled
+		btn.Text = "Wallhack & Distance ESP: " .. (ESPEnabled and "ON" or "OFF")
+		if not ESPEnabled then
+			for _, player in pairs(Players:GetPlayers()) do
+				if highlights[player] then
+					highlights[player]:Destroy()
+					highlights[player] = nil
+				end
+				if distanceBillboards[player] then
+					distanceBillboards[player]:Destroy()
+					distanceBillboards[player] = nil
+				end
+			end
+		end
+	end)
+
+	createButton("Auto Clicker: OFF", 167, function(btn)
+		AutoClickerEnabled = not AutoClickerEnabled
+		btn.Text = "Auto Clicker: " .. (AutoClickerEnabled and "ON" or "OFF")
+	end)
+
+	createButton("Fake PC Device Tag: OFF", 200, function(btn)
+		FakePCEnabled = not FakePCEnabled
+		btn.Text = "Fake PC Device Tag: " .. (FakePCEnabled and "ON" or "OFF")
+		
+		if FakePCEnabled then
+			local char = LocalPlayer.Character
+			if char and char:FindFirstChild("Head") then
+				pcBillboard = Instance.new("BillboardGui")
+				pcBillboard.Name = "FakePC_Tag"
+				pcBillboard.Size = UDim2.new(0, 120, 0, 30)
+				pcBillboard.StudsOffset = Vector3.new(0, 3.8, 0)
+				pcBillboard.AlwaysOnTop = true
+				
+				local txt = Instance.new("TextLabel")
+				txt.Parent = pcBillboard
+				txt.Size = UDim2.new(1, 0, 1, 0)
+				txt.BackgroundTransparency = 1
+				txt.Text = "💻 [PC Player]"
+				txt.TextColor3 = Color3.fromRGB(0, 255, 128)
+				txt.TextStrokeTransparency = 0
+				txt.Font = Enum.Font.SourceSansBold
+				txt.TextSize = 16
+				
+				pcBillboard.Adornee = char.Head
+				pcBillboard.Parent = char
+			end
+		else
+			if pcBillboard then
+				pcBillboard:Destroy()
+				pcBillboard = nil
+			end
+		end
+	end)
+
+	local colorList = {"Green", "Red", "Blue", "Yellow", "Pink", "White"}
+	local colorIndex = 1
+	createButton("Theme Color: Green", 233, function(btn)
+		colorIndex = colorIndex + 1
+		if colorIndex > #colorList then colorIndex = 1 end
+		local colorName = colorList[colorIndex]
+		currentColor = Colors[colorName]
+		
+		btn.Text = "Theme Color: " .. colorName
+		updateColors()
+	end)
+
+	Players.PlayerRemoving:Connect(function(player)
+		if highlights[player] then
+			highlights[player]:Destroy()
+			highlights[player] = nil
+		end
+		if distanceBillboards[player] then
+			distanceBillboards[player]:Destroy()
+			distanceBillboards[player] = nil
+		end
+	end)
+
+	LocalPlayer.CharacterAdded:Connect(function(newChar)
+		if FakePCEnabled then
+			task.wait(1)
+			if newChar:FindFirstChild("Head") then
+				if pcBillboard then pcBillboard:Destroy() end
+				pcBillboard = Instance.new("BillboardGui")
+				pcBillboard.Name = "FakePC_Tag"
+				pcBillboard.Size = UDim2.new(0, 120, 0, 30)
+				pcBillboard.StudsOffset = Vector3.new(0, 3.8, 0)
+				pcBillboard.AlwaysOnTop = true
+				
+				local txt = Instance.new("TextLabel")
+				txt.Parent = pcBillboard
+				txt.Size = UDim2.new(1, 0, 1, 0)
+				txt.BackgroundTransparency = 1
+				txt.Text = "💻 [PC Player]"
+				txt.TextColor3 = Color3.fromRGB(0, 255, 128)
+				txt.TextStrokeTransparency = 0
+				txt.Font = Enum.Font.SourceSansBold
+				txt.TextSize = 16
+				
+				pcBillboard.Adornee = newChar.Head
+				pcBillboard.Parent = newChar
+			end
+		end
+	end)
+
+	-- نظام "اللي ضربني يموت"
+	local lastHealth = LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("Humanoid") and LocalPlayer.Character.Humanoid.Health or 100
+	LocalPlayer.CharacterAdded:Connect(function(newChar)
+		local hum = newChar:WaitForChild("Humanoid")
+		lastHealth = hum.Health
+		hum.HealthChanged:Connect(function(newH)
+			if AttackerDiesOnHit and newH < lastHealth then
+				pcall(function()
+					local myRoot = LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("HumanoidRootPart")
+					if myRoot then
+						for _, p in pairs(Players:GetPlayers()) do
+							if p ~= LocalPlayer and p.Character and p.Character:FindFirstChild("HumanoidRootPart") then
+								local pRoot = p.Character.HumanoidRootPart
+								if (myRoot.Position - pRoot.Position).Magnitude < 25 then
+									local pHum = p.Character:FindFirstChild("Humanoid")
+									if pHum then
+										pHum.Health = 0
+									end
+								end
+							end
+						end
+					end
+				end)
+			end
+			lastHealth = newH
+		end)
+	end)
+
+	if LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("Humanoid") then
+		LocalPlayer.Character.Humanoid.HealthChanged:Connect(function(newH)
+			if AttackerDiesOnHit and newH < lastHealth then
+				pcall(function()
+					local myRoot = LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("HumanoidRootPart")
+					if myRoot then
+						for _, p in pairs(Players:GetPlayers()) do
+							if p ~= LocalPlayer and p.Character and p.Character:FindFirstChild("HumanoidRootPart") then
+								local pRoot = p.Character.HumanoidRootPart
+								if (myRoot.Position - pRoot.Position).Magnitude < 25 then
+									local pHum = p.Character:FindFirstChild("Humanoid")
+									if pHum then
+										pHum.Health = 0
+									end
+								end
+							end
+						end
+					end
+				end)
+			end
+			lastHealth = newH
+		end)
+	end
+
+	-- تحديث الـ FPS والبينغ وقوة الإشارة الحية
+	task.spawn(function()
+		while task.wait(1) do
+			pcall(function()
+				local fps = math.floor(1 / RunService.RenderStepped:Wait())
+				local ping = math.floor(Stats.Network.ServerStatsItem["Data Ping"]:GetValue())
+				local networkQuality = ping < 100 and "ممتازة 🟢" or (ping < 250 and "متوسطة 🟡" or "ضعيفة 🔴")
+
+				InfoBox.Text = "👤 الحساب: " .. LocalPlayer.Name .. 
+							   "\n⚡ الـ FPS: " .. fps .. " | البينغ: " .. ping .. "ms" ..
+							   "\n📶 جودة الاتصال: " .. networkQuality
+			end)
+		end
+	end)
+
+	-- محرك التفعيل المستمر
+	RunService.RenderStepped:Connect(function()
+		if ESPEnabled then updateESP() end
+
+		-- ميزة جعل اللاعبين القريبين (100 متر) يدورون في مكانهم باستمرار
+		if SpinPlayersEnabled then
+			pcall(function()
+				local myRoot = LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("HumanoidRootPart")
+				if myRoot then
+					for _, player in pairs(Players:GetPlayers()) do
+						if player ~= LocalPlayer and player.Character and player.Character:FindFirstChild("HumanoidRootPart") then
+							local pRoot = player.Character.HumanoidRootPart
+							local dist = (myRoot.Position - pRoot.Position).Magnitude
+							if dist <= 100 then
+								pRoot.CFrame = pRoot.CFrame * CFrame.Angles(0, math.rad(25), 0)
+								pRoot.Velocity = Vector3.new(0, 0, 0)
+								pRoot.AssemblyLinearVelocity = Vector3.new(0, 0, 0)
+							end
+						end
+					end
+				end
+			end)
+		end
+
+		if HitboxEnabled then
+			for _, player in pairs(Players:GetPlayers()) do
+				if player ~= LocalPlayer and player.Character then
+					local rootPart = player.Character:FindFirstChild("HumanoidRootPart")
+					if rootPart then
+						rootPart.Size = Vector3.new(HitboxSize, HitboxSize, HitboxSize)
+						rootPart.Color = currentColor
+						rootPart.Material = Enum.Material.Neon
+						rootPart.Transparency = 0.5
+						rootPart.CanCollide = false
+					end
+				end
+			end
+		end
+
+		if AutoClickerEnabled then
+			pcall(function() mouse1click() end)
+			task.wait(0.05)
+		end
+	end)
+
+	print("Adam Hub Pro Loaded Successfully with Spin Players & Counter-Kill!")
+end
+
+button.MouseButton1Click:Connect(function()
+	local key = string.upper((input.Text or ""):gsub("%s+", ""))
+	local duration = KEY_DURATIONS[key]
+
+	if not duration then
+		showError("خطأ: المفتاح غير صالح!")
+		return
+	end
+
+	if duration > 0 then
+		local storageName = "LINBO_ADAM_EXP_" .. key
+		local ok, savedExpiry = pcall(function()
+			if readfile and isfile and isfile(storageName) then
+				return tonumber(readfile(storageName))
+			end
+			return nil
+		end)
+
+		local expiry
+		if ok and savedExpiry then
+			expiry = savedExpiry
+		else
+			expiry = os.time() + duration
+			pcall(function()
+				if writefile then writefile(storageName, tostring(expiry)) end
+			end)
+		end
+
+		if os.time() >= expiry then
+			showError("خطأ: انتهت صلاحية هذا المفتاح!")
+			return
 		end
 	end
 
-	if AutoClickerEnabled then
-		pcall(function()
-			mouse1click()
-		end)
-		task.wait(0.05)
-	end
+	status.Text = "تم التحقق بنجاح! جاري فتح القائمة..."
+	status.TextColor3 = Color3.fromRGB(90, 230, 160)
+	button.Text = "تم بنجاح"
+	
+	task.wait(0.8)
+	loadAdamHub()
 end)
